@@ -1,0 +1,96 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.oa.NoticeMapper">
+    
+    <!-- app 消息通知 列表-->
+	<select id="getNoticeList" parameterType="map" resultType="map">
+	   select * from (
+	    select  a.forwarduserid as id,a.isread,a.receiveid,date_format(b.createtime,"%Y-%m-%d")as createtime,
+	    b.title,b.content,b.noticeid,a.companyid,cuu.userid,cuu.realname,cuu.headimage,b.createtime as realtime
+	        from c_t_use_forward_user a left join c_t_use_notice b on a.resourceid = b.noticeid
+	         left join c_t_use_userinfo cuu on cuu.userid=b.createid
+	        where a.delflag = 0 and b.delflag = 0 and a.resourcetype = 27
+		 
+	      union all
+	     select a.id,a.isread,a.userid as receiveid,date_format(b.createtime,"%Y-%m-%d")as createtime,
+	    b.title,b.content,b.noticeid,a.companyid,cuu.userid,cuu.realname,cuu.headimage,b.createtime as realtime   
+	    	from c_t_use_releaserange_user a
+	     	left join c_t_use_notice b on a.resourceid = b.noticeid
+	     	left join c_t_use_userinfo cuu on cuu.userid=b.createid
+	     	where a.delflag = 0 and b.delflag = 0 and a.resourcetype = 1
+	    ) nt   
+	    <where>
+	        <if test="receiveid != null and receiveid != ''"> and nt.receiveid = #{receiveid}</if>
+	        <if test="companyid != null and companyid != ''">and nt.companyid = #{companyid}</if>
+	        <if test="noticeid != null and noticeid != ''"> and nt.noticeid = #{noticeid}</if>
+	        <if test="title != null and title != ''">and nt.title like concat("%",#{title},"%")</if>
+	    </where>
+	    group by nt.noticeid
+	     order by nt.realtime desc
+	     <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<!-- app 消息通知 总记录数 -->
+	<select id="getNoticeListCount" parameterType="map" resultType="int">
+	    select count(*) from (
+	    (select  a.forwarduserid as id,a.isread,a.receiveid,date_format(b.createtime,"%Y-%m-%d")as createtime,b.title,b.content,b.noticeid,a.companyid 
+	        from c_t_use_forward_user a left join c_t_use_notice b on a.resourceid = b.noticeid 
+	        where a.delflag = 0 and b.delflag = 0 and a.resourcetype = 27
+		 )
+	      union all
+	    (  select a.id,a.isread,a.userid as receiveid,date_format(b.createtime,"%Y-%m-%d")as createtime,b.title,b.content,b.noticeid,a.companyid  
+	    	from c_t_use_releaserange_user a
+	     	left join c_t_use_notice b on a.resourceid = b.noticeid
+	     	where a.delflag = 0 and b.delflag = 0 and a.resourcetype = 1
+	    )
+	  
+	    ) nt
+	    <where>
+	        <if test="receiveid != null and receiveid != ''"> and nt.receiveid = #{receiveid}</if>
+	        <if test="companyid != null and companyid != ''">and nt.companyid = #{companyid}</if>
+	        <if test="noticeid != null and noticeid != ''"> and nt.noticeid = #{noticeid}</if>
+	        <if test="title != null and title != ''">and nt.title like concat("%",#{title},"%")</if>
+	    </where>
+	</select>
+	
+	<!-- 新增消息通知基本信息 -->
+	<insert id="addNotice" parameterType="map">
+	    insert into c_t_use_notice
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="noticeid != null and noticeid != ''">noticeid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="title != null and title != ''">title,</if>
+	        <if test="content != null and content != ''">content,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null and delflag != ''">delflag,</if>
+	        <if test="status != null and status != ''">status,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	      
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="noticeid != null and noticeid != ''">#{noticeid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="title != null and title != ''">#{title},</if>
+	        <if test="content != null and content != ''">#{content},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null and delflag != ''">#{delflag},</if>
+	        <if test="status != null and status != ''">#{status},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	    </trim>
+	</insert>
+	
+		<update id="updatenotice" parameterType="map">
+	    update c_t_use_notice
+	    <set>
+	        <if test="title != null and title != ''">title=#{title},</if>
+	        <if test="content != null and content != ''">content=#{content},</if>
+	        <if test="companyid != null and companyid != ''">companyid=#{companyid},</if>
+	        <if test="delflag != null">delflag=#{delflag},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	    </set>
+	    where noticeid=#{noticeid}
+	</update>
+</mapper>

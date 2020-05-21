@@ -1,0 +1,718 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.starassess.StarAssessMapper">
+    
+    <select id="appGetEvaluateTemplateList" parameterType="map" resultType="map">
+    	select
+    		cet.templateid,cet.companyid,cet.templatename,cet.type,cet.organizeid
+    	from c_t_use_evaluate_template cet
+    	inner join c_t_use_releaserange_user cturu on cet.templateid=cturu.resourceid and cturu.resourcetype=9
+    	<where>
+            <if test="companyid != null and companyid != ''">and cet.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and cturu.userid=#{userid}</if>
+            <if test="type != null and type != ''">and cet.type=#{type}</if>
+            <if test="organizeid != null and organizeid != ''">and cet.organizeid=#{organizeid}</if>
+            and cet.delflag=0
+        </where>
+        group by cet.templateid
+        order by cet.createtime desc
+    </select>
+    
+    <select id="getEvaluateTemplateList" parameterType="map" resultType="map">
+    	select
+    		cet.templateid,cet.companyid,cet.templatename,cet.type,cuo.organizeid,cuo.organizename
+    	from c_t_use_evaluate_template cet
+    	left join c_t_use_organize cuo on cuo.organizeid=cet.organizeid
+    	<where>
+    		<if test="companyid != null and companyid != ''">and cet.companyid=#{companyid}</if>
+    		<if test="type != null and type != ''">and cet.type=#{type}</if>
+    		<if test="datacode != null and datacode != ''">and locate(#{datacode},cuo.datacode) > 0</if>
+    		and cet.delflag=0
+    	</where>
+    	group by cet.templateid
+    	order by cet.createtime desc
+    	<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+	<select id="getStarProjectList" parameterType="map" resultType="map">
+	    select 
+	    	projectid,companyid,projectname,organizeid,createid,
+	    	DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,type,status,resoucetemplateid 
+	    from c_t_use_poststar_project
+	    <where>
+	        <if test="organizeid != null and organizeid != ''">and organizeid=#{organizeid}</if>
+	        <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	        <if test="templateid != null and templateid != ''">and templateid=#{templateid}</if>
+	        and delflag=0
+	    </where>
+	    order by createtime,priority
+	</select>
+	<insert id="insertEvaluate" parameterType="map">
+	    insert into c_t_use_evaluate
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="evaluateid != null and evaluateid != ''">evaluateid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="templateid != null and templateid != ''">templateid,</if>
+	        <if test="sumstar != null and sumstar != ''">sumstar,</if>
+	        <if test="examineuserid != null and examineuserid != ''">examineuserid,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="templatename != null and templatename != ''">templatename,</if>
+	        <if test="organizename != null and organizename != ''">organizename,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="evaluateid != null and evaluateid != ''">#{evaluateid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="templateid != null and templateid != ''">#{templateid},</if>
+	        <if test="sumstar != null and sumstar != ''">#{sumstar},</if>
+	        <if test="examineuserid != null and examineuserid != ''">#{examineuserid},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="templatename != null and templatename != ''">#{templatename},</if>
+	        <if test="organizename != null and organizename != ''">#{organizename},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	    </trim>
+	</insert>
+	<insert id="insertEvaluateStar"  parameterType="map">
+	    insert into c_t_use_evaluate_star
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">starid,</if>
+	        <if test="evaluateid != null and evaluateid != ''">evaluateid,</if>
+	        <if test="projectid != null and projectid != ''">projectid,</if>
+	        <if test="starlevel != null and starlevel != ''">starlevel,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="priority != null and priority != ''">priority,</if>
+	        <if test="projectname != null and projectname != ''">projectname,</if>
+	        <if test="type != null">type,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">#{starid},</if>
+	        <if test="evaluateid != null and evaluateid != ''">#{evaluateid},</if>
+	        <if test="projectid != null and projectid != ''">#{projectid},</if>
+	        <if test="starlevel != null and starlevel != ''">#{starlevel},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="priority != null and priority != ''">#{priority},</if>
+	        <if test="projectname != null and projectname != ''">#{projectname},</if>
+	        <if test="type != null">#{type},</if>
+	    </trim>
+	</insert>
+	<select id="getEvaluateInfo" parameterType="map" resultType="map">
+	    select ctue.evaluateid,ctue.companyid,ctue.organizeid,ctue.sumstar,ctue.result,ctue.examineuserid,ctue.opinion,ctue.createid,DATE_FORMAT(ctue.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ctuu.realname as createname,ctuu.headimage as createheadimage,DATE_FORMAT(ctue.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+	    ctuu1.realname as examinename,ctuu1.headimage as examineheadimage,ctue.organizename,ctuu.position as identityname,ctue.status,ctue.templatename,
+	    ctue.CCuserids,IFNULL(ctue.CCusernames,"") as CCusernames
+	    from c_t_use_evaluate ctue 
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    left join c_t_use_userinfo ctuu1 on ctue.examineuserid=ctuu1.userid
+	    <where>
+	        <if test="evaluateid != null and evaluateid != ''">and ctue.evaluateid=#{evaluateid}</if>
+	    </where>
+	    limit 1
+	</select>
+	<select id="getEvaluateStarList" parameterType="map" resultType="map">
+	    select ctue.starid,ctue.evaluateid,ctue.projectid,ctue.starlevel,ctue.createid,DATE_FORMAT(ctue.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ctue.projectname,ctue.type as status
+	    from c_t_use_evaluate_star ctue
+	    <where>
+	        <if test="evaluateid != null and evaluateid != ''">and ctue.evaluateid=#{evaluateid}</if>
+	    </where>
+	    order by ctue.priority
+	</select>
+	<update id="updateEvaluate" parameterType="map">
+	    update c_t_use_evaluate
+	    <set>
+	        <if test="opinion != null and opinion != ''">opinion=#{opinion},</if>
+	        <if test="sumstar != null and sumstar != ''">sumstar=#{sumstar},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="delflag != null">delflag=#{delflag},</if>
+	        <if test="result != null and result != ''">result=#{result},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	    </set>
+	    where evaluateid=#{evaluateid}
+	</update>
+	<select id="getEvaluateList" parameterType="map" resultType="map">
+	    select DISTINCT ctue.evaluateid,ctue.companyid,ctue.organizeid,ctue.sumstar,ctue.result,ctue.examineuserid,ctue.opinion,ctue.createid,DATE_FORMAT(ctufu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctue.status,
+	    ctuu.realname as createname,ctufu.isread,ctufu.forwarduserid
+	    from c_t_use_forward_user ctufu
+	    left join c_t_use_evaluate ctue on ctue.evaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null and status != -1">and ctue.status=#{status}</if>
+	        <if test="beforetime != null and beforetime != ''">and ctufu.createtime &gt;= concat(#{beforetime}," 00:00:00")</if>
+	        <if test="aftertime != null and aftertime != ''">and ctufu.createtime &lt;= concat(#{aftertime}," 23:59:59")</if>
+	        <if test="delflag != null">and ctufu.delflag=0</if>
+	        <if test="createid != null and createid != ''">and ctue.createid=#{createid}</if>
+	        and ctufu.resourcetype=6 and ctue.delflag=0
+	    </where>
+	    order by ctue.status,ctufu.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getEvaluateListNum" parameterType="map" resultType="int">
+	    select DISTINCT count(0) from c_t_use_forward_user ctufu
+	    left join c_t_use_evaluate ctue on ctue.evaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null and status != -1">and ctue.status=#{status}</if>
+	        <if test="beforetime != null and beforetime != ''">and ctufu.createtime &gt;= concat(#{beforetime}," 00:00:00")</if>
+	        <if test="aftertime != null and aftertime != ''">and ctufu.createtime &lt;= concat(#{aftertime}," 23:59:59")</if>
+	        <if test="isread != null">and ctufu.isread=#{isread}</if>
+	        <if test="delflag != null">and ctufu.delflag=0</if>
+	        <if test="createid != null and createid != ''">and ctue.createid=#{createid}</if>
+	        and ctufu.resourcetype=6 and ctue.delflag=0
+	    </where>
+	</select>
+	
+	<insert id="insertOverallvaluate" parameterType="map">
+	    insert into c_t_use_overallvaluate
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="overallvaluateid != null and overallvaluateid != ''">overallvaluateid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="templateid != null and templateid != ''">templateid,</if>
+	        <if test="sumstar != null and sumstar != ''">sumstar,</if>
+	        <if test="examineuserid != null and examineuserid != ''">examineuserid,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="templatename != null and templatename != ''">templatename,</if>
+	        <if test="organizename != null and organizename != ''">organizename,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="overallvaluateid != null and overallvaluateid != ''">#{overallvaluateid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="templateid != null and templateid != ''">#{templateid},</if>
+	        <if test="sumstar != null and sumstar != ''">#{sumstar},</if>
+	        <if test="examineuserid != null and examineuserid != ''">#{examineuserid},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="templatename != null and templatename != ''">#{templatename},</if>
+	        <if test="organizename != null and organizename != ''">#{organizename},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	    </trim>
+	</insert>
+	<insert id="insertOverallvaluateStar"  parameterType="map">
+	    insert into c_t_use_overallvaluate_star
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">starid,</if>
+	        <if test="overallvaluateid != null and overallvaluateid != ''">overallvaluateid,</if>
+	        <if test="projectid != null and projectid != ''">projectid,</if>
+	        <if test="starlevel != null and starlevel != ''">starlevel,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="description != null and description != ''">description,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="priority != null and priority != ''">priority,</if>
+	        <if test="projectname != null and projectname != ''">projectname,</if>
+	        <if test="type != null">type,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">#{starid},</if>
+	        <if test="overallvaluateid != null and overallvaluateid != ''">#{overallvaluateid},</if>
+	        <if test="projectid != null and projectid != ''">#{projectid},</if>
+	        <if test="starlevel != null and starlevel != ''">#{starlevel},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="description != null and description != ''">#{description},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="priority != null and priority != ''">#{priority},</if>
+	        <if test="projectname != null and projectname != ''">#{projectname},</if>
+	        <if test="type != null">#{type},</if>
+	    </trim>
+	</insert>
+	<select id="getOverallvaluateInfo" parameterType="map" resultType="map">
+	    select ctuov.overallvaluateid,ctuov.status,ctuov.companyid,ctuov.organizeid,ctuov.sumstar,ctuov.result,ctuov.examineuserid,ctuov.opinion,ctuov.createid,DATE_FORMAT(ctuov.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ctuu.realname as createname,ctuu.headimage as createheadimage,DATE_FORMAT(ctuov.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+	    ctuu1.realname as examinename,ctuu1.headimage as examineheadimage,ctuov.organizename,ctuu.position as identityname,ctuov.templatename,
+	    ctuov.CCuserids,IFNULL(ctuov.CCusernames,"") as CCusernames
+	    from c_t_use_overallvaluate ctuov
+	    left join c_t_use_userinfo ctuu on ctuov.createid=ctuu.userid
+	    left join c_t_use_userinfo ctuu1 on ctuov.examineuserid=ctuu1.userid
+	    <where>
+	        <if test="overallvaluateid != null and overallvaluateid != ''">and ctuov.overallvaluateid=#{overallvaluateid}</if>
+	    </where>
+	    limit 1
+	</select>
+	<select id="getOverallvaluateStarList" parameterType="map" resultType="map">
+	    select ctuos.starid,ctuos.overallvaluateid,ifnull(ctuos.description,"") as description,ctuos.projectid,ctuos.starlevel,ctuos.createid,DATE_FORMAT(ctuos.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ctuos.projectname,ctuos.type as status
+	    from c_t_use_overallvaluate_star ctuos
+	    <where>
+	        <if test="overallvaluateid != null and overallvaluateid != ''">and ctuos.overallvaluateid=#{overallvaluateid}</if>
+	    </where>
+	    order by ctuos.priority
+	</select>
+	<update id="updateOverallvaluate" parameterType="map">
+	    update c_t_use_overallvaluate
+	    <set>
+	        <if test="opinion != null and opinion != ''">opinion=#{opinion},</if>
+	        <if test="sumstar != null and sumstar != ''">sumstar=#{sumstar},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="delflag != null">delflag=#{delflag},</if>
+	        <if test="result != null and result != ''">result=#{result},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	    </set>
+	    where overallvaluateid=#{overallvaluateid}
+	</update>
+	<select id="getOverallvaluateList" parameterType="map" resultType="map">
+	    select DISTINCT ctue.overallvaluateid,ctue.companyid,ctue.organizeid,ctue.sumstar,ctue.result,ctue.examineuserid,ctue.opinion,ctue.createid,DATE_FORMAT(ctufu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctue.status,
+	    ctuu.realname as createname,ctufu.forwarduserid,ctufu.isread
+	    from c_t_use_forward_user ctufu
+	    left join c_t_use_overallvaluate ctue on ctue.overallvaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null">and ctue.status=#{status}</if>
+	        <if test="beforetime != null and beforetime != ''">and ctufu.createtime &gt;= concat(#{beforetime}," 00:00:00")</if>
+	        <if test="aftertime != null and aftertime != ''">and ctufu.createtime &lt;= concat(#{aftertime}," 23:59:59")</if>
+	        <if test="delflag != null">and ctufu.delflag=0</if>
+	        <if test="createid != null and createid != ''">and ctue.createid=#{createid}</if>
+	        and ctufu.resourcetype=7 and ctue.delflag=0
+	    </where>
+	    order by ctufu.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getOverallvaluateListNum" parameterType="map" resultType="int">
+	    select DISTINCT count(0) from c_t_use_forward_user ctufu
+	    left join c_t_use_overallvaluate ctue on ctue.overallvaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null">and ctue.status=#{status}</if>
+	        <if test="beforetime != null and beforetime != ''">and ctufu.createtime &gt;= concat(#{beforetime}," 00:00:00")</if>
+	        <if test="aftertime != null and aftertime != ''">and ctufu.createtime &lt;= concat(#{aftertime}," 23:59:59")</if>
+	        <if test="isread != null">and ctufu.isread=#{isread}</if>
+	        <if test="delflag != null">and ctufu.delflag=0</if>
+	        <if test="createid != null and createid != ''">and ctue.createid=#{createid}</if>
+	        and ctufu.resourcetype=7 and ctue.delflag=0
+	    </where>
+	</select>
+	<select id="getUserStarListNum" parameterType="map" resultType="int">
+	    SELECT 
+	    	COUNT(0)
+	    FROM (
+	    	SELECT
+				star.userid,star.phone,star.realname,star.headimage,IFNULL(SUM(star.sumstar),0) allstar
+			from (
+				select 
+					ctuu.userid,ctuu.phone,ctuu.realname,ctuu.headimage,ctue.sumstar
+				from c_t_use_evaluate ctue
+				INNER join c_t_use_userinfo ctuu on ctuu.userid=ctue.createid
+				inner join c_t_use_organize_userinfo ctuou on ctuou.userid=ctuu.userid
+				INNER JOIN c_t_use_organize ctuo on ctuo.organizeid = ctuou.organizeid
+				<where>
+					<if test="companyid != null and companyid != ''">and ctuu.companyid=#{companyid}</if>
+					<if test="organizeid != null and organizeid != ''">and ctuou.organizeid=#{organizeid}</if>
+					<if test="year != null and year != ''">and DATE_FORMAT(ctue.createtime,'%Y')=#{year}</if>
+					<if test="monthnum != null and monthnum != ''">AND DATE_FORMAT(ctue.createtime,'%m')=#{monthnum}</if>
+					<if test="datacode != null and datacode != ''">AND LOCATE(#{datacode},ctuo.datacode) > 0</if>
+					and ctue.result=1
+				</where>
+				group by ctue.evaluateid
+				UNION ALL
+				select 
+					ctuu.userid,ctuu.phone,ctuu.realname,ctuu.headimage,ctuo.sumstar
+				from  c_t_use_overallvaluate ctuo
+				INNER join c_t_use_userinfo ctuu on ctuu.userid=ctuo.createid
+				inner join c_t_use_organize_userinfo ctuou on ctuou.userid=ctuu.userid
+				INNER JOIN c_t_use_organize ctuo2 on ctuo2.organizeid = ctuou.organizeid
+				<where>
+					<if test="companyid != null and companyid != ''">and ctuu.companyid=#{companyid}</if>
+					<if test="organizeid != null and organizeid != ''">and ctuou.organizeid=#{organizeid}</if>
+					<if test="year != null and year != ''">and DATE_FORMAT(ctuo.createtime,'%Y')=#{year}</if>
+					<if test="monthnum != null and monthnum != ''">AND DATE_FORMAT(ctuo.createtime,'%m')=#{monthnum}</if>
+					<if test="datacode != null and datacode != ''">AND LOCATE(#{datacode},ctuo2.datacode) > 0</if>
+					and ctuo.result=1
+				</where>
+				group by ctuo.overallvaluateid
+			) star
+			group by star.userid
+	    ) starnum
+	</select>
+	<select id="getUserStarList" parameterType="map" resultType="map">
+		SELECT
+			star.userid,star.phone,star.realname,star.headimage,IFNULL(SUM(star.sumstar),0) allstar,IFNULL(SUM(star.selfstar),0) AS selfstar,IFNULL(SUM(star.overallstar),0) AS overallstar
+		from (
+			select 
+				ctuu.userid,ctuu.phone,ctuu.realname,ctuu.headimage,ctue.sumstar,ctue.sumstar as selfstar,0 AS overallstar
+			from c_t_use_evaluate ctue
+			INNER join c_t_use_userinfo ctuu on ctuu.userid=ctue.createid
+			inner join c_t_use_organize_userinfo ctuou on ctuou.userid=ctuu.userid
+			INNER JOIN c_t_use_organize ctuo on ctuo.organizeid = ctuou.organizeid
+			<where>
+				<if test="companyid != null and companyid != ''">and ctuu.companyid=#{companyid}</if>
+				<if test="organizeid != null and organizeid != ''">and ctuou.organizeid=#{organizeid}</if>
+				<if test="year != null and year != ''">and DATE_FORMAT(ctue.createtime,'%Y')=#{year}</if>
+				<if test="monthnum != null and monthnum != ''">AND DATE_FORMAT(ctue.createtime,'%m')=#{monthnum}</if>
+				<if test="datacode != null and datacode != ''">AND LOCATE(#{datacode},ctuo.datacode) > 0</if>
+				and ctue.result=1
+			</where>
+			group by ctue.evaluateid
+			UNION ALL
+			select 
+				ctuu.userid,ctuu.phone,ctuu.realname,ctuu.headimage,ctuo.sumstar,0 as selfstar,ctuo.sumstar AS overallstar
+			from  c_t_use_overallvaluate ctuo
+			INNER join c_t_use_userinfo ctuu on ctuu.userid=ctuo.createid
+			inner join c_t_use_organize_userinfo ctuou on ctuou.userid=ctuu.userid
+			INNER JOIN c_t_use_organize ctuo2 on ctuo2.organizeid = ctuou.organizeid
+			<where>
+				<if test="companyid != null and companyid != ''">and ctuu.companyid=#{companyid}</if>
+				<if test="organizeid != null and organizeid != ''">and ctuou.organizeid=#{organizeid}</if>
+				<if test="year != null and year != ''">and DATE_FORMAT(ctuo.createtime,'%Y')=#{year}</if>
+				<if test="monthnum != null and monthnum != ''">AND DATE_FORMAT(ctuo.createtime,'%m')=#{monthnum}</if>
+				<if test="datacode != null and datacode != ''">AND LOCATE(#{datacode},ctuo2.datacode) > 0</if>
+				and ctuo.result=1
+			</where>
+			group by ctuo.overallvaluateid
+		) star
+		group by star.userid
+		order by IFNULL(SUM(star.sumstar),0) DESC
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getStarRuleList" parameterType="map" resultType="map">
+	    select ctsr.ruleid,ctsr.companyid,ctsr.createid,ctsr.title,ctsr.content,DATE_FORMAT(ctsr.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctsr.updateid,DATE_FORMAT(ctsr.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime 
+	    from c_t_manage_starranking_rule ctsr
+	    left join c_t_use_releaserange_user cturr on cturr.resourceid=ctsr.ruleid and cturr.resourcetype=10
+	    <where>
+	        <if test="userid != null and userid != ''">and cturr.userid=#{userid}</if>
+	        <if test="companyid != null and companyid != ''">and ctsr.companyid=#{companyid}</if>
+	        <if test="title != null and title != ''">and locate(#{title},ctsr.title) > 0</if>
+	        and ctsr.delflag=0
+	    </where>
+	    group by ctsr.ruleid
+	    order by ctsr.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getStarRuleListNum" parameterType="map" resultType="int">
+	    select count(0) from(select ctsr.ruleid,ctsr.companyid,ctsr.createid,ctsr.title,ctsr.content,DATE_FORMAT(ctsr.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctsr.updateid,DATE_FORMAT(ctsr.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime
+	    from c_t_manage_starranking_rule ctsr
+	    left join c_t_use_releaserange_user cturr on cturr.resourceid=ctsr.ruleid and cturr.resourcetype=10
+	    <where>
+	        <if test="userid != null and userid != ''">and cturr.userid=#{userid}</if>
+	        <if test="companyid != null and companyid != ''">and ctsr.companyid=#{companyid}</if>
+	        <if test="title != null and title != ''">and locate(#{title},ctsr.title) > 0</if>
+	        and ctsr.delflag=0
+	    </where>
+	    group by ctsr.ruleid
+	    ) a 
+	</select>
+	<select id="getStarRuleInfo" parameterType="map" resultType="map">
+	   	select ctsr.ruleid,ctsr.companyid,ctsr.createid,ctsr.title,ctsr.content,DATE_FORMAT(ctsr.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctsr.updateid,DATE_FORMAT(ctsr.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime
+	    from c_t_manage_starranking_rule ctsr
+	    <where>
+	        <if test="ruleid != null and ruleid != ''">and ctsr.ruleid=#{ruleid}</if>
+	    </where>
+	    limit 1
+	</select>
+	
+	<!-- 查询综合星值时间 -->
+	<select id="getOverallvaluateListTime" parameterType="map" resultType="map">
+		select 
+			DISTINCT DATE_FORMAT(ctufu.createtime,'%Y-%m-%d') as createtime
+	    from c_t_use_forward_user ctufu
+	    left join c_t_use_overallvaluate ctue on ctue.overallvaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null">and ctue.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctufu.createtime &gt;= concat(#{starttime}," 00:00:00")</if>
+	        <if test="endtime != null and endtime != ''">and ctufu.createtime &lt;= concat(#{endtime}," 23:59:59")</if>
+	        and ctufu.resourcetype=7 and ctue.delflag=0 and ctufu.delflag=0
+	    </where>
+	    order by ctufu.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<!-- 查询综合星值时间的总数 -->
+	<select id="getOverallvaluateListTimeCount" parameterType="map" resultType="int">
+		select 
+			count(*)
+		from (
+			select 
+				DISTINCT DATE_FORMAT(ctufu.createtime,'%Y-%m-%d') as createtime
+		    from c_t_use_forward_user ctufu
+		    left join c_t_use_overallvaluate ctue on ctue.overallvaluateid=ctufu.resourceid
+		    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+		    <where>
+		        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+		        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+		        <if test="status != null">and ctue.status=#{status}</if>
+		        <if test="starttime != null and starttime != ''">and ctufu.createtime &gt;= concat(#{starttime}," 00:00:00")</if>
+	        	<if test="endtime != null and endtime != ''">and ctufu.createtime &lt;= concat(#{endtime}," 23:59:59")</if>
+	        	<if test="isread != null">and ctufu.isread=#{isread}</if>
+		        and ctufu.resourcetype=7 and ctue.delflag=0 and ctufu.delflag=0
+		    </where>
+		) overallvaluate
+	</select>
+	
+	<!-- 查询岗位星值时间列表 -->
+	<select id="getEvaluateListTime" parameterType="map" resultType="map">
+		select 
+			DISTINCT DATE_FORMAT(ctufu.createtime,'%Y-%m-%d') as createtime
+	    from c_t_use_forward_user ctufu
+	    left join c_t_use_evaluate ctue on ctue.evaluateid=ctufu.resourceid
+	    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+	        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+	        <if test="status != null">and ctue.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctufu.createtime &gt;= concat(#{starttime}," 00:00:00")</if>
+	        <if test="endtime != null and endtime != ''">and ctufu.createtime &lt;= concat(#{endtime},"23:59:59")</if>
+	        and ctufu.resourcetype=6 and ctue.delflag=0 and ctufu.delflag=0
+	    </where>
+	    order by ctufu.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<!-- 查询岗位星值时间列表总数 -->
+	<select id="getEvaluateListTimeCount" parameterType="map" resultType="int">
+		select
+			count(*)
+		from (
+			select 
+				DISTINCT DATE_FORMAT(ctufu.createtime,'%Y-%m-%d') as createtime
+		    from c_t_use_forward_user ctufu
+		    left join c_t_use_evaluate ctue on ctue.evaluateid=ctufu.resourceid
+		    left join c_t_use_userinfo ctuu on ctue.createid=ctuu.userid
+		    <where>
+		        <if test="companyid != null and companyid != ''">and ctue.companyid=#{companyid}</if>
+		        <if test="receiveid != null and receiveid != ''">and ctufu.receiveid=#{receiveid}</if>
+		        <if test="status != null">and ctue.status=#{status}</if>
+		        <if test="starttime != null and starttime != ''">and ctufu.createtime &gt;= concat(#{starttime}," 00:00:00")</if>
+		        <if test="endtime != null and endtime != ''">and ctufu.createtime &lt;= concat(#{endtime},"23:59:59")</if>
+		        <if test="isread != null">and ctufu.isread=#{isread}</if>
+		        and ctufu.resourcetype=6 and ctue.delflag=0 and ctufu.delflag=0
+		    </where>
+		) evaluate
+	</select>
+	
+	
+	
+	
+	<insert id="insertStarRankingRuleInfo" parameterType="map">
+		insert into c_t_manage_starranking_rule
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="ruleid != null and ruleid != ''">ruleid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="title != null and title != ''">title,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+			<if test="content != null and content != ''">content,</if>
+			
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="status != null">status,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="ruleid != null and ruleid != ''">#{ruleid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="title != null and title != ''">#{title},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+			<if test="content != null and content != ''">#{content},</if>
+			
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="status != null">#{status},</if>
+		</trim>
+	</insert>
+	
+	
+	<update id="updateStarRankingRuleInfo" parameterType="map">
+		update c_t_manage_starranking_rule
+		<set>
+			<if test="title != null and title != ''">title=#{title},</if>
+			<if test="content != null and content != ''">content=#{content},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+		</set>
+		where ruleid=#{ruleid}
+	</update>
+	
+	<select id="getStarRankingRuleDetailInfo" parameterType="map" resultType="map">
+		select 
+			csr.ruleid,csr.title,csr.content,cuu.realname,date_format(csr.createtime,"%Y-%m-%d %H:%i") as createtime
+		from c_t_manage_starranking_rule csr
+		left join c_t_use_userinfo cuu on csr.createid=cuu.userid
+		where csr.ruleid=#{ruleid}
+		limit 1
+	</select>
+	
+	
+	
+	
+	
+	<select id="getEvaluateTemplateListCount" parameterType="map" resultType="int">
+    	select
+    		count(0)
+    	from c_t_use_evaluate_template cet
+    	left join c_t_use_organize cuo on cuo.organizeid=cet.organizeid
+    	<where>
+    		<if test="companyid != null and companyid != ''">and cet.companyid=#{companyid}</if>
+    		<if test="type != null and type != ''">and cet.type=#{type}</if>
+    		<if test="datacode != null and datacode != ''">and locate(#{datacode},cuo.datacode) > 0</if>
+    		and cet.delflag=0
+    	</where>
+    </select>
+	
+	<insert id="insertEvaluateTemplateInfo" parameterType="map">
+		insert into c_t_use_evaluate_template
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="templateid != null and templateid != ''">templateid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="templatename != null and templatename != ''">templatename,</if>
+			<if test="organizeid != null and organizeid != ''">organizeid,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+			
+			<if test="type != null and type != ''">type,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="delflag != null">delflag,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="templateid != null and templateid != ''">#{templateid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="templatename != null and templatename != ''">#{templatename},</if>
+			<if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+			
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="delflag != null">#{delflag},</if>
+		</trim>
+	</insert>
+	
+	<update id="updateEvaluateTemplateInfo" parameterType="map">
+		update c_t_use_evaluate_template
+		<set>
+			<if test="templatename != null and templatename != ''">templatename=#{templatename},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+		</set>
+		where templateid=#{templateid}
+	</update>
+	
+	<insert id="insertEvaluateProjectInfo" parameterType="map">
+		insert into c_t_use_poststar_project
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="projectid != null and projectid != ''">projectid,</if>
+			<if test="templateid != null and templateid != ''">templateid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="projectname != null and projectname != ''">projectname,</if>
+			<if test="organizeid != null and organizeid != ''">organizeid,</if>
+			
+			<if test="createid != null and createid != ''">createid,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="delflag != null">delflag,</if>
+			<if test="status != null">status,</if>
+			<if test="priority != null and priority != ''">priority,</if>
+			<if test="resoucetemplateid != null and resoucetemplateid != ''">resoucetemplateid,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="projectid != null and projectid != ''">#{projectid},</if>
+			<if test="templateid != null and templateid != ''">#{templateid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="projectname != null and projectname != ''">#{projectname},</if>
+			<if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+			
+			<if test="createid != null and createid != ''">#{createid},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="delflag != null">#{delflag},</if>
+			<if test="status != null">#{status},</if>
+			<if test="priority != null and priority != ''">#{priority},</if>
+			<if test="resoucetemplateid != null and resoucetemplateid != ''">#{resoucetemplateid},</if>
+		</trim>
+	</insert>
+	
+	<delete id="updateEvaluateProjectInfo" parameterType="map">
+		delete from  c_t_use_poststar_project
+		where templateid=#{templateid}
+	</delete>
+	
+	<!-- 查询模板信息 -->
+	<select id="getEvaluateDetailInfo" parameterType="map" resultType="map">
+		select
+			templateid,templatename,type
+		from c_t_use_evaluate_template
+		where templateid=#{templateid}
+		limit 1
+	</select>
+	
+	<!-- 修改岗位自评星值信息 -->
+	<update id="updateEvaluateStarInfo" parameterType="map">
+		update c_t_use_evaluate_star set starlevel=#{starlevel}
+		where starid=#{starid} and evaluateid=#{evaluateid}
+	</update>
+	
+	<!-- 修改综合自评星值信息 -->
+	<update id="updateOverAllaluateStarInfo" parameterType="map">
+		update c_t_use_overallvaluate_star
+		set starlevel=#{starlevel},description=#{description}
+		where starid=#{starid} and overallvaluateid=#{overallvaluateid}
+	</update>
+
+	<!-- 查询公司的组织信息 -->
+	<select id="getOrganizeByCompanyId" parameterType="map" resultType="map">
+		select 
+			organizeid,datacode,companyid
+		from c_t_use_organize
+		where parentid is null and companyid=#{companyid}
+		order by priority
+	</select>
+	
+	<!-- 查询模板名称是否重复 -->
+	<select id="getEValuateTemplateNameIsExists" parameterType="map" resultType="int">
+		select 
+			count(0)
+		from c_t_use_evaluate_template
+		where companyid=#{companyid} and organizeid=#{organizeid} and type=#{type} and templatename=#{templatename}
+		and delflag = 0
+		<if test="templateid != null and templateid != ''">and templateid!=#{templateid}</if>
+	</select>
+	
+	<!-- 查询评论信息中的转发人信息 -->
+	<select id="getCommentForwardUserids" parameterType="map" resultType="map">
+		select
+			forwarduserids,forwardusernames
+		from c_t_use_comment
+		where resourceid=#{resourceid} and delflag=0 and forwarduserids is not null
+	</select>
+</mapper>

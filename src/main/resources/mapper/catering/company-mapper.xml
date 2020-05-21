@@ -1,0 +1,561 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.CompanyMapper">
+    
+	<select id="getCompanyInfo" parameterType="map" resultType="map">
+	    select ctuc.companyid,ctuc.companyname,ctuc.createid,DATE_FORMAT(ctuc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuc.address,ctuc.contactperson,ctuc.idcodetype,ctuc.idcode,ctuc.telephone,ctuc.phone,
+	    ctuc.email,ctuc.info,ctuc.updatetime,ctuc.updateid,ctuc.status,
+	    ctucc.cloudid,ifnull(CAST(ctucc.maxmemory/1024/1024 as decimal(11,2)),0) as maxmemory,
+	    ifnull(CAST(ctucc.usedmemory/1024/1024 as decimal(11,2)),0) as usedmemory,
+	    ifnull(CAST(ctucc.shujudmemory/1024/1024 as decimal(11,2)),0) as shujudmemory,
+	    ifnull(CAST(ctucc.qywpdmemory/1024/1024 as decimal(11,2)),0) as qywpdmemory,
+	    ifnull(CAST(ctucc.gmdmemory/1024/1024 as decimal(11,2)),0) as gmdmemory,
+	    ifnull(CAST((ctucc.maxmemory-ctucc.usedmemory)/1024/1024 as decimal(11,2)),0)  as remainmemory,
+	    ctuu.realname as createname,ctuc.edition,ctuc.logourl
+	    from c_t_use_company ctuc
+	    left join c_t_use_company_cloud ctucc on  ctuc.companyid=ctucc.companyid
+	    left join c_t_use_userinfo ctuu on ctuc.createid=ctuu.userid
+	    <where>
+	        <if test="companyname != null and companyname != ''">and ctuc.companyname=#{companyname}</if>
+	        <if test="companyid != null and companyid != ''">and ctuc.companyid=#{companyid}</if>
+	    </where>
+	    limit 1
+	</select>
+	<insert id="insertCompanyInfo" parameterType="map">
+	    insert into c_t_use_company
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="companyname != null and companyname != ''">companyname,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="address != null and address != ''">address,</if>
+	        <if test="contactperson != null and contactperson != ''">contactperson,</if>
+	        <if test="idcodetype != null">idcodetype,</if>
+	        <if test="idcode != null and idcode != ''">idcode,</if>
+	        <if test="telephone != null and telephone != ''">telephone,</if>
+	        <if test="phone != null and phone != ''">phone,</if>
+	        <if test="email != null and email != ''">email,</if>
+	        <if test="info != null and info != ''">info,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	        <if test="status != null ">status,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="companyname != null and companyname != ''">#{companyname},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null ">#{delflag},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="address != null and address != ''">#{address},</if>
+	        <if test="contactperson != null and contactperson != ''">#{contactperson},</if>
+	        <if test="idcodetype != null ">#{idcodetype},</if>
+	        <if test="idcode != null and idcode != ''">#{idcode},</if>
+	        <if test="telephone != null and telephone != ''">#{telephone},</if>
+	        <if test="phone != null and phone != ''">#{phone},</if>
+	        <if test="email != null and email != ''">#{email},</if>
+	        <if test="info != null and info != ''">#{info},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	        <if test="status != null ">#{status},</if>
+	    </trim>
+	</insert>
+	<update id="updateCompany" parameterType="map">
+	    update c_t_use_company
+	    <set>
+	        <if test="companyname != null and companyname != ''">companyname=#{companyname},</if>
+	        <if test="createid != null and createid != ''">createid=#{createid},</if>
+	        <if test="delflag != null ">delflag=#{delflag},</if>
+	        <if test="address != null and address != ''">address=#{address},</if>
+	        <if test="contactperson != null and contactperson != ''">contactperson=#{contactperson},</if>
+	        <if test="idcodetype != null ">idcodetype=#{idcodetype},</if>
+	        <if test="idcode != null and idcode != ''">idcode=#{idcode},</if>
+	        <if test="telephone != null and telephone != ''">telephone=#{telephone},</if>
+	        <if test="phone != null and phone != ''">phone=#{phone},</if>
+	        <if test="email != null and email != ''">email=#{email},</if>
+	        <if test="info != null and info != ''">info=#{info},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="logourl != null and logourl != ''">logourl=#{logourl},</if>
+	        <if test="edition != null and edition != ''">edition=#{edition},</if>
+	        <if test="ispromote != null">ispromote=#{ispromote}</if>
+	    </set>
+	    where companyid=#{companyid}
+	</update>
+	<select id="getCompanyListByPhone" parameterType="map" resultType="map">
+	    select ctuu.username,ctuu.userid,ctuc.companyid,ctuc.companyname,ctuc.createid,DATE_FORMAT(ctuc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuc.address,ctuc.contactperson,ctuc.idcodetype,ctuc.idcode,ctuc.telephone,ctuc.phone,
+	    ctuc.email,ctuc.info,ctuc.updatetime,ctuc.updateid,ctuc.status 
+	    from  c_t_use_userinfo ctuu
+	    left join c_t_use_company ctuc on ctuu.companyid=ctuc.companyid
+	    <where>
+	        <if test="phone != null and phone != ''">and ctuu.phone=#{phone}</if>
+	        <if test="username != null and username != ''">and ctuu.username=#{username}</if>
+	        <if test="password != null and password != ''">and ctuu.password=#{password}</if>
+	        and ctuu.delflag=0 and ctuu.status=1 and ctuc.status=1
+	    </where>
+	</select>
+	<select id="getLogList" parameterType="map" resultType="map">
+	    select ctml.codeid,ctml.companyid,ctml.type,ctml.model,ctml.content,ctml.userid,DATE_FORMAT(ctml.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuu.realname
+	    from c_t_manage_log  ctml
+	    left join c_t_use_userinfo ctuu on ctml.userid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctml.companyid=#{companyid}</if>
+	        <if test="model != null and model != ''">and ctml.model=#{model}</if>
+	        <if test="type != null">and ctml.type=#{type}</if>
+	        <if test="starttime != null and starttime != ''">and ctml.createtime &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and ctml.createtime &lt;= #{endtime}</if>
+	        <if test="searchcontent != null and searchcontent != ''">and (ctuu.realname like concat("%",#{searchcontent},"%") or ctml.content like concat("%",#{searchcontent},"%"))</if>
+	    </where>
+	    order by ctml.createtime desc
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getLogListNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_manage_log  ctml
+	    left join c_t_use_userinfo ctuu on ctml.userid=ctuu.userid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctml.companyid=#{companyid}</if>
+	        <if test="model != null and model != ''">and ctml.model=#{model}</if>
+	        <if test="type != null">and ctml.type=#{type}</if>
+	        <if test="starttime != null and starttime != ''">and ctml.createtime &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and ctml.createtime &lt;= #{endtime}</if>
+	        <if test="searchcontent != null and searchcontent != ''">and (ctuu.realname like concat("%",#{searchcontent},"%") or ctml.content like concat("%",#{searchcontent},"%"))</if>
+	    </where>
+	</select>
+	<select id="getLogModelList" parameterType="map" resultType="map">
+	    select model from c_t_manage_log
+	    <where>
+	        <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	        <if test="type != null">and type=#{type}</if>
+	    </where>
+	   	group by model
+	</select>
+	<select id="getBannerList" parameterType="map" resultType="map">
+	    select id,imgurl,httpurl,type,model,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime from c_t_manage_banner 
+	    <where>
+	        <if test="type != null"> and type=#{type}</if>
+	        <if test="companyid != null and companyid != ''"> and companyid=#{companyid}</if>
+	        and delflag=0
+	    </where>
+	    order by priority
+	</select>
+	<insert id="insertBanner" parameterType="map">
+	    insert into c_t_manage_banner
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="id != null and id != ''">id,</if>
+	        <if test="imgurl != null and imgurl != ''">imgurl,</if>
+	        <if test="httpurl != null and httpurl != ''">httpurl,</if>
+	        <if test="type != null and type != ''">type,</if>
+	        <if test="model != null and model != ''">model,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="priority != null and priority != ''">priority,</if>
+	        <if test="delflag != null">delflag,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="id != null and id != ''">#{id},</if>
+	        <if test="imgurl != null and imgurl != ''">#{imgurl},</if>
+	        <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+	        <if test="type != null and type != ''">#{type},</if>
+	        <if test="model != null and model != ''">#{model},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="priority != null">#{priority},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	    </trim>
+	</insert>
+	<update id="updateBanner" parameterType="map">
+	    update c_t_manage_banner
+	    <set>
+	        <if test="imgurl != null and imgurl != ''">imgurl=#{imgurl},</if>
+	        <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+	        <if test="type != null and type != ''">type=#{type},</if>
+	        <if test="model != null and model != ''">model=#{model},</if>
+	        <if test="companyid != null and companyid != ''">companyid=#{companyid},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	        <if test="priority != null">priority=#{priority},</if>
+	        <if test="delflag != null">delflag=#{delflag},</if>
+	    </set>
+	    where id=#{id}
+	</update>
+	<select id="getLicenseList" parameterType="map" resultType="map">
+	    select licenseid,companyid,imageurl,createid,createtime  from c_t_use_company_license
+	    <where>
+	        <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	        and delflag=0
+	    </where>
+	    order by  createtime
+	</select>
+	<delete id="deleteLicense" parameterType="map">
+	    delete from c_t_use_company_license where companyid=#{companyid}
+	</delete>
+	<insert id="insertLicense" parameterType="map">
+	    insert into c_t_use_company_license
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="licenseid != null and licenseid != ''">licenseid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="imageurl != null and imageurl != ''">imageurl,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null ">delflag,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="licenseid != null and licenseid != ''">#{licenseid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="imageurl != null and imageurl != ''">#{imageurl},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null ">#{delflag},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	<insert id="insertUserFunction" parameterType="map">
+	    insert into c_t_manage_user_function
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userfunctionid != null and userfunctionid != ''">userfunctionid,</if>
+	        <if test="functionid != null and functionid != ''">functionid,</if>
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="delflag != null and delflag != ''">delflag,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="userfunctionid != null and userfunctionid != ''">#{userfunctionid},</if>
+	        <if test="functionid != null and functionid != ''">#{functionid},</if>
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="delflag != null and delflag != ''">#{delflag},</if>
+	    </trim>
+	</insert>
+	<select id="getCompanyNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_use_company
+	    <where>
+	        <if test="edition != null">and edition=#{edition}</if>
+	    </where>
+	</select>
+	<select id="getUserNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_use_userinfo
+	    <where>
+	        <if test="isfristlogin != null">and isfristlogin=#{isfristlogin}</if>
+	        and delflag=0
+	    </where>
+	</select>
+	<select id="getAllCompanyList" resultType="map" parameterType="map">
+	    select  
+		    ctuc.companyid,ctuc.companyname,ctuc.createid,DATE_FORMAT(ctuc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+		    ctuc.address,ctuc.contactperson,ctuc.idcodetype,ctuc.idcode,ctuc.telephone,ctuc.phone,ctuc.edition,ctuc.ispromote,
+		    ctuc.email,ctuc.info,ctuc.updatetime,ctuc.updateid,ctuc.status,ifnull(count(ctuu.userid),0) as usernum,ctuc.logourl  
+	    from c_t_use_company ctuc
+		left join c_t_use_userinfo ctuu on ctuc.companyid=ctuu.companyid
+		<where>
+		    <if test="companyname != null and companyname != ''">and (ctuc.companyname like concat("%",#{companyname},"%")  or ctuc.contactperson like concat("%",#{companyname},"%"))</if>
+		    and ctuc.delflag=0
+		    <if test="condition != null and condition == 'ordinary'">and ctuc.edition=1</if>
+		    <if test="condition != null and condition == 'professional'">and ctuc.edition=2</if>
+		    <if test="condition != null and condition == 'notjoinin'">and ctuc.ispromote=0 and ctuc.edition=1</if>
+		    <if test="condition != null and condition == 'joinin'">and ctuc.ispromote=1 and ctuc.edition=1</if>
+		</where> 
+		GROUP BY ctuc.companyid
+		<if test="priority != null and priority != '' and priority=='time'">order by ctuc.createtime asc</if>
+		<if test="priority != null and priority != '' and priority=='num'">order by usernum desc</if>
+		<if test="priority == null or priority == ''">order by ctuc.createtime desc</if>
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	</select>
+
+	<select id="getAllCompanyListNum" resultType="int" parameterType="map">
+	    select count(0)  from (select  ctuc.companyid,ctuc.companyname,ctuc.createid,DATE_FORMAT(ctuc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuc.address,ctuc.contactperson,ctuc.idcodetype,ctuc.idcode,ctuc.telephone,ctuc.phone,
+	    ctuc.email,ctuc.info,ctuc.updatetime,ctuc.updateid,ctuc.status,count(ctuu.userid) as usernum  from c_t_use_company ctuc
+		left join c_t_use_userinfo ctuu on ctuc.companyid=ctuu.companyid
+		<where>
+		    <if test="companyname != null and companyname != ''">and (ctuc.companyname like concat("%",#{companyname},"%")  or ctuc.contactperson like concat("%",#{companyname},"%"))</if>
+		    and ctuc.delflag=0
+		    <if test="condition != null and condition == 'ordinary'">and ctuc.edition=1</if>
+		    <if test="condition != null and condition == 'professional'">and ctuc.edition=2</if>
+		    <if test="condition != null and condition == 'notjoinin'">and ctuc.ispromote=0 and ctuc.edition=1</if>
+		    <if test="condition != null and condition == 'joinin'">and ctuc.ispromote=1 and ctuc.edition=1</if>
+		</where> 
+		GROUP BY ctuc.companyid) a
+	</select>
+	<select id="getPowerByCompany" parameterType="map" resultType="map">
+	    select ctup.powerid,ctup.datacode,ctup.parentid,ctup.function,ctup.powername,ctup.info,ctup.edition,ctup.childnum,ctupc.companyid,
+	    ctupc.result,ctupc.status,ctupc.createid,DATE_FORMAT(ctupc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctupc.powercompanyid
+	    from c_t_use_power  ctup
+	    left join c_t_use_power_company ctupc on ctup.powerid=ctupc.powerid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>
+	    </where>
+	</select>
+	<update id="updateCompanyPower" parameterType="map">
+	    update c_t_use_power_company
+	    <set>
+	        <if test="result != null">result=#{result},</if>
+	        <if test="status  != null">status=#{status},</if>
+	        <if test="delflag  != null">delflag=#{delflag},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	    </set>
+	    where powerid like concat(#{powerid},"%") and companyid=#{companyid}
+	</update>
+	<select id="getCompanyStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c_time.comparetime,'%Y-%m-%d') as comparetime,ifnull(count(ctuc.companyid),0) as count
+ 		FROM c_t_manage_time c_time left join 
+		c_t_use_companyuselog  ctuc on ctuc.usetime=c_time.comparetime
+		<where>
+			<if test="starttime != null and starttime != ''">and c_time.comparetime &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c_time.comparetime &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c_time.comparetime
+	</select>
+	<select id="getNewCompanyStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c_time.comparetime,'%Y-%m-%d') as comparetime,ifnull(count(ctuc.companyid),0) as count
+ 		FROM c_t_manage_time c_time left join 
+		c_t_use_company  ctuc on DATE_FORMAT(ctuc.createtime,'%Y-%m-%d')=c_time.comparetime
+		<where>
+			<if test="starttime != null and starttime != ''">and c_time.comparetime &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c_time.comparetime &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c_time.comparetime
+	</select>
+	
+	<select id="getCompanyBlackList" parameterType="map" resultType="map">
+	    select ctuc.companyid,ctuc.companyname,count(ctuu.userid) as usernum,ctuc.logourl   from c_t_use_company ctuc
+	    left join c_t_use_userinfo ctuu on ctuc.companyid=ctuu.companyid and ctuu.delflag=0
+	    <if test="starttime != null and starttime != ''">and ctuu.createtime &gt;= #{starttime}</if>
+	    <if test="endtime != null and endtime != ''">and ctuu.createtime &lt;= #{endtime}</if>
+	    where ctuc.delflag=0
+	    group by ctuc.companyid
+	    order by ctuc.createtime desc
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getCompanyBlackListNum" parameterType="map" resultType="int">
+	    select count(0) from (select ctuc.companyid,ctuc.companyname,count(ctuu.userid) as usernum   from c_t_use_company ctuc
+	    left join c_t_use_userinfo ctuu on ctuc.companyid=ctuu.companyid and ctuu.delflag=0
+	    <if test="starttime != null and starttime != ''">and ctuu.createtime &gt;= #{starttime}</if>
+	    <if test="endtime != null and endtime != ''">and ctuu.createtime &lt;= #{endtime}</if>
+	    where ctuc.delflag=0
+	    group by ctuc.companyid
+	    ) a
+	</select>
+	<select id="getMaxCompanyDataCode" resultType="string">
+	    select IFNULL(datacode,"10000") AS datacode from  c_t_use_organize 
+	    where parentid is null
+	    order by datacode desc
+	    limit 1
+	</select>
+	<insert id="insertCompanyCloud" parameterType="map">
+	    insert into c_t_use_company_cloud
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="cloudid != null and cloudid != ''">cloudid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="maxmemory != null and maxmemory != ''">maxmemory,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="delflag != null">delflag,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="cloudid != null and cloudid != ''">#{cloudid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="maxmemory != null and maxmemory != ''">#{maxmemory},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	    </trim>
+	</insert>
+	<select id="getAllPowerList" resultType="map">
+	    select * from c_t_use_power where delflag=0
+	</select>
+	<insert id="insertCompanyPower" parameterType="map">
+	    insert into c_t_use_power_company
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="powercompanyid != null and powercompanyid != ''">powercompanyid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="powerid != null and powerid != ''">powerid,</if>
+	        <if test="status != null ">status,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="powercompanyid != null and powercompanyid != ''">#{powercompanyid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="powerid != null and powerid != ''">#{powerid},</if>
+	        <if test="status != null ">#{status},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	<insert id="insertOrganizeUser" parameterType="map">
+	    insert into c_t_use_organize_userinfo
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="manageid != null and manageid != ''">manageid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="companyid != null ">companyid,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="manageid != null and manageid != ''">#{manageid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="companyid != null ">#{companyid},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	<update id="updateOrganize" parameterType="map">
+	    update c_t_use_organize
+	    <set>
+	        <if test="usernum != null">usernum=ifnull(usernum,0)+#{usernum},</if>
+	    </set>
+	    where organizeid=#{organizeid}
+	</update>
+	
+	<insert id="insertOrganizeMap" parameterType="map">
+		insert into c_t_use_organize
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="organizeid != null and organizeid != ''">organizeid,</if>
+			<if test="datacode != null and datacode != ''">datacode,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="organizename != null and organizename != ''">organizename,</if>
+			<if test="type != null and type != ''">type,</if>		
+			<if test="parentid != null">parentid,</if>
+			<if test="address != null and address != ''">address,</if>
+			<if test="childnum != null and childnum != ''">hildnum,</if>
+			<if test="usernum != null and usernum != ''">usernum,</if>
+			<if test="delfalg != null">delfalg,</if>
+			<if test="qrcode != null and qrcode != ''">qrcode,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="priority != null and priority != ''">priority,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+			<if test="datacode != null and datacode != ''">#{datacode},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="organizename != null and organizename != ''">#{organizename},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="parentid != null">#{parentid},</if>
+			<if test="address != null and address != ''">#{address},</if>
+			<if test="childnum != null and childnum != ''">#{hildnum},</if>
+			<if test="usernum != null and usernum != ''">#{usernum},</if>
+			<if test="delfalg != null">#{delfalg},</if>
+			<if test="qrcode != null and qrcode != ''">#{qrcode},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="priority != null and priority != ''">#{priority},</if>
+		</trim>
+	</insert>
+	
+	<!-- 查询组织架构是否存在店面 -->
+	<select id="getOrganizeStoreIsExsits" parameterType="map" resultType="int">
+		select 
+			count(0)
+		from c_t_use_organize
+		where delflag=0 and companyid=#{companyid} and type=3
+		<if test="datacodelist != null and datacodelist != ''">and datacode
+			<foreach collection="datacodelist" close=")" index="index" item="item" open="in (" separator=",">#{item}</foreach>
+		</if>
+		<if test="likedatacode != null and likedatacode != ''">and LOCATE(#{likedatacode},datacode) > 0</if>
+		<if test="myorganizeid != null and myorganizeid != ''">and organizeid!=#{myorganizeid}</if>
+	</select>
+	
+	<!-- 查询某组织机构下面 最大的排序值 -->
+	<select id="getOrganizeMaxPriorityNum" parameterType="map" resultType="int">
+		SELECT
+			IFNULL(MAX(priority),0) as num
+		FROM c_t_use_organize
+		WHERE delflag=0 AND parentid=#{organizeid}
+		<if test="companyid != null and companyid != ''">AND companyid=#{companyid}</if>
+	</select>
+	
+	
+	<!-- 查询公司创建者信息 -->
+	<select id="getComapnyCreateUserInfo" parameterType="map" resultType="map">
+		select ctuc.companyid,ctuc.companyname,ctuc.createid,DATE_FORMAT(ctuc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ctuc.email,ctuc.info,ctuc.updatetime,ctuc.updateid,ctuc.status,ctuu.realname,IFNULL(ctuu.managerole,0) AS managerole
+	    from c_t_use_company ctuc
+	    left join c_t_use_userinfo ctuu on ctuc.createid=ctuu.userid
+	    <where>
+	        <if test="userid != null and userid != ''">and ctuc.createid=#{userid}</if>
+	        <if test="companyid != null and companyid != ''">and ctuc.companyid=#{companyid}</if>
+	    </where>
+	    limit 1
+	</select>
+	<!-- 修改企业状态 -->
+	<update id="updatecompanyedition" parameterType="map">
+		update c_t_use_company set edition=2 where companyid=#{companyid}
+	</update>
+	
+	<!-- 查询人员所属的组织架构 -->
+	<select id="getUserShops" parameterType="map" resultType="map">
+		select 
+			ctuou.manageid,ctuou.organizeid,ctuou.userid,ctuou.companyid,ctuo.datacode
+		from c_t_use_organize_userinfo ctuou
+		inner join c_t_use_organize ctuo on ctuo.organizeid=ctuou.organizeid
+		where ctuou.userid=#{userid} and ctuou.delflag=0
+	</select>
+	<!-- 查询某组织上级存在的店面信息（包括自己） -->
+	<select id="queryUserUpIsExistsShop" parameterType="map" resultType="map">
+		select
+			*
+		from c_t_use_organize
+		where delflag=0 and companyid=#{companyid} and type=3
+		<if test="datacodelist != null and datacodelist != ''">and datacode
+			<foreach collection="datacodelist" close=")" index="index" item="item" open="in (" separator=",">#{item}</foreach>
+		</if>
+		limit 1
+	</select>
+	
+	<!-- 查询公司的已使用的人数 -->
+	<select id="getCompanyUsedUserNum" parameterType="map" resultType="int">
+		 select count(0) from c_t_use_userinfo
+		 where
+		 	delflag=0
+	        <if test="isfristlogin != null">and isfristlogin=#{isfristlogin}</if>
+	     	<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	</select>
+	
+	<!-- 添加公司使用日志信息 -->
+	<insert id="insertCompanyUseLog" parameterType="map">
+		replace into c_t_use_companyuselog
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="companyuseid != null and companyuseid != ''">companyuseid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="usetime != null and usetime != ''">usetime,</if>
+			<if test="lastusetime != null and lastusetime != ''">lastusetime,</if>
+			<if test="userid != null and userid != ''">userid,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="companyuseid != null and companyuseid != ''">#{companyuseid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="usetime != null and usetime != ''">#{usetime},</if>
+			<if test="lastusetime != null and lastusetime != ''">#{lastusetime},</if>
+			<if test="userid != null and userid != ''">#{userid},</if>
+		</trim>
+	</insert>
+	
+	
+	<select id="getAllComapnyListByPage" parameterType="map" resultType="map">
+	  	select 
+	  		cm.companyid,cm.companyname,cm.countPeople,cm.usePeople,IFNULL(cu.everydayPeople,0) AS everydayPeople,IFNULL((cu.everydayPeople/cm.usePeople),0) as everydayactivenum
+	  	from 
+	  	(select  
+		    ctuc.companyid,ctuc.companyname,ctuc.createid,COUNT(ctuu.userid) as countPeople,SUM(case when ctuu.isfristlogin=0 then 1 else 0 end) as usePeople
+	    from  c_t_use_userinfo ctuu
+	    left join c_t_use_company ctuc on ctuc.companyid=ctuu.companyid
+	    group by ctuc.companyid) cm
+	    left join (
+	    	SELECT IFNULL(COUNT(ctuu1.userid),0)/TIMESTAMPDIFF(DAY,#{starttime},#{endtime}) as everydayPeople,ctuu1.companyid
+	 		FROM c_t_use_userlog ctuu1
+			<where>
+				<if test="starttime != null and starttime != ''">and ctuu1.usetime &gt;= #{starttime}</if>
+				<if test="endtime != null and endtime != ''">and ctuu1.usetime &lt;= #{endtime}</if>
+			</where>
+			GROUP BY ctuu1.companyid
+	    ) cu on cu.companyid=cm.companyid
+	    order by everydayactivenum desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+</mapper>

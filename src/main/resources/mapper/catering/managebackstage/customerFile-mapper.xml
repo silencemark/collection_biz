@@ -1,0 +1,27 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.managebackstage.CustomerFileMapper">
+
+	<!-- 添加文件上传信息 -->
+	<insert id="insertCustomerFileInfo" parameterType="map">
+		insert into c_t_manage_customer_file
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="fileid != null and fileid != ''">fileid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="userid != null and userid != ''">userid,</if>
+			<if test="size != null">size,</if>
+			<if test="type != null and type != ''">type,</if>
+			<if test="url != null and url != ''">url,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="fileid != null and fileid != ''">#{fileid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="userid != null and userid != ''">#{userid},</if>
+			<if test="size != null">#{size},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="url != null and url != ''">#{url},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+		</trim>
+	</insert>
+
+</mapper>

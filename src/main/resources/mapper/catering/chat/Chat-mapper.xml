@@ -1,0 +1,359 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.chat.ChatMapper">
+    
+    <!-- app 消息讨论组 列表-->
+	<select id="getChatGroupList" parameterType="map" resultType="map">
+	    	select a.groupid, ifnull(a.groupname,"") as groupname, a.isgroup,b.groupuserid,b.isdisturb,b.istop,b.cleantime,c.realname,c.headimage,a.groupurl  from c_t_use_group a 
+	        left join c_t_use_user_group b on a.groupid = b.groupid
+	        left join c_t_use_userinfo c on c.userid = b.userid 
+	      <where>
+	         <if test="groupid != null and groupid !=''">and a.groupid= #{groupid}</if>
+	         <if test="userid != null and userid !=''">and b.userid= #{userid}</if>
+	         <if test="groupname != null and groupname !=''">and a.groupname like concat("%", #{groupname},"%")</if>
+	         <if test="groupids != null">
+		         <foreach collection="groupids" open="and a.groupid in (" separator="," close=")" item="item">
+		             '${item}'
+		         </foreach>
+	         </if>
+	         and a.delflag = 0
+	      </where>
+	      group by a.groupid
+	      order by b.istop desc
+	     <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<select id="getChatGroupInfo" parameterType="map" resultType="map">
+	    select a.groupid, a.groupname,a.createid, a.isgroup,b.groupuserid,b.isdisturb,b.istop,b.cleantime,c.realname,c.headimage,a.groupurl  
+	    from c_t_use_group a 
+        left join c_t_use_user_group b on a.groupid = b.groupid
+        left join c_t_use_userinfo c on c.userid = b.userid 
+        <where>
+	         <if test="groupid != null and groupid !=''">and a.groupid= #{groupid}</if>
+	         <if test="userid != null and userid !=''">and b.userid= #{userid}</if>
+	         and  a.delflag = 0
+	    </where>
+	    limit 1
+	</select>
+	<!-- app 消息讨论组  记录数 -->
+	<select id="getChatGroupListCount" parameterType="map" resultType="int">
+	   	select count(*) (select a.* from c_t_use_group a 
+	        left join c_t_use_user_group b on a.groupid = b.groupid
+	        left join c_t_use_userinfo c on c.userid = b.userid 
+	      <where>
+	         <if test="groupid != null and groupid !=''">and a.groupid= #{groupid}</if>
+	         <if test="userid != null and userid !=''">and b.userid= #{userid}</if>
+	         <if test="groupname != null and groupname !=''">and a.groupname like concat("%", #{groupname},"%")</if>
+	         <if test="groupids != null">
+		         <foreach collection="groupids" open="and a.groupid in (" separator="," close=")" item="item">
+		             '${item}'
+		         </foreach>
+	         </if>
+	         and  a.delflag = 0
+	      </where>
+	      group by a.groupid
+	      )
+	</select>
+	
+	<!-- 新增讨论组-->
+	<insert id="insertGroup" parameterType="map">
+	    insert into c_t_use_group
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="groupid != null and groupid != ''">groupid,</if>
+	        <if test="groupname != null and groupname != ''">groupname,</if>
+	        <if test="isgroup != null and isgroup != ''">isgroup,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="status != null and status != ''">status,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="groupid != null and groupid != ''">#{groupid},</if>
+	        <if test="groupname != null and groupname != ''">#{groupname},</if>
+	        <if test="isgroup != null and isgroup != ''">#{isgroup},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="status != null and status != ''">#{status},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	    </trim>
+	</insert>
+  
+    <!-- 邀请进讨论组 -->
+    <insert id="insertUserToGroup" parameterType="map">
+	    insert into c_t_use_user_group
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="groupuserid != null and groupuserid != ''">groupuserid,</if>
+	        <if test="groupid != null and groupid != ''">groupid,</if>
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="isdisturb != null">isdisturb,</if>
+	        <if test="istop != null">istop,</if>
+	        <if test="cleantime != null and cleantime != ''">cleantime,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="status != null and status != ''">status,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="groupuserid != null and groupuserid != ''">#{groupuserid},</if>
+	        <if test="groupid != null and groupid != ''">#{groupid},</if>
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="isdisturb != null">#{isdisturb},</if>
+	        <if test="istop != null ">#{istop},</if>
+	        <if test="cleantime != null and cleantime != ''">#{cleantime},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="status != null and status != ''">#{status},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	    </trim>
+	</insert>
+    
+    <!-- 发送消息 -->
+    <insert id="insertChatRecord" parameterType="map">
+    	update c_t_use_chat_record set islast = 1 where groupid = #{groupid};
+	    insert into c_t_use_chat_record
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="recordid != null and recordid != ''">recordid,</if>
+	        <if test="content != null and content != ''">content,</if>
+	        <if test="groupid != null and groupid != ''">groupid,</if>
+	        <if test="type != null and type != ''">type,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="delflag != null and delflag != ''">delflag,</if>
+	        <if test="status != null and status != ''">status,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="recordid != null and recordid != ''">#{recordid},</if>
+	        <if test="content != null and content != ''">#{content},</if>
+	        <if test="groupid != null and groupid != ''">#{groupid},</if>
+	        <if test="type != null and type != ''">#{type},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="delflag != null and delflag != ''">#{delflag},</if>
+	        <if test="status != null and status != ''">#{status},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	    </trim>
+	</insert>
+    
+    <!-- 聊天分组 - 用户表相关操作 -->
+    <update id="updateUserGroup" parameterType="map">
+       update c_t_use_user_group 
+       <set>
+         <if test="isdisturb != null">isdisturb = #{isdisturb},</if>
+         <if test="istop != null">istop = #{istop},</if>
+         <if test="delflag != null">delflag = #{delflag},</if>
+         <if test="cleantime != null and cleantime != ''">cleantime = #{cleantime},</if>
+         <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+         <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+       </set>
+       <where>
+          groupuserid = #{groupuserid} and delflag = 0
+       </where>
+    </update>
+  
+ 	<select id="getMyGroupNum" parameterType="map" resultType="int">
+ 	    select count(0) from c_t_use_group where createid=#{createid} and delflag=0
+ 	</select>
+ 	<select id="getLastRecord" parameterType="map" resultType="map">
+ 	    select ifnull(content,"") as lastcontent,DATE_FORMAT(createtime,'%H:%i') as lasttime,createtime,type from c_t_use_chat_record
+ 	    where groupid=#{groupid} and delflag=0
+ 	    order by createtime desc
+ 	    limit 1
+ 	</select>
+ 	<select id="getChatUserList" parameterType="map" resultType="map">
+ 	    select ctuu.userid,ctuu.password,ctuu.username,ctuu.phone,ctuu.isshowphone,ctuu.email,ctuu.realname,ctuu.sex,ctuu.birthday,ctuu.headimage,ctuu.isfristlogin,ctuu.status,ctuu.delflag,DATE_FORMAT(ctuu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuu.isinvite,ctuu.companyid,DATE_FORMAT(ctuu.invitetime,'%Y-%m-%d %H:%i:%S') as invitetime,DATE_FORMAT(ctuu.logintime,'%Y-%m-%d %H:%i:%S') as logintime, DATE_FORMAT(ctuu.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuu.updateid,
+	    ctuc.datacode,ctuc.companyname,ctuu.position,ctuu.managerole
+	    from c_t_use_userinfo ctuu
+	    left join c_t_use_company ctuc on ctuu.companyid=ctuc.companyid
+	    <where>
+	        <if test="userids != null">
+	            <foreach collection="userids" open="and ctuu.userid in(" close=")" separator="," item="item">
+	                '${item}'
+	            </foreach>
+	        </if>
+	    </where>
+ 	</select>
+ 	<update id="updateGroup" parameterType="map">
+ 	    update c_t_use_group
+ 	    <set>
+ 	        <if test="groupname != null and groupname != ''">groupname=#{groupname},</if>
+ 	        <if test="groupurl != null and groupurl != ''">groupurl=#{groupurl},</if>
+ 	        <if test="isgroup != null">isgroup=#{isgroup},</if>
+ 	        <if test="delflag != null">delflag=#{delflag},</if>
+ 	        <if test="updatetime != null">updatetime=#{updatetime},</if>
+ 	        <if test="updateid != null">updateid=#{updateid},</if>
+ 	    </set>
+ 	    where groupid=#{groupid}
+ 	</update>
+ 	<select id="getUserGroup" parameterType="map" resultType="map">
+ 	    select groupuserid,groupid,userid,isdisturb,istop,createtime from c_t_use_user_group
+ 	    <where>
+ 	        <if test="groupid != null and groupid != ''">and groupid=#{groupid}</if>
+ 	        <if test="userid != null and userid != ''">and userid=#{userid}</if>
+ 	        <if test="groupuserid != null and groupuserid != ''">and groupuserid=#{groupuserid}</if>
+ 	        and delflag=0
+ 	    </where>
+ 	    limit 1
+ 	</select>
+ 	
+ 	<select id="isCreateOneCart" parameterType="map" resultType="string">
+ 	SELECT groupid from (
+		SELECT A1.groupid,CONCAT(",",group_concat(A2.userid),",") userid FROM c_t_use_group A1
+		inner join c_t_use_user_group A2 on A1.groupid = A2.groupid and (A2.userid = #{userid1} or A2.userid = #{userid2}) and A2.delflag = 0 and A1.delflag = 0
+		where A1.isgroup = 2
+		group by A1.groupid
+	) A1 where LOCATE(',${userid2},',userid)>0 and LOCATE(',${userid1},',userid)>0  
+	limit 1 
+ 	</select>
+ 	
+ 	<select id="getMyAllCartList" parameterType="map" resultType="map">
+select * from (
+select A2.userid,A1.groupid,A1.groupname,A1.groupurl,A1.isgroup,A1.createtime,A2.istop,A3.content,A3.type,A4.`status`,
+A3.createtime lasttime from c_t_use_group A1 
+INNER JOIN c_t_use_user_group A2 on A1.groupid = A2.groupid and A2.userid = #{userid} 
+and A2.delflag = 0 and A1.delflag = 0 
+left JOIN c_t_use_chat_record A3 on A1.groupid = A3.groupid and A3.islast =0
+left JOIN c_t_use_chat_record_status A4 on A4.recordid = A3.recordid and A4.userid = #{userid} 
+<where>
+   <if test="groupid != null">
+   and A1.groupid = #{groupid}
+   </if>
+</where>
+group by A1.groupid 
+order by A2.istop desc,A3.createtime desc,A1.createtime desc
+) AA
+	
+	<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+ 	</select>
+ 	<select id="getMyAllCartListCount" parameterType="map" resultType="int">
+ 	select count(0) from (
+select A2.userid,A1.groupid,A1.groupname,A1.groupurl,A1.isgroup,A1.createtime,A2.istop,A3.content,A3.type,A4.`status`,
+A3.createtime lasttime from c_t_use_group A1 
+INNER JOIN c_t_use_user_group A2 on A1.groupid = A2.groupid and A2.userid = #{userid} 
+and A2.delflag = 0 and A1.delflag = 0 
+left JOIN c_t_use_chat_record A3 on A1.groupid = A3.groupid and A3.islast =0
+left JOIN c_t_use_chat_record_status A4 on A4.recordid = A3.recordid and A4.userid = #{userid} 
+<where>
+   <if test="groupid != null">
+   and A1.groupid = #{groupid}
+   </if>
+</where>
+group by A1.groupid 
+order by A2.istop desc,A3.createtime desc,A1.createtime desc
+ 	) A
+ 	</select>
+ 	
+ 	<select id="getChatGroupUserList" parameterType="map" resultType="map">
+	    select A1.userid,A2.realname,A2.headimage,A1.isdisturb from c_t_use_user_group A1 
+		INNER JOIN c_t_use_userinfo A2 on A1.userid = A2.userid and A1.delflag=0 and A2.delflag = 0
+		where groupid = #{groupid}
+		GROUP BY A1.userid
+		<if test="limitnum!=null">
+			limit ${limitnum}		
+		</if>
+	</select>
+	
+	<!-- 添加消息状态 -->
+	<insert id="insertChatRecordStatus" parameterType="map">
+	insert into c_t_use_chat_record_status(recordid,groupid,type,userid)values(#{recordid},#{groupid},#{type},#{userid})
+	</insert>
+	<!-- 标记已读状态 -->
+	<update id="signChatRecordStatus" parameterType="map">
+		update c_t_use_chat_record_status set status = 1 where groupid = #{groupid} and userid = #{userid};
+	</update>
+	<!-- 清空聊天记录 -->
+	<delete id="deleteChatRecord" parameterType="map">
+		delete from c_t_use_chat_record_status where groupid = #{groupid} and userid = #{userid};
+	</delete>
+	<!-- 标记语音已读状态 -->
+	<delete id="signVoiceChatRecordStatus" parameterType="map">
+		update c_t_use_chat_record_status set voicestatus = 1 where groupid = #{groupid} and userid = #{userid} and recordid = #{recordid} and type = 3;
+	</delete>
+	<!-- 获取用户是否有未读信息数-->
+	<select id="getChatRecordStatusCount" parameterType="map" resultType="int">
+	    select count(8) from c_t_use_chat_record_status 
+	    <where>
+	    	userid = #{userid} and status= 0
+	    	<if test="groupid!=null">
+	    	and groupid = #{groupid}
+	    	</if>
+	    </where>
+	</select>
+	
+	<!-- app 聊天记录 列表-->
+	<select id="getChatRecordList" parameterType="map" resultType="map">
+select A.recordid,A.content,A.type,B.voicestatus,A.createtime,A.createid,D.realname createrealname,D.headimage createheadimage
+from c_t_use_chat_record A
+INNER JOIN c_t_use_chat_record_status B on A.recordid = B.recordid
+INNER JOIN c_t_use_userinfo C on C.userid = B.userid and C.userid = #{userid}
+LEFT JOIN c_t_use_userinfo D on D.userid = A.createid
+where A.groupid = #{groupid}
+order by A.createtime desc
+	     <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<!-- app  聊天记录   记录数 -->
+	<select id="getChatRecordListCount" parameterType="map" resultType="int">
+select count(8) from (
+select A.recordid,A.content,A.type,B.voicestatus,A.createtime,A.createid,D.realname createrealname,D.headimage createheadimage
+from c_t_use_chat_record A
+INNER JOIN c_t_use_chat_record_status B on A.recordid = B.recordid
+INNER JOIN c_t_use_userinfo C on C.userid = B.userid and C.userid = #{userid}
+LEFT JOIN c_t_use_userinfo D on D.userid = A.createid
+where A.groupid = #{groupid}
+) AA
+	</select>
+	 
+	 <!-- 查询用户所在群组的信息 -->
+	 <select id="getGroupListInfoByUserid" parameterType="map" resultType="map">
+	 	select 
+	 		cuug.groupuserid,cuug.groupid,cuug.userid,cuu.realname,cug.groupname 
+	 	from c_t_use_user_group cuug
+	 	left join  c_t_use_userinfo cuu on cuug.userid=cuu.userid
+	 	left join c_t_use_group cug on cug.groupid=cuug.groupid
+	 	where cuug.userid=#{userid} and cuug.delflag=0 
+	 	<if test="groupid != null and groupid != ''">and cuug.groupid=#{groupid}</if>
+	 	group by cuug.groupid
+	 </select>
+	 
+	 <!-- 根据群组的id查询群组的人数 -->
+	 <select id="getGroupUserNumByGroupId" parameterType="map" resultType="int">
+	 	select 
+	 		count(0)
+	 	from c_t_use_user_group
+	 	where groupid=#{groupid} and delflag=0
+	 </select>
+	 
+	 <!-- 根据groupid删除群组中的人员信息 -->
+	 <update id="deleteGroupUserInfo" parameterType="map">
+	 	update c_t_use_user_group set delflag=1
+	 	<where>
+	 		<if test="groupid != null and groupid != ''">and groupid=#{groupid}</if>
+	 		<if test="groupuserid != null and groupuserid != ''">and groupuserid=#{groupuserid}</if>
+	 		and delflag=0
+	 	</where>
+	 </update>
+	 
+	 <!-- 修改群组中的信息 -->
+	 <update id="updateGroupInfo" parameterType="map">
+	 	update c_t_use_group
+	 	<set>
+	 		<if test="groupname != null and groupname != ''">groupname=#{groupname},</if>
+	 		<if test="delflag != null and delflag != ''">delflag=#{delflag},</if>
+	 	</set>
+	 	where groupid=#{groupid}
+	 </update>
+	 
+	 <!-- 将删除人员未读的信息的状态改为已读 -->
+	 <update id="updateChatRecordStatus" parameterType="map">
+	 	update c_t_use_chat_record_status set status=1
+	 	where groupid=#{groupid} and userid=#{userid} and status=0
+	 </update>
+	 
+</mapper>

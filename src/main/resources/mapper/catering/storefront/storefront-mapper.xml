@@ -1,0 +1,482 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.storefront.StoreFrontMapper">
+    <insert id="insertTourStore" parameterType="map">
+        insert into c_t_use_tour_store
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="tourstoreid != null and tourstoreid != ''">tourstoreid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="arrivetime != null and arrivetime != ''">arrivetime,</if>
+	        <if test="leavetime !=null and leavetime != ''">leavetime,</if>
+	        <if test="findproblem != null and findproblem != ''">findproblem,</if>
+	        <if test="solveproblem != null and solveproblem != ''">solveproblem,</if>
+	        <if test="copyuserid != null and copyuserid != ''">copyuserid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="tourstoreid != null and tourstoreid != ''">#{tourstoreid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="arrivetime != null and arrivetime != ''">#{arrivetime},</if>
+	        <if test="leavetime !=null and leavetime != ''">#{leavetime},</if>
+	        <if test="findproblem != null and findproblem != ''">#{findproblem},</if>
+	        <if test="solveproblem != null and solveproblem != ''">#{solveproblem},</if>
+	        <if test="copyuserid != null and copyuserid != ''">#{copyuserid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	    </trim>
+    </insert>
+    <select id="getTourStoreList" parameterType="map" resultType="map">
+     select 
+         ctfu.forwarduserid,
+         ctfu.isread,
+		 ctuts.tourstoreid,
+		 ctuts.companyid,
+		 ctuts.organizeid,
+		 ifnull(DATE_FORMAT(ctuts.arrivetime,'%Y-%m-%d %H:%i'),"") as arrivetime,
+		 ifnull(DATE_FORMAT(ctuts.leavetime,'%Y-%m-%d %H:%i'),"") as leavetime,
+		 ifnull(ctuts.findproblem,"")as findproblem,
+		 ifnull(ctuts.solveproblem,"")as solveproblem,
+		 ifnull(ctuts.copyuserid,"")as copyuserid,
+         ifnull(DATE_FORMAT(ctuts.updatetime,'%Y-%m-%d %H:%i:%S'),"") as updatetime,
+		 ifnull(ctuts.updateid,"")as updateid,
+		 ifnull(ctuts.status,"")as status,
+		 ifnull(ctuts.opinion,"")as opinion ,
+		 ifnull(ctuts.createid,"")as createid,
+		 ifnull(DATE_FORMAT(ctuts.createtime,'%Y-%m-%d %H:%i:%S'),"") as createtime,
+         ifnull(ctuu.realname ,"")as createname,
+		 ifnull(ctuu1.realname,"") as copyname,
+		 ifnull(ctuo.organizename,"")as organizename
+        from c_t_use_tour_store ctuts
+        left join c_t_use_organize ctuo on ctuts.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuts.tourstoreid and resourcetype=22
+        left join c_t_use_userinfo ctuu on ctuts.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuts.copyuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuts.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null">and ctuts.status=#{status}</if>
+	        <if test="createtime != null and createtime != ''">and date(ctuts.createtime) = #{createtime}</if>
+	        <if test="starttime != null and starttime != ''">and date(ctuts.createtime) &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and date(ctuts.createtime) &lt;= #{endtime}</if>
+            and ctuts.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctuts.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getTourStoreListNum" parameterType="map" resultType="int">
+        select count(0) from c_t_use_tour_store ctuts
+        left join c_t_use_organize ctuo on ctuts.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuts.tourstoreid and resourcetype=22
+        left join c_t_use_userinfo ctuu on ctuts.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuts.copyuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuts.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null">and ctuts.status=#{status}</if>
+	        <if test="createtime != null and createtime != ''">and date(ctuts.createtime) = #{createtime}</if>
+	        <if test="starttime != null and starttime != ''">and date(ctuts.createtime) &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and date(ctuts.createtime) &lt;= #{endtime}</if>
+	        <if test="isread != null">and ctfu.isread=#{isread}</if>
+            and ctuts.delflag=0 and ctfu.delflag=0
+        </where>
+    </select>
+    
+    <!-- 巡店日志分组时间查询时间 -->
+    <select id="getTourDateList" parameterType="map" resultType="map">
+     select date(a.createtime) as createtime from c_t_use_tour_store  a
+     left join c_t_use_forward_user b on b.resourceid=a.tourstoreid and b.resourcetype=22
+      <where>
+             a.delflag = 0 and b.delflag = 0 and b.delflag=0
+            <if test="companyid != null and companyid !=''">and a.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and b.receiveid=#{userid}</if>
+	        <if test="status != null">and a.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and date(a.createtime) &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and date(a.createtime) &lt;= #{endtime}</if>
+      </where>
+      group by date(a.createtime)
+      order by date(a.createtime) desc
+      <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <!-- 巡店日志分组时间查询时间总记录数 -->
+    <select id="getTourDateListCount" parameterType="map" resultType="int">
+       select count(*) from (
+		     select date(a.createtime) as createtime  from c_t_use_tour_store  a
+		     left join c_t_use_forward_user b on b.resourceid=a.tourstoreid and b.resourcetype=22
+		      <where>
+		             a.delflag = 0 and b.delflag = 0 and b.delflag=0
+		            <if test="companyid != null and companyid !=''">and a.companyid=#{companyid}</if>
+		            <if test="userid != null and userid != ''">and b.receiveid=#{userid}</if>
+			        <if test="status != null">and a.status=#{status}</if>
+			        <if test="starttime != null and starttime != ''">and date(a.createtime) &gt;= #{starttime}</if>
+			        <if test="endtime != null and endtime != ''">and date(a.createtime) &lt;= #{endtime}</if>
+			        <if test="isread != null">and b.isread=#{isread}</if>
+		      </where>
+		      group by date(a.createtime)
+		  )as s
+    </select>
+    
+    <select id="getTourStoreInfo" parameterType="map" resultType="map">
+        select
+			 ifnull(ctfu.forwarduserid,"")as forwarduserid,
+			 ifnull(ctfu.isread,"")as isread,
+			 ifnull(ctuts.tourstoreid,"")as tourstoreid,
+			 ifnull(ctuts.companyid,"")as companyid,
+			 ifnull(ctuts.organizeid,"")as organizeid,
+			 ifnull(ctuts.arrivetime,"")as arrivetime,
+			 ifnull(ctuts.leavetime,"")as leavetime,
+			 ifnull(ctuts.findproblem,"")as findproblem,
+			 ifnull(ctuts.solveproblem,"")as solveproblem,
+			 ifnull(ctuts.copyuserid,"")as copyuserid,
+			 ifnull(ctuts.copyopinion,"")as copyopinion,
+			 ifnull(DATE_FORMAT(ctuts.updatetime,'%Y-%m-%d %H:%i:%S'),"") as updatetime,
+			 ifnull(ctuts.updateid,"")as updateid,
+			 ifnull(ctuts.status,"") as status,
+			 ifnull(ctuts.opinion,"")as opinion,
+			 ifnull(ctuts.createid ,"")as createid, 
+			 ifnull(DATE_FORMAT(ctuts.createtime,'%Y-%m-%d %H:%i:%S'),"") as createtime,	  
+			 ifnull(ctuu.realname,"") as createname,
+			 ifnull(ctuu1.realname,"") as copyname,
+			 ifnull(ctuo.organizename,"")as organizename,
+			 ctuu.headimage as createheadimage,ctuu1.headimage as copyheadimage,
+			 ctuts.CCuserids,IFNULL(ctuts.CCusernames,"") AS CCusernames
+		from c_t_use_tour_store ctuts
+        left join c_t_use_organize ctuo on ctuts.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuts.tourstoreid and resourcetype=22
+        left join c_t_use_userinfo ctuu on ctuts.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuts.copyuserid=ctuu1.userid
+        <where>
+            <if test="tourstoreid != null and tourstoreid !=''">and ctuts.tourstoreid=#{tourstoreid}</if>
+        </where>
+        limit 1
+    </select>
+    <update id="updateTourStore" parameterType="map">
+        update c_t_use_tour_store
+        <set>
+            <if test="updatetime !=null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid !=null and updateid != ''">updateid=#{updateid},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="copyopinion != null and copyopinion != ''">copyopinion=#{copyopinion},</if>
+            <if test="status != null">status=#{status},</if>
+        </set>
+        where tourstoreid=#{tourstoreid}
+    </update>
+    <select id="getKpiStarList" parameterType="map" resultType="map">
+	    select sum(sumstar) as sumstar,createtime,SUM(evalstarnum) AS selfstar,SUM(overstarnum) AS overallstar from (
+			select sumstar,DATE_FORMAT(createtime,'%Y-%m-%d') as createtime,sumstar as evalstarnum,0 as overstarnum 
+			from c_t_use_evaluate 
+			<where>
+			    <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			    <if test="userid != null and userid != ''">and createid=#{userid}</if>
+				<if test="year != null and year != ''">
+	            and DATE_FORMAT(createtime,'%Y')=#{year}
+		        </if>
+		        <if test="monthnum != null and monthnum != ''">
+		            and DATE_FORMAT(createtime,'%m')=#{monthnum}
+		        </if>	
+			    and result=1
+			</where>
+			union all
+			select sumstar,DATE_FORMAT(createtime,'%Y-%m-%d') as createtime,0 as evalstarnum,sumstar as overstarnum   
+			from c_t_use_overallvaluate
+			<where>
+			    <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			    <if test="userid != null and userid != ''">and createid=#{userid}</if>
+			    <if test="year != null and year != ''">
+	            and DATE_FORMAT(createtime,'%Y')=#{year}
+		        </if>
+		        <if test="monthnum != null and monthnum != ''">
+		            and DATE_FORMAT(createtime,'%m')=#{monthnum}
+		        </if>
+			    and result=1
+			</where>
+		)a
+		group by createtime
+		order by createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getSelfStarNum" parameterType="map" resultType="int">
+	    select ifnull(sum(sumstar),0) as sumstar from c_t_use_evaluate
+	    <where>
+	        <if test="createtime != null and createtime != ''">and DATE_FORMAT(createtime,'%Y-%m-%d') =#{createtime}</if>
+	        and result =1
+	    </where>
+	</select>
+	<select id="getOverallStarNum" parameterType="map" resultType="int">
+	    select ifnull(sum(sumstar),0) as sumstar from c_t_use_overallvaluate
+	    <where>
+	        <if test="createtime != null and createtime != ''">and DATE_FORMAT(createtime,'%Y-%m-%d') =#{createtime}</if>
+	         and result = 1
+	    </where>
+	</select>
+	
+	<select id="getKpiStarListNum" parameterType="map" resultType="int">
+	    select count(0) from  (select sum(sumstar) as sumstar,createtime from (
+			select sumstar,DATE_FORMAT(createtime,'%Y-%m-%d') as createtime from
+			c_t_use_evaluate 
+			<where>
+			    <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			    <if test="userid != null and userid != ''">and createid=#{userid}</if>
+				<if test="year != null and year != ''">
+	            and DATE_FORMAT(createtime,'%Y')=#{year} 
+		        </if>
+		        <if test="monthnum != null and monthnum != ''">
+		            and DATE_FORMAT(createtime,'%m')=#{monthnum} 
+		        </if>
+			    and result=1
+			</where>
+			union all
+			select sumstar,DATE_FORMAT(createtime,'%Y-%m-%d') as createtime from
+			c_t_use_overallvaluate
+			<where>
+			    <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			    <if test="userid != null and userid != ''">and createid=#{userid}</if>
+			    <if test="year != null and year != ''">
+	            and DATE_FORMAT(createtime,'%Y')=#{year} 
+		        </if>
+		        <if test="monthnum != null and monthnum != ''">
+		            and DATE_FORMAT(createtime,'%m')=#{monthnum}
+		        </if>
+			    and result=1
+			</where>
+		)a
+		group by createtime) b
+	</select>
+	
+	<select id="getPathRewardList" parameterType="map" resultType="map">
+	    select cturo.rewardid,ifnull(ctmdd.cname,resulttext) as rewardresult,ctuu.realname,ctuu.headimage,DATE_FORMAT(cturo.createtime,'%Y-%m-%d %H:%i') as createtime from c_t_use_reward_order cturo
+	    left join c_t_use_userinfo ctuu on  cturo.rewarduserid=ctuu.userid
+	    left join c_t_manage_dict_data ctmdd on cturo.rewardresult=ctmdd.dataid
+	    <where>
+	        <if test="rewarduserid != null and rewarduserid != ''">and cturo.rewarduserid=#{rewarduserid}</if>
+	        <if test="companyid != null and companyid != ''">and cturo.companyid=#{companyid}</if>
+	        <if test="userid != null and userid != ''">and cturo.rewarduserid=#{userid}</if>
+	        <if test="year != null and year != ''">
+            	and DATE_FORMAT(cturo.createtime,'%Y')=#{year}
+	        </if>
+	        <if test="monthnum != null and monthnum != ''">
+	            and DATE_FORMAT(cturo.createtime,'%m')=#{monthnum}
+	        </if>
+		    and cturo.result=1
+	    </where>
+	    order by cturo.createtime desc 
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getPathRewardListNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_use_reward_order cturo
+	    left join c_t_use_userinfo ctuu on  cturo.rewarduserid=ctuu.userid
+	    left join c_t_manage_dict_data ctmdd on cturo.rewardresult=ctmdd.dataid
+	    <where>
+	        <if test="rewarduserid != null and rewarduserid != ''">and cturo.rewarduserid=#{rewarduserid}</if>
+	        <if test="companyid != null and companyid != ''">and cturo.companyid=#{companyid}</if>
+	        <if test="userid != null and userid != ''">and cturo.rewarduserid=#{userid}</if>
+	        <if test="year != null and year != ''">
+            	and DATE_FORMAT(cturo.createtime,'%Y')=#{year}
+	        </if>
+	        <if test="monthnum != null and monthnum != ''">
+	            and DATE_FORMAT(cturo.createtime,'%m')=#{monthnum}
+	        </if>
+		    and cturo.result=1
+	    </where>
+	</select>
+	<select id="getPathPunishList" parameterType="map" resultType="map">
+	    select ctupo.punishid,ctmdd.cname as punishresult,ctuu.realname,ctuu.headimage,DATE_FORMAT(ctupo.createtime,'%Y-%m-%d %H:%i') as createtime 
+	    from c_t_use_punish_order ctupo
+	    left join c_t_use_userinfo ctuu on  ctupo.punishuserid=ctuu.userid
+	    left join c_t_manage_dict_data ctmdd on ctupo.punishresult=ctmdd.dataid
+	    <where>
+	        <if test="punishuserid != null and punishuserid != ''">and ctupo.punishuserid=#{punishuserid}</if>
+	        <if test="companyid != null and companyid != ''">and ctupo.companyid=#{companyid}</if>
+	        <if test="userid != null and userid != ''">and ctupo.punishuserid=#{userid}</if>
+	        <if test="year != null and year != ''">
+            	and DATE_FORMAT(ctupo.createtime,'%Y')=#{year}
+	        </if>
+	        <if test="monthnum != null and monthnum != ''">
+	            and DATE_FORMAT(ctupo.createtime,'%m')=#{monthnum}
+	        </if>
+		    and ctupo.result=1
+	    </where>
+	    order by ctupo.createtime desc 
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getPathPunishListNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_use_punish_order ctupo
+	    left join c_t_use_userinfo ctuu on  ctupo.punishuserid=ctuu.userid
+	    left join c_t_manage_dict_data ctmdd on ctupo.punishresult=ctmdd.dataid
+	    <where>
+	        <if test="punishuserid != null and punishuserid != ''">and ctupo.punishuserid=#{punishuserid}</if>
+	        <if test="companyid != null and companyid != ''">and ctupo.companyid=#{companyid}</if>
+	        <if test="userid != null and userid != ''">and ctupo.punishuserid=#{userid}</if>
+	        <if test="year != null and year != ''">
+            	and DATE_FORMAT(ctupo.createtime,'%Y')=#{year} 
+	        </if>
+	        <if test="monthnum != null and monthnum != ''">
+	            and DATE_FORMAT(ctupo.createtime,'%m')=#{monthnum}
+	        </if>
+		    and ctupo.result=1
+	    </where>
+	</select>
+	<insert id="insertStoreEvaluate" parameterType="map">
+	    insert into c_t_use_store_evaluate
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="evaluateid != null and evaluateid != ''">evaluateid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="tastescore != null and tastescore != ''">tastescore,</if>
+	        <if test="environmentscore !=null and environmentscore != ''">environmentscore,</if>
+	        <if test="pricescore != null and pricescore != ''">pricescore,</if>
+	        <if test="servicescore != null and servicescore != ''">servicescore,</if>
+	        <if test="averagescore != null and averagescore != ''">averagescore,</if>
+	        <if test="isreceipt != null">isreceipt,</if>
+	        <if test="seat != null and seat != ''">seat,</if>
+	        <if test="phone != null and phone != ''">phone,</if>
+	        <if test="name != null and name != ''">name,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="evaluateid != null and evaluateid != ''">#{evaluateid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="tastescore != null and tastescore != ''">#{tastescore},</if>
+	        <if test="environmentscore !=null and environmentscore != ''">#{environmentscore},</if>
+	        <if test="pricescore != null and pricescore != ''">#{pricescore},</if>
+	        <if test="servicescore != null and servicescore != ''">#{servicescore},</if>
+	        <if test="averagescore != null and averagescore != ''">#{averagescore},</if>
+	        <if test="isreceipt != null">#{isreceipt},</if>
+	        <if test="seat != null and seat != ''">#{seat},</if>
+	        <if test="phone != null and phone != ''">#{phone},</if>
+	        <if test="name != null and name != ''">#{name},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	    </trim>
+	</insert>
+	<select id="getStoreEvaluateList" parameterType="map" resultType="map">
+	    select
+		 ctuse.evaluateid,
+		 ifnull(ctuse.companyid,"") as companyid,
+		 ifnull(ctuse.organizeid,"") as organizeid,
+		 ctuse.tastescore,
+		 ctuse.environmentscore,
+		 ctuse.servicescore,
+		 ctuse.pricescore,
+		 ctuse.averagescore,
+		 ifnull(ctuse.opinion,"")as opinion,
+		 ctuse.isreceipt,
+		 ifnull(ctuse.seat,"") as seat,
+		 ifnull(ctuse.phone,"")as phone,
+		 ifnull(ctuse.name,"")as name,
+		 ifnull(DATE_FORMAT(ctuse.createtime,'%Y-%m-%d %H:%i:%S'),"")as createtime,
+		 ifnull(DATE_FORMAT(ctuse.updatetime,'%Y-%m-%d %H:%i:%S'),"") as updatetime,
+		 ifnull(ctuef.isfollow,0)as isfollow,
+		 ctuef.createid
+		 <if test="userid != null and userid != ''">,sum(case when  ctuef.createid=#{userid} and ctuef.isfollow=1 then 1 else 0 end) as isfw</if>
+	    from c_t_use_store_evaluate ctuse
+	    left join c_t_use_evaluate_follow ctuef on ctuse.evaluateid=ctuef.evaluateid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctuse.companyid=#{companyid}</if>
+	        <if test="organizeid != null and organizeid != ''">and ctuse.organizeid=#{organizeid}</if>
+	        <if test="createtime != null and createtime != ''">
+	            and date(ctuse.createtime) = #{createtime} 
+	        </if>
+	        <if test="isfollow != null and isfollow != ''">
+	            and  ctuef.isfollow = #{isfollow} 
+	        </if>
+	        <if test="createid != null and createid != ''">and ctuef.createid=#{createid}</if>
+	        and ctuse.delflag=0
+	    </where>
+	    group by ctuse.evaluateid
+	    order by ctuse.createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getStoreEvaluateListNum" parameterType="map" resultType="int">
+	    select count(0) from (select ctuse.evaluateid,ctuse.companyid,ctuse.organizeid,ctuse.tastescore,ctuse.environmentscore,ctuse.servicescore,ctuse.pricescore,ctuse.averagescore,ctuse.opinion,ctuse.isreceipt,ctuse.seat,ctuse.phone,ctuse.name,
+	    DATE_FORMAT(ctuse.createtime,'%Y-%m-%d %H:%i:%S') as createtime, DATE_FORMAT(ctuse.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuef.isfollow
+	    from c_t_use_store_evaluate ctuse
+	    left join c_t_use_evaluate_follow ctuef on ctuse.evaluateid=ctuef.evaluateid
+	    <where>
+	        <if test="companyid != null and companyid != ''">and ctuse.companyid=#{companyid}</if>
+	        <if test="organizeid != null and organizeid != ''">and ctuse.organizeid=#{organizeid}</if>
+	        <if test="year != null and year != ''">
+            	and DATE_FORMAT(ctuse.createtime,'%Y')=#{year} 
+	        </if>
+	        <if test="isfollow != null and isfollow != ''">
+	            and  ctuef.isfollow = #{isfollow} 
+	        </if>
+	        <if test="monthnum != null and monthnum != ''">
+	            and DATE_FORMAT(ctuse.createtime,'%m')=#{monthnum} 
+	        </if>
+	        <if test="createid != null and createid != ''">and ctuef.createid=#{createid}</if>
+	        and ctuse.delflag=0
+	    </where>
+	    group by ctuse.evaluateid
+	    ) a 
+	</select>
+	
+    <!-- 关注 -->
+    <insert id="insertEvaluateFollow" parameterType="map">
+	    insert into c_t_use_evaluate_follow
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="followid != null and followid != ''">followid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="evaluateid != null and evaluateid != ''">evaluateid,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="isfollow != null and isfollow != ''">isfollow,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime,</if>
+	        <if test="updateid != null and updateid != ''">updateid,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="followid != null and followid != ''">#{followid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="evaluateid != null and evaluateid != ''">#{evaluateid},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="isfollow != null and isfollow != ''">#{isfollow},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">#{updateid},</if>
+	    </trim>
+	 </insert>
+	
+	<!-- 修改关注状态  -->
+	<update id="updateFollowStatus" parameterType="map">
+	   update c_t_use_evaluate_follow 
+	   <set>
+	       <if test="isfollow != null and isfollow != ''">isfollow = #{isfollow},</if>
+	       <if test="updatetime != null and updatetime != ''">updatetime = #{updatetime},</if>
+	       <if test="updateid != null and updateid != ''">updateid = #{updateid},</if>
+	       <if test="delflag != null and delflag != ''">delflag = #{delflag},</if> 
+	   </set>
+	    <where>
+	      delflag = 0 and evaluateid = #{evaluateid} and createid = #{createid}
+	    </where>  
+	</update>
+	
+	<!-- 查询是否关注过 -->
+	<select id="getFollowInfo" parameterType="map" resultType="map">
+	   select count(*)as count,isfollow,followid  from c_t_use_evaluate_follow 
+	    where evaluateid = #{evaluateid} and createid =#{createid} and delflag = 0
+	    limit 1
+	</select>
+	
+</mapper>

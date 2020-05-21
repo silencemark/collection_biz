@@ -1,0 +1,699 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.SystemMapper">
+    <select id="getUserInfo" parameterType="map" resultType="map">
+        select userid,username,phone,email,realname,sex,birthday,headimage,status,createtime,updatetime,deletetime,delflag,address from c_t_manage_user
+        <where>
+            <if test="username != null and username != ''">and username=#{username}</if>
+            <if test="password != null and password != ''">and password=#{password}</if>
+            <if test="phone != null and phone != ''">and phone=#{phone}</if>
+            <if test="userid != null and userid != ''">and userid=#{userid}</if>
+        </where>
+        limit 1
+    </select>
+    <update id="updateUserInfo" parameterType="map">
+        update c_t_manage_user
+        <set>
+            <if test="password != null and password != ''">password=#{password},</if>
+            <if test="phone != null and phone != ''">phone=#{phone},</if>
+            <if test="username != null and username != ''">username=#{username},</if>
+            <if test="email != null and email != ''">email=#{email},</if>
+            <if test="realname != null and realname != ''">realname=#{realname},</if>
+            <if test="sex != null">sex=#{sex},</if>
+            <if test="headimage != null and headimage != ''">headimage=#{headimage},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="deletetime != null and deletetime != ''">deletetime=#{deletetime},</if>
+            <if test="birthday != null and birthday != ''">birthday=#{birthday},</if>
+             <if test="address != null and address != ''">address=#{address},</if>
+        </set>
+        where userid=#{userid}
+    </update>
+    <insert id="insertAdminUser" parameterType="map">
+        insert into c_t_manage_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">userid,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="email != null and email != ''">email,</if>
+            <if test="realname != null and realname != ''">realname,</if>
+            <if test="sex != null">sex,</if>
+            <if test="headimage != null and headimage != ''">headimage,</if>
+            <if test="status != null">status,</if>
+            <if test="delflag != null">delflag,</if>
+            <if test="deletetime != null and deletetime != ''">deletetime,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="birthday != null and birthday != ''">birthday,</if>
+            <if test="address != null and address != ''">address,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">#{userid},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="email != null and email != ''">#{email},</if>
+            <if test="realname != null and realname != ''">#{realname},</if>
+            <if test="sex != null">#{sex},</if>
+            <if test="headimage != null and headimage != ''">#{headimage},</if>
+            <if test="status != null">#{status},</if>
+            <if test="delflag != null">#{delflag},</if>
+            <if test="deletetime != null and deletetime != ''">#{deletetime},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="birthday != null and birthday != ''">#{birthday},</if>
+            <if test="address != null and address != ''">#{address},</if>
+        </trim>
+    </insert>
+    <select id="getNoticeList" parameterType="map" resultType="map">
+        select ctuc.companyid,concat(ctuc.companyname,"申请",ctup.powername,"功能") as content,ctupc.powercompanyid as reasonid,DATE_FORMAT(ctupc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,1 as type from c_t_use_power_company ctupc
+		left join c_t_use_company ctuc on ctupc.companyid=ctuc.companyid
+		left join c_t_use_power ctup on  ctupc.powerid=ctup.powerid
+		where ctupc.status=2 and ctupc.delflag=0 
+		union
+		select ctuc.companyid,concat(ctuc.companyname,"申请企业空间扩容",CAST(ctmcc.memory/1024/1024 as decimal(11,2)),"G") as content,ctmcc.capacityid as reasonid,DATE_FORMAT(ctmcc.createtime,'%Y-%m-%d %H:%i:%S') as createtime,2 as type  from c_t_manage_cloud_capacity ctmcc
+		left join c_t_use_company_cloud ctucc on  ctucc.cloudid=ctmcc.cloudid
+		left join c_t_use_company ctuc on ctucc.companyid=ctuc.companyid
+		where ctmcc.status=1 and ctmcc.delflag=0
+		order by createtime desc
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getNoticeListNum" parameterType="map" resultType="int">
+        select count(0) from(select concat(ctuc.companyname,"申请",ctup.powername,"功能") as content,ctupc.powercompanyid as reasonid,DATE_FORMAT(ctupc.createtime,'%Y-%m-%d %H:%i:%S') as createtime from c_t_use_power_company ctupc
+		left join c_t_use_company ctuc on ctupc.companyid=ctuc.companyid
+		left join c_t_use_power ctup on  ctupc.powerid=ctup.powerid
+		where ctupc.status=2 and ctupc.delflag=0 
+		union
+		select concat(ctuc.companyname,"申请企业空间扩容",CAST(ctmcc.memory/1024/1024 as decimal(11,2)),"G") as content,ctmcc.capacityid as reasonid,DATE_FORMAT(ctmcc.createtime,'%Y-%m-%d %H:%i:%S') as createtime  from c_t_manage_cloud_capacity ctmcc
+		left join c_t_use_company_cloud ctucc on  ctucc.cloudid=ctmcc.cloudid
+		left join c_t_use_company ctuc on ctucc.companyid=ctuc.companyid
+		where ctmcc.status=1 and ctmcc.delflag=0) a
+    </select>
+
+    
+       <select id="getSystemMessageCount" parameterType="map" resultType="int">
+        select count(0) from c_t_use_system_message
+        <where>
+            <if test="messageid != null and messageid != ''">and messageid=#{messageid}</if>
+            <if test="title != null and title != ''">and title like concat('%',#{title},'%')</if>
+               and delflag =0
+        </where>
+    </select>
+    
+      <select id="getSystemMessage" parameterType="map" resultType="map">
+        select messageid,title,content,createid,delflag,date_format(createtime,"%Y-%m-%d %h:%i:%s")as createtime,
+		date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime,updateid,status from c_t_use_system_message
+        <where>
+            <if test="messageid != null and messageid != ''">and messageid=#{messageid}</if>
+            <if test="title != null and title != ''">and title like concat('%',#{title},'%')</if>
+            and delflag =0
+        </where>
+                 order by createtime desc
+         <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+
+    </select>
+ 
+	<insert id="insertSystemMessage" parameterType="map">
+		insert into c_t_use_system_message
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="messageid != null and messageid != ''">messageid,</if>
+			<if test="title != null and title != ''">title,</if>
+			<if test="content != null and content != ''">content,</if>
+			<if test="createid != null and createid != ''">createid,</if>	
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="status != null">status,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="messageid != null and messageid != ''">#{messageid},</if>
+			<if test="title != null and title != ''">#{title},</if>
+			<if test="content != null and content != ''">#{content},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>	
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="status != null">#{status},</if>
+		</trim>
+	</insert>
+    
+        <update id="updataSystemMessageDetail" parameterType="map">
+        update c_t_use_system_message
+        <set>
+			<if test="title != null and title != ''">title=#{title},</if>
+			<if test="content != null and content != ''">content=#{content},</if>
+			<if test="createid != null and createid != ''">createid=#{createid},</if>	
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="createtime != null and createtime != ''">createtime=#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+			<if test="status != null">status=#{status},</if>
+        </set>
+        where messageid=#{messageid}
+    </update>
+    
+    
+       <select id="getSystemBackCount" parameterType="map" resultType="int">
+	       select count(*)
+			from c_t_use_feedback ctuf LEFT JOIN c_t_use_company ctuc
+			on ctuf.companyid=ctuc.companyid
+			LEFT JOIN c_t_use_userinfo ctuu 
+			on ctuf.createid=ctuu.userid
+	        <where>
+	            <if test="feedbackid != null and feedbackid != ''">and ctuf.feedbackid=#{feedbackid}</if>
+	            <if test="status != null and status != ''">and ctuf.status=#{status}</if>
+	            <if test="realname != null and realname != ''">
+		            and ctuu.realname like concat('%',#{realname},'%')
+		            or 	ctuc.companyname like concat('%',#{realname},'%')
+		            or  ctuf.description like concat('%',#{realname},'%')
+	            </if>
+	            and ctuf.delflag=0
+	        </where>
+   	 	</select>
+   	 	
+       <select id="getSystemBacklist" parameterType="map" resultType="map">
+		    select ctuf.feedbackid,ctuf.companyid,ctuf.description,ctuf.isread,ctuf.createid,ctuf.delflag,
+			date_format(ctuf.createtime,"%Y-%m-%d %h:%i:%s")as createtime,date_format(ctuf.updatetime,"%Y-%m-%d %h:%i:%s")as createtime,
+			ctuf.updateid,ctuf.status,ctuc.companyname,ctuu.userid,ctuu.realname
+			from c_t_use_feedback ctuf LEFT JOIN c_t_use_company ctuc
+			on ctuf.companyid=ctuc.companyid
+			LEFT JOIN c_t_use_userinfo ctuu 
+			on ctuf.createid=ctuu.userid
+	        <where>
+	            <if test="feedbackid != null and feedbackid != ''">and ctuf.feedbackid=#{feedbackid}</if>
+	            <if test="status != null and status != ''">and ctuf.status=#{status}</if>
+	            <if test="realname != null and realname != ''">
+		            and ctuu.realname like concat('%',#{realname},'%')
+		            or 	ctuc.companyname like concat('%',#{realname},'%')
+		            or  ctuf.description like concat('%',#{realname},'%')
+	            </if>
+	           and ctuf.delflag=0
+	        </where>
+	           order by status 
+	             <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+   	 	</select>
+   	 	
+   	 <update id="updataSystemBack" parameterType="map">
+	        update c_t_use_feedback
+	        <set>
+				<if test="isread != null">isread=#{isread},</if>
+				<if test="delflag != null">delflag=#{delflag},</if>
+				<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+				<if test="status != null">status=#{status},</if>
+	        </set>
+	        where feedbackid=#{feedbackid} and delflag=0
+    </update>
+   	 	
+   	 	<insert id="insertSystemBackReply" parameterType="map">
+			insert into c_t_use_feedback_reply
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="replyid != null and replyid != ''">replyid,</if>
+				<if test="feedbackid != null and feedbackid != ''">feedbackid,</if>
+				<if test="content != null and content != ''">content,</if>
+				<if test="createid != null and createid != ''">createid,</if>	
+				<if test="delflag != null">delflag,</if>
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="updatetime != null and updatetime != ''">updatetime,</if>
+				<if test="updateid != null and updateid != ''">updateid,</if>
+				<if test="status != null">status,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="replyid != null and replyid != ''">#{replyid},</if>
+				<if test="feedbackid != null and feedbackid != ''">#{feedbackid},</if>
+				<if test="content != null and content != ''">#{content},</if>
+				<if test="createid != null and createid != ''">#{createid},</if>	
+				<if test="delflag != null">#{delflag},</if>
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">#{updateid},</if>
+				<if test="status != null">#{status},</if>
+			</trim>
+	</insert>
+	
+	   <select id="getSystemBackReply" parameterType="map" resultType="map">
+			select replyid,feedbackid,content,createid,delflag,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s")as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime,status
+			from c_t_use_feedback_reply
+	   		  <where>
+	            <if test="feedbackid != null and feedbackid != ''">and feedbackid=#{feedbackid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	           and delflag=0
+	        </where>
+	        limit 1
+	   </select>
+    <select id="getAdminUserList" parameterType="map" resultType="map">
+        select userid,username,phone,password,email,realname,sex,birthday,headimage,status,
+        DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,DATE_FORMAT(deletetime,'%Y-%m-%d %H:%i:%S') as deletetime,address
+        from c_t_manage_user
+        <where>
+            <if test="realname != null and realname != ''">and realname like concat("%",#{realname},"%")</if>
+            and delflag=0
+        </where>
+        order by createtime desc
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getAdminUserListNum" parameterType="map" resultType="int">
+        select count(0) from c_t_manage_user
+        <where>
+            <if test="realname != null and realname != ''">and realname like concat("%",#{realname},"%")</if>
+            and delflag=0
+        </where>
+    </select>
+    <update id="updateAdminUser" parameterType="map">
+        update c_t_manage_user
+        <set>
+            <if test="phone != null and phone != ''">phone=#{phone},</if>
+            <if test="password != null and password != ''">password=#{password},</if>
+            <if test="email != null and email != ''">email=#{email},</if>
+            <if test="realname != null and realname != ''">realname=#{realname},</if>
+            <if test="sex != null ">sex=#{sex},</if>
+            <if test="birthday != null and birthday != ''">birthday=#{birthday},</if>
+            <if test="headimage != null and headimage != ''">headimage=#{headimage},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="address != null and address != ''">address=#{address},</if>
+        </set>
+        where userid=#{userid}
+    </update>
+    <select id="getLogList" parameterType="map" resultType="map">
+	    select ctml.codeid,ctml.companyid,ctml.type,ctml.model,ctml.content,ctml.userid,DATE_FORMAT(ctml.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuu.realname
+	    from c_t_manage_log  ctml
+	    left join c_t_manage_user ctuu on ctml.userid=ctuu.userid
+	    <where>
+	        <if test="model != null and model != ''">and ctml.model=#{model}</if>
+	        <if test="type != null">and ctml.type=#{type}</if>
+	        <if test="starttime != null and starttime != ''">and ctml.createtime &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and ctml.createtime &lt;= #{endtime}</if>
+	        <if test="searchcontent != null and searchcontent != ''">and (ctuu.realname like concat("%",#{searchcontent},"%") or ctml.content like concat("%",#{searchcontent},"%"))</if>
+	    </where>
+	    order by ctml.createtime desc
+	    <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	</select>
+	<select id="getLogListNum" parameterType="map" resultType="int">
+	    select count(0) from c_t_manage_log  ctml
+	    left join c_t_manage_user ctuu on ctml.userid=ctuu.userid
+	    <where>
+	        <if test="model != null and model != ''">and ctml.model=#{model}</if>
+	        <if test="type != null">and ctml.type=#{type}</if>
+	        <if test="starttime != null and starttime != ''">and ctml.createtime &gt;= #{starttime}</if>
+	        <if test="endtime != null and endtime != ''">and ctml.createtime &lt;= #{endtime}</if>
+	        <if test="searchcontent != null and searchcontent != ''">and (ctuu.realname like concat("%",#{searchcontent},"%") or ctml.content like concat("%",#{searchcontent},"%"))</if>
+	    </where>
+	</select>
+	<select id="getEverydayTypeList" parameterType="map" resultType="map">
+	    select typeid,typename,createid,createtime,ismanyadd from c_t_manage_everyday_report_type
+	    where delflag=0 order by createtime asc
+	</select>
+	<select id="getEverydayDataList" parameterType="map" resultType="map">
+	    select dataid,dataname,typeid,isnum,createid,createtime,isconsume from c_t_manage_everyday_report_data
+	    <where>
+	        <if test="typeid != null and typeid != ''">and typeid=#{typeid}</if>
+	        and delflag=0
+	    </where>
+	    order by createtime
+	</select>
+	
+	   	 	
+   	 	<insert id="insertSystemPctop" parameterType="map">
+			insert into c_t_use_pctop_colume
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="codeid != null and codeid != ''">codeid,</if>
+				<if test="modularid != null and modularid != ''">modularid,</if>
+				<if test="modularname != null and modularname != ''">modularname,</if>
+				<if test="name != null and name != ''">name,</if>
+				<if test="url != null and url != ''">url,</if>
+				<if test="createid != null and createid != ''">createid,</if>	
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="updatetime != null and updatetime != ''">updatetime,</if>
+				<if test="updateid != null and updateid != ''">updateid,</if>
+				<if test="status != null">status,</if>
+				<if test="delflag != null">delflag,</if>
+				<if test="sort != null">sort,</if>
+				<if test="type != null">type,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="codeid != null and codeid != ''">#{codeid},</if>
+				<if test="modularid != null and modularid != ''">#{modularid},</if>
+				<if test="modularname != null and modularname != ''">#{modularname},</if>
+				<if test="name != null and name != ''">#{name},</if>
+				<if test="url != null and url != ''">#{url},</if>
+				<if test="createid != null and createid != ''">#{createid},</if>	
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">#{updateid},</if>
+				<if test="status != null">#{status},</if>
+				<if test="delflag != null">#{delflag},</if>
+				<if test="sort != null">#{sort},</if>
+				<if test="type != null">#{type},</if>
+			</trim>
+	</insert>
+		 <select id="getSystemPctopCount" parameterType="map" resultType="int">
+			select count(0)	from c_t_use_pctop_colume
+	   		  <where>
+	            <if test="codeid != null and codeid != ''">and codeid=#{codeid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	         	<if test="modularid != null and modularid != ''">and modularid=#{modularid}</if>
+	            and delflag=0
+	        </where>
+	          order by sort
+		 </select>
+	 <select id="getSystemPctop" parameterType="map" resultType="map">
+			select codeid,name,url,createid,updateid,`status`,modularid,modularname,delflag,sort,type,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s")as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			from c_t_use_pctop_colume
+	   		  <where>
+	            <if test="codeid != null and codeid != ''">and codeid=#{codeid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	         	<if test="modularid != null and modularid != ''">and modularid=#{modularid}</if>
+	            and delflag=0
+	        </where>
+	        order by sort
+	         <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	 </select>
+	 
+	  <update id="updateSystemPctop" parameterType="map">
+        update c_t_use_pctop_colume
+        <set>
+				<if test="modularid != null and modularid != ''">modularid=#{modularid},</if>
+				<if test="modularname != null and modularname != ''">modularname=#{modularname},</if>
+				<if test="name != null and name != ''">name=#{name},</if>
+				<if test="url != null and url != ''">url=#{url},</if>
+				<if test="createid != null and createid != ''">createid=#{createid},</if>	
+				<if test="createtime != null and createtime != ''">createtime=#{createtime},</if>
+				<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+				<if test="status != null">status=#{status},</if>
+				<if test="delflag != null">delflag=#{delflag},</if>
+				<if test="sort != null">sort=#{sort},</if>
+				<if test="type != null">type=#{type},</if>
+        </set>
+        where codeid=#{codeid}
+    </update>	
+    
+	 <select id="getSystemPctopModular" parameterType="map" resultType="map">
+			select modularid,modularname,`describe`,url,createid,updateid,`status`,delflag,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s") as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			from c_t_use_pctop_modular
+	   		  <where>
+	            <if test="modularid != null and modularid != ''">and modularid=#{modularid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	            and delflag=0
+	        </where>
+	         
+	 </select>
+	 <select id="getSystemDictTypeCount" parameterType="map" resultType="int">
+			SELECT count(0)
+			FROM c_t_manage_dict_data_type
+	   		  <where>
+	            <if test="modularid != null and modularid != ''">and modularid=#{modularid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	            and delflag=0
+	        </where>
+	 </select>
+	 <select id="getSystemDictType" parameterType="map" resultType="map">
+			SELECT datatypeid,datacode,cname,ename,remark,delflag,createid,updateid,`status`,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s") as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			FROM c_t_manage_dict_data_type
+	   		  <where>
+	            <if test="modularid != null and modularid != ''">and modularid=#{modularid}</if>
+	            <if test="createid != null and createid != ''">and createid=#{createid}</if>
+	            and delflag=0
+	        </where>
+	        order by createtime desc
+	        <if test="startnum!=null">limit #{startnum},#{rownum}</if>
+	 </select>
+	 
+	 <select id="getSystemDict" parameterType="map" resultType="map">			
+			SELECT dataid,typeid,datacode,cname,ename,priority,remark,delflag,createid,updateid,`status`,templatename,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s") as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			FROM c_t_manage_dict_data
+	   		  <where>
+	            <if test="dataid != null and dataid != ''">and dataid=#{dataid}</if>
+	            <if test="typeid != null and typeid != ''">and typeid=#{typeid}</if>
+	            <if test="datacode != null and datacode != ''">and datacode=#{datacode}</if>
+	            <if test="datacodelist != null">
+		            <foreach collection="datacodelist" item="item" open="and datacode in (" close=")" separator=",">
+		                '${item}'
+		            </foreach>
+	       	 	</if>
+	            and delflag=0
+	        </where>
+	        order by priority
+	 </select>
+	 	
+	 <update id="updateSystemDict" parameterType="map">
+        update c_t_manage_dict_data
+        <set>
+				<if test="typeid != null and typeid != ''">typeid=#{typeid},</if>
+				<if test="datacode != null and datacode != ''">datacode=#{datacode},</if>
+				<if test="cname != null and cname != ''">cname=#{cname},</if>
+				<if test="ename != null and ename != ''">ename=#{ename},</if>	
+				<if test="priority != null and priority != ''">priority=#{priority},</if>
+				<if test="remark != null and remark != ''">remark=#{remark},</if>
+				<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+				<if test="templatename != null and templatename != ''">templatename=#{templatename},</if>
+				<if test="status != null">status=#{status},</if>
+				<if test="delflag != null">delflag=#{delflag},</if>
+				<if test="sort != null">sort=#{sort},</if>
+				<if test="type != null">type=#{type},</if>
+        </set>
+      		  <where>
+	            <if test="dataid != null and dataid != ''">and dataid=#{dataid}</if>
+	            <if test="datacode != null and datacode != ''">and datacode=#{datacode}</if>
+	            and delflag=0
+	        </where>
+    </update>
+	    	 	
+   	 	<insert id="insertSystemDict" parameterType="map">
+			insert into c_t_manage_dict_data
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="dataid != null and dataid != ''">dataid,</if>
+				<if test="typeid != null and typeid != ''">typeid,</if>
+				<if test="datacode != null and datacode != ''">datacode,</if>
+				<if test="cname != null and cname != ''">cname,</if>
+				<if test="ename != null and ename != ''">ename=#{ename},</if>	
+				<if test="priority != null and priority != ''">priority,</if>
+				<if test="remark != null and remark != ''">remark,</if>
+				<if test="updatetime != null and updatetime != ''">updatetime,</if>
+				<if test="updateid != null and updateid != ''">updateid,</if>
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="createid != null and createid != ''">createid,</if>
+				<if test="templatename != null and templatename != ''">templatename,</if>
+				<if test="status != null">status,</if>
+				<if test="delflag != null">delflag,</if>
+				<if test="sort != null">sort,</if>
+				<if test="type != null">type,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="dataid != null and dataid != ''">#{dataid},</if>
+				<if test="typeid != null and typeid != ''">#{typeid},</if>
+				<if test="datacode != null and datacode != ''">#{datacode},</if>
+				<if test="cname != null and cname != ''">#{cname},</if>
+				<if test="ename != null and ename != ''">#{ename},</if>	
+				<if test="priority != null and priority != ''">#{priority},</if>
+				<if test="remark != null and remark != ''">#{remark},</if>
+				<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">#{updateid},</if>
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="createid != null and createid != ''">#{createid},</if>
+				<if test="templatename != null and templatename != ''">#{templatename},</if>
+				<if test="status != null">#{status},</if>
+				<if test="delflag != null">#{delflag},</if>
+				<if test="sort != null">#{sort},</if>
+				<if test="type != null">#{type},</if>
+			</trim>
+	</insert>
+	
+		 
+	 <select id="getManageBanner" parameterType="map" resultType="map">			
+			select id,imgurl,httpurl,type,model,companyid,createid,delflag,updateid,`status`,priority,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s") as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			from c_t_manage_banner
+	   		  <where>
+	            <if test="id != null and id != ''">and id=#{id}</if>
+	            <if test="type != null">and type=#{type}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="priority != null">and priority=#{priority}</if>
+	            and delflag=0
+	        </where>
+	         order by priority 
+	 </select>
+	 
+	 <select id="getManageBannerSort" parameterType="map" resultType="map">			
+			select priority from c_t_manage_banner
+	   		  <where>
+	            <if test="id != null and id != ''">and id=#{id}</if>
+	            <if test="type != null">and type=#{type}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="priority != null">and priority=#{priority}</if>
+	            and delflag=0
+	        </where>
+	         order by priority  desc
+	 </select>
+	   <update id="updateManageBanner" parameterType="map">
+        update c_t_manage_banner
+        <set>
+				<if test="imgurl != null and imgurl != ''">imgurl=#{imgurl},</if>
+				<if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+				<if test="type != null ">type=#{type},</if>
+				<if test="model != null">model=#{model},</if>
+				<if test="companyid != null and companyid != ''">companyid=#{companyid},</if>
+				<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+				<if test="status != null">status=#{status},</if>
+				<if test="delflag != null">delflag=#{delflag},</if>
+				<if test="priority != null">priority=#{priority},</if>
+        </set>
+        <where>
+	            <if test="id != null and id != ''">and id=#{id}</if>
+	            <if test="type != null ">and type=#{type}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="priority != null ">and priority=#{priority}</if>
+	            and delflag=0
+	    </where>
+    </update>		
+	 <insert id="insertManageBanner" parameterType="map">
+			insert into c_t_manage_banner
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="id != null and id != ''">id,</if>
+				<if test="imgurl != null and imgurl != ''">imgurl,</if>
+				<if test="httpurl != null and httpurl != ''">httpurl,</if>
+				<if test="type != null ">type,</if>
+				<if test="model != null">model,</if>
+				<if test="companyid != null and companyid != ''">companyid,</if>
+				
+				<if test="createid != null and createid != ''">createid,</if>	
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="updatetime != null and updatetime != ''">updatetime,</if>
+				<if test="updateid != null and updateid != ''">updateid,</if>
+				<if test="status != null">status,</if>
+				<if test="delflag != null">delflag,</if>
+				<if test="priority != null">priority,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="id != null and id != ''">#{id},</if>
+				<if test="imgurl != null and imgurl != ''">#{imgurl},</if>
+				<if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+				<if test="type != null ">#{type},</if>
+				<if test="model != null">#{model},</if>
+				<if test="companyid != null and companyid != ''">#{companyid},</if>
+				
+				<if test="createid != null and createid != ''">#{createid},</if>	
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">#{updateid},</if>
+				<if test="status != null">#{status},</if>
+				<if test="delflag != null">#{delflag},</if>
+				<if test="priority != null">#{priority},</if>
+			</trim>
+	</insert>
+	
+	<select id="getManageaAppconfig" parameterType="map" resultType="map">			
+			SELECT codeid,model,content,url,`order`,createid,updateid,`status`,delflag,
+			date_format(createtime,"%Y-%m-%d %h:%i:%s") as createtime,date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime
+			from c_t_manage_appconfig
+	   		  <where>
+	            <if test="codeid != null and codeid != ''">and codeid=#{codeid}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="order!= null">and `order`=#{order}</if>
+	            and delflag=0
+	        </where>
+	         order by `order` 
+	 </select>
+	 <select id="getManageaAppconfigOrder" parameterType="map" resultType="int">			
+			select `order` from c_t_manage_appconfig
+	   		  <where>
+	           <if test="codeid != null and codeid != ''">and codeid=#{codeid}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="order!= null">and `order`=#{order}</if>
+	            and delflag=0
+	        </where>
+	         order by `order`  desc limit 1
+	 </select>
+	  <update id="updateManageAppconfig" parameterType="map">
+        update c_t_manage_appconfig
+        <set>
+				<if test="content != null and content != ''">content=#{content},</if>
+				<if test="url != null and url != ''">url=#{url},</if>
+				<if test="order != order">`order`=#{order},</if>
+				<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+				<if test="status != null">status=#{status},</if>
+				<if test="delflag != null">delflag=#{delflag},</if>
+				<if test="priority != null">priority=#{priority},</if>
+        </set>
+         <where>
+	            <if test="codeid != null and codeid != ''">and codeid=#{codeid}</if>
+	            <if test="model != null ">and model=#{model}</if>
+	            <if test="order!= null">and `order`=#{order}</if>
+	            and delflag=0
+	        </where>
+    </update>
+	 <insert id="insertManageAppconfigr" parameterType="map">
+			insert into c_t_manage_appconfig
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="codeid != null and codeid != ''">codeid,</if>
+				<if test="content != null and content != ''">content,</if>
+				<if test="model != null and model != ''">model,</if>
+				<if test="order != null ">`order`,</if>
+				<if test="url != null and url != ''">url,</if>
+				
+				<if test="createid != null and createid != ''">createid,</if>	
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="updatetime != null and updatetime != ''">updatetime,</if>
+				<if test="updateid != null and updateid != ''">updateid,</if>
+				<if test="status != null">status,</if>
+				<if test="delflag != null">delflag,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="codeid != null and codeid != ''">#{codeid},</if>
+				<if test="content != null and content != ''">#{content},</if>
+				<if test="model != null and model != ''">#{model},</if>
+				<if test="order != null ">#{order},</if>
+				<if test="url != null and url != ''">#{url},</if>
+				
+				<if test="createid != null and createid != ''">#{createid},</if>	
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+				<if test="updateid != null and updateid != ''">#{updateid},</if>
+				<if test="status != null">#{status},</if>
+				<if test="delflag != null">#{delflag},</if>
+			</trim>
+	</insert>	
+	
+	 <insert id="insertDailyReportData" parameterType="map">
+			insert into c_t_manage_everyday_report_data
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="dataid != null and dataid != ''">dataid,</if>
+				<if test="dataname != null and dataname != ''">dataname,</if>
+				<if test="typeid != null and typeid != ''">typeid,</if>
+				<if test="isnum != null">isnum,</if>
+				<if test="createid != null and createid != ''">createid,</if>	
+				<if test="createtime != null and createtime != ''">createtime,</if>
+				<if test="delflag != null">delflag,</if>
+			</trim>
+			<trim prefix="values(" suffix=")" suffixOverrides=",">
+				<if test="dataid != null and dataid != ''">#{dataid},</if>
+				<if test="dataname != null and dataname != ''">#{dataname},</if>
+				<if test="typeid != null and typeid != ''">#{typeid},</if>
+				<if test="isnum != null">#{isnum},</if>
+				<if test="createid != null and createid != ''">#{createid},</if>	
+				<if test="createtime != null and createtime != ''">#{createtime},</if>
+				<if test="delflag != null">#{delflag},</if>
+			</trim>
+	</insert>
+	<update id="updateDailyReportData" parameterType="map">
+	    update c_t_manage_everyday_report_data
+	    <set>
+			<if test="dataname != null and dataname != ''">dataname=#{dataname},</if>
+			<if test="isnum != null">isnum=#{isnum},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>	
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+	    </set>
+	    where dataid=#{dataid}
+	</update>
+</mapper>

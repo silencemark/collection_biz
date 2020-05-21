@@ -1,0 +1,731 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.worksheet.InspectMapper">
+     <select id="getInspectTemplateList" parameterType="map" resultType="map">
+        select ctmot.templateid,ctmot.companyid,ctmot.templatename,ctmot.type,ctmot.createid,
+        DATE_FORMAT(ctmot.createtime,'%Y-%m-%d %H:%i:%S') as createtime,DATE_FORMAT(ctmot.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctmot.updateid
+        from c_t_manage_organize_template ctmot 
+        inner join c_t_use_releaserange_user cturu on ctmot.templateid=cturu.resourceid and cturu.resourcetype=8
+        <where>
+            <if test="companyid != null and companyid != ''">and ctmot.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and cturu.userid=#{userid}</if>
+            <if test="type != null and type != ''">and ctmot.type=#{type}</if>
+            <if test="organizeid != null and organizeid != ''">and ctmot.organizeid=#{organizeid}</if>
+            and ctmot.delflag=0
+        </where>
+        group by ctmot.templateid
+        order by ctmot.createtime desc
+    </select>
+    <select id="getTemplateProjectList" parameterType="map" resultType="map">
+        select projectid,projectname,templateid,createid,createtime,updatetime,updateid,status
+        from c_t_manage_inspect_project
+        <where>
+            <if test="templateid != null and templateid != ''">and templateid=#{templateid}</if>
+            and delflag=0
+        </where>
+        order by priority
+    </select>
+    <insert id="insertLeaveshop" parameterType="map">
+        insert into c_t_use_leaveshop_inspect
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">inspectid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="templateid != null and templateid != ''">templateid,</if>
+	        <if test="examineuserid != null and examineuserid != ''">examineuserid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="templatename != null and templatename != ''">templatename,</if>
+	        <if test="organizename != null and organizename != ''">organizename,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	        <if test="avgstarlevel != null">avgstarlevel,</if>
+	        <if test="sumstar != null">sumstar,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">#{inspectid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="templateid != null and templateid != ''">#{templateid},</if>
+	        <if test="examineuserid != null and examineuserid != ''">#{examineuserid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="templatename != null and templatename != ''">#{templatename},</if>
+	        <if test="organizename != null and organizename != ''">#{organizename},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	        <if test="avgstarlevel != null">#{avgstarlevel},</if>
+	        <if test="sumstar != null">#{sumstar},</if>
+	    </trim>
+    </insert>
+    <insert id="insertInspectStar" parameterType="map">
+        insert into c_t_use_inspect_star
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">starid,</if>
+	        <if test="inspectid != null and inspectid != ''">inspectid,</if>
+	        <if test="projectid != null and projectid != ''">projectid,</if>
+	        <if test="starlevel != null and starlevel != ''">starlevel,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="priority != null and priority != ''">priority,</if>
+	        <if test="projectname != null and projectname != ''">projectname,</if>
+	        <if test="type != null">type,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="starid != null and starid != ''">#{starid},</if>
+	        <if test="inspectid != null and inspectid != ''">#{inspectid},</if>
+	        <if test="projectid != null and projectid != ''">#{projectid},</if>
+	        <if test="starlevel != null and starlevel != ''">#{starlevel},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="priority != null and priority != ''">#{priority},</if>
+	        <if test="projectname != null and projectname != ''">#{projectname},</if>
+	        <if test="type != null">#{type},</if>
+	    </trim>
+    </insert>
+    <select id="getLeaveShopList" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,ctuli.opinion,
+        ctuli.createid,DATE_FORMAT(ctfu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,ctfu.forwarduserid,cot.templatename as templatename
+        from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null and status!=-1" >and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+	        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getLeaveShopListNum" parameterType="map" resultType="int">
+        select count(0) from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null and status != -1">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+	        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+	        <if test="isread != null">and ctfu.isread=#{isread}</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+    </select>
+    
+    <!-- 查询离店报告单，表单唯一 -->
+    <select id="getLeaveShopListOnlyOne" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,ctuli.opinion,
+        ctuli.createid,DATE_FORMAT(ctfu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,ctfu.forwarduserid,cot.templatename as templatename
+        from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+	        <if test="status != null and status!=-1" >and ctuli.status=#{status}</if>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 	        <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+	        <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+            and ctuli.delflag=0
+        </where>
+        group by ctuli.inspectid
+        order by ctuli.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getLeaveShopListNumOnlyOne" parameterType="map" resultType="int">
+        select count(0)
+        from (
+        	select ctuli.inspectid from c_t_use_leaveshop_inspect ctuli
+	        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+	        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+	        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+		        <if test="status != null and status != -1">and ctuli.status=#{status}</if>
+<!-- 		        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 		        <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+		        <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+	            and ctuli.delflag=0
+	        </where>
+	        group by ctuli.inspectid
+        ) TB
+    </select>
+    
+    <!-- 查询李典检查时间列表信息 -->
+    <select id="getLeaveShopListTimes" parameterType="map" resultType="map">
+        select 
+        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+       from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+	        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <!-- 查询李典检查时间列表信息的总数 -->
+    <select id="getLeaveShopListTimesCount" parameterType="map" resultType="int">
+        select count(*) from (
+        	select 
+	        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+	        from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and ctfu.resourcetype=10
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+		        <if test="status != null">and ctuli.status=#{status}</if>
+		        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+		        <if test="isread != null">and ctfu.isread=#{isread}</if>
+	            and ctuli.delflag=0 and ctfu.delflag=0
+	        </where>
+        ) leaveshop
+    </select>
+    
+    <select id="getLeaveShopInfo" parameterType="map" resultType="map">
+        select ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,
+        ctuli.opinion,ctuli.createid,DATE_FORMAT(ctuli.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuli.organizename,ctuli.templatename,
+        ctuu1.headimage as examineheadimage,ctuu.headimage as createheadimage,ctuli.CCuserids,IFNULL(ctuli.CCusernames,"") AS CCusernames
+        from c_t_use_leaveshop_inspect ctuli
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+           	<if test="inspectid != null and inspectid != ''">and ctuli.inspectid=#{inspectid}</if>
+           	<if test="status != null and status!= -1" >and ctuli.status=#{status}</if>
+        </where>
+        limit 1
+    </select>
+    
+    <select id="getInspectStarList" parameterType="map" resultType="map">
+        select ctuis.starid,ctuis.inspectid,ctuis.projectid,ctuis.starlevel,ctuis.createid,
+        ctuis.projectname,ctuis.type as status
+        from c_t_use_inspect_star ctuis
+        <where>
+            <if test="inspectid != null and inspectid != ''">and ctuis.inspectid=#{inspectid}</if>
+            and ctuis.delflag=0
+        </where>
+        order by ctuis.priority
+    </select>
+    <update id="updateLeaveShop" parameterType="map">
+        update c_t_use_leaveshop_inspect
+        <set>
+            <if test="updatetime !=null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid !=null and updateid != ''">updateid=#{updateid},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="opinion != null and opinion != ''">opinion=#{opinion},</if>
+            <if test="status != null">status=#{status},</if>
+        </set>
+        where inspectid=#{inspectid}
+    </update>
+    
+    <!-- 餐前检查 -->
+    
+    <insert id="insertBeforeMeal" parameterType="map">
+        insert into c_t_use_beforemeal_inspect
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">inspectid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="templateid != null and templateid != ''">templateid,</if>
+	        <if test="examineuserid != null and examineuserid != ''">examineuserid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="status != null">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="templatename != null and templatename != ''">templatename,</if>
+	        <if test="organizename != null and organizename != ''">organizename,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	        <if test="avgstarlevel != null">avgstarlevel,</if>
+	        <if test="sumstar != null">sumstar,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">#{inspectid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="templateid != null and templateid != ''">#{templateid},</if>
+	        <if test="examineuserid != null and examineuserid != ''">#{examineuserid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="templatename != null and templatename != ''">#{templatename},</if>
+	        <if test="organizename != null and organizename != ''">#{organizename},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	        <if test="avgstarlevel != null">#{avgstarlevel},</if>
+	        <if test="sumstar != null">#{sumstar},</if>
+	    </trim>
+    </insert>
+    <select id="getBeforeMealList" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i') as updatetime,ctuli.updateid,ctuli.status,ctuli.opinion,ctuli.createid,
+        DATE_FORMAT(ctfu.createtime,'%Y-%m-%d %H:%i') as createtime,ctfu.forwarduserid,ctuli.status,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,cot.templatename
+        from c_t_use_beforemeal_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null  and status!= -1 ">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		    <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getBeforeMealListNum" parameterType="map" resultType="int">
+        select count(0) from c_t_use_beforemeal_inspect ctuli
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null and  status!= -1">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		    <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+		    <if test="isread != null">and ctfu.isread=#{isread}</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+    </select>
+    
+    <!-- 查询餐前检查表单，表单唯一 -->
+    <select id="getBeforeMealListOnlyOne" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i') as updatetime,ctuli.updateid,ctuli.status,ctuli.opinion,ctuli.createid,
+        DATE_FORMAT(ctfu.createtime,'%Y-%m-%d %H:%i') as createtime,ctfu.forwarduserid,ctuli.status,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,cot.templatename
+        from c_t_use_beforemeal_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+	        <if test="status != null  and status!= -1 ">and ctuli.status=#{status}</if>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 		    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+		    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+            and ctuli.delflag=0
+        </where>
+        group by ctuli.inspectid
+        order by ctuli.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getBeforeMealListNumOnlyOne" parameterType="map" resultType="int">
+        select count(0)
+        from (
+	        select ctuli.inspectid from c_t_use_beforemeal_inspect ctuli
+	        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+	        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+	        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+		        <if test="status != null and  status!= -1">and ctuli.status=#{status}</if>
+<!-- 		        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 			    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+			    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+	            and ctuli.delflag=0
+	        </where>
+	        group by ctuli.inspectid
+        ) TB
+    </select>
+    
+    <!-- 查询餐前检查时间列表信息 -->
+    <select id="getBeforeMealListTimes" parameterType="map" resultType="map">
+        select 
+        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+        from c_t_use_beforemeal_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null  and status!= -1">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <!-- 查询餐前检查时间列表信息的总数 -->
+    <select id="getBeforeMealListTimesCount" parameterType="map" resultType="int">
+        select count(*) from (
+        	select 
+	        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+	        from c_t_use_beforemeal_inspect ctuli
+	        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+	        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=11
+	        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+	        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+		        <if test="status != null and status!= -1">and ctuli.status=#{status}</if>
+		        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+		        <if test="isread != null">and ctfu.isread=#{isread}</if>
+	            and ctuli.delflag=0 and ctfu.delflag=0
+	        </where>
+        ) beforemeal
+    </select>
+    
+    <select id="getBeforeMealInfo" parameterType="map" resultType="map">
+        select ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,
+        ctuli.status,ctuli.opinion,ctuli.createid,DATE_FORMAT(ctuli.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuli.organizename,ctuli.templatename,
+        ctuu1.headimage as examineheadimage,ctuu.headimage as createheadimage,ctuli.CCuserids,IFNULL(ctuli.CCusernames,"") AS CCusernames
+        from c_t_use_beforemeal_inspect ctuli
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+           	<if test="inspectid != null and inspectid != ''">and ctuli.inspectid=#{inspectid}</if>
+           	<if test="status != null and status != -1">and ctuli.status=#{status}</if>
+        </where>
+        limit 1
+    </select>
+    <update id="updateBeforeMeal" parameterType="map">
+        update c_t_use_beforemeal_inspect
+        <set>
+            <if test="updatetime !=null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid !=null and updateid != ''">updateid=#{updateid},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="opinion != null and opinion != ''">opinion=#{opinion},</if>
+            <if test="status != null">status=#{status},</if>
+        </set>
+        where inspectid=#{inspectid}
+    </update>
+    
+    
+     <!-- 厨房检查 -->
+    
+    <insert id="insertKitchen" parameterType="map">
+        insert into c_t_use_kitchen_inspect
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">inspectid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="organizeid != null and organizeid != ''">organizeid,</if>
+	        <if test="templateid != null and templateid != ''">templateid,</if>
+	        <if test="examineuserid != null and examineuserid != ''">examineuserid,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="status != null and status!= -1">status,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="opinion != null and opinion != ''">opinion,</if>
+	        <if test="templatename != null and templatename != ''">templatename,</if>
+	        <if test="organizename != null and organizename != ''">organizename,</if>
+	        <if test="CCuserids != null and CCuserids != ''">CCuserids,</if>
+	        <if test="CCusernames != null and CCusernames != ''">CCusernames,</if>
+	        <if test="avgstarlevel != null">avgstarlevel,</if>
+	        <if test="sumstar != null">sumstar,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="inspectid != null and inspectid != ''">#{inspectid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+	        <if test="templateid != null and templateid != ''">#{templateid},</if>
+	        <if test="examineuserid != null and examineuserid != ''">#{examineuserid},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="status != null and status!= -1">#{status},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="opinion != null and opinion != ''">#{opinion},</if>
+	        <if test="templatename != null and templatename != ''">#{templatename},</if>
+	        <if test="organizename != null and organizename != ''">#{organizename},</if>
+	        <if test="CCuserids != null and CCuserids != ''">#{CCuserids},</if>
+	        <if test="CCusernames != null and CCusernames != ''">#{CCusernames},</if>
+	        <if test="avgstarlevel != null">#{avgstarlevel},</if>
+	        <if test="sumstar != null">#{sumstar},</if>
+	    </trim>
+    </insert>
+    <select id="getKitchenList" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,
+        ctuli.opinion,ctfu.createid,DATE_FORMAT(ctuli.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,ctfu.forwarduserid,cot.templatename
+        from c_t_use_kitchen_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+	        <if test="status != null and status!=-1">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getKitchenListNum" parameterType="map" resultType="int">
+       	select count(0)
+        from c_t_use_kitchen_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+	        <if test="status != null and status!=-1">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+		        <if test="isread != null">and ctfu.isread=#{isread}</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+    </select>
+    
+    <!-- 查询厨房检查-表单唯一 -->
+    <select id="getKitchenListOnlyOne" parameterType="map" resultType="map">
+        select ctfu.isread,ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,
+        ctuli.opinion,ctfu.createid,DATE_FORMAT(ctuli.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuo.organizename,ctfu.forwarduserid,cot.templatename
+        from c_t_use_kitchen_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+	        <if test="status != null and status!=-1">and ctuli.status=#{status}</if>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 		    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+		    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+            and ctuli.delflag=0
+        </where>
+        group by ctuli.inspectid
+        order by ctuli.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getKitchenListNumOnlyOne" parameterType="map" resultType="int">
+        select count(0) from (
+        	select ctuli.inspectid
+	        from c_t_use_kitchen_inspect ctuli
+	        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+	        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+	        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+	        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        left join c_t_manage_organize_template cot on ctuli.templateid=cot.templateid
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+		        <if test="status != null and status!=-1">and ctuli.status=#{status}</if>
+<!-- 		        <if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 			    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt; concat(#{endtime}," 23:59:59")</if> -->
+			    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctuli.createtime,'%Y-%m')=#{starttime}</if>
+	            and ctuli.delflag=0
+	        </where>
+	       group by ctuli.inspectid
+        ) TB
+    </select>
+    
+    
+    <!-- 厨房检查时间列表信息 -->
+    <select id="getKitchenListTimes" parameterType="map" resultType="map">
+        select 
+        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+        from c_t_use_kitchen_inspect ctuli
+        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+	        <if test="status != null">and ctuli.status=#{status}</if>
+	        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+		        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+            and ctuli.delflag=0 and ctfu.delflag=0
+        </where>
+        order by ctfu.createtime desc
+        <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <!-- 厨房检查时间列表信息总数 -->
+    <select id="getKitchenListTimesCount" parameterType="map" resultType="int">
+        select count(*) from (
+        	select 
+	        	DISTINCT DATE_FORMAT(ctfu.createtime,'%Y-%m-%d') as createtime
+	        from c_t_use_kitchen_inspect ctuli
+	        left join c_t_use_organize ctuo on ctuli.organizeid=ctuo.organizeid
+	        left join c_t_use_forward_user ctfu on ctfu.resourceid=ctuli.inspectid and resourcetype=12
+	        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+	        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+	        
+	        <where>
+	            <if test="companyid != null and companyid !=''">and ctuli.companyid=#{companyid}</if>
+	            <if test="userid != null and userid != ''">and ctfu.receiveid=#{userid}</if>
+		        <if test="status != null">and ctuli.status=#{status}</if>
+		        <if test="starttime != null and starttime != ''">and ctfu.createtime &gt;= concat(#{starttime}," 00:00:00") </if>
+			        <if test="endtime != null and endtime != ''">and ctfu.createtime &lt; concat(#{endtime}," 23:59:59")</if>
+			        <if test="isread != null">and ctfu.isread=#{isread}</if>
+	            and ctuli.delflag=0 and ctfu.delflag=0
+	        </where>
+        ) kitchen
+    </select>
+    
+    <select id="getKitchenInfo" parameterType="map" resultType="map">
+        select 
+        ctuli.inspectid,ctuli.companyid,ctuli.organizeid,ctuli.examineuserid,
+        DATE_FORMAT(ctuli.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuli.updateid,ctuli.status,
+        ctuli.opinion,ctuli.createid,DATE_FORMAT(ctuli.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+        ctuu.realname as createname,ctuu1.realname as examinename,ctuli.organizename,ctuli.templatename,
+        ctuu1.headimage as examineheadimage,ctuu.headimage as createheadimage,ctuli.CCuserids,IFNULL(ctuli.CCusernames,"") AS CCusernames
+        from c_t_use_kitchen_inspect ctuli
+        left join c_t_use_userinfo ctuu on ctuli.createid=ctuu.userid
+        left join c_t_use_userinfo ctuu1 on ctuli.examineuserid=ctuu1.userid
+        <where>
+           	<if test="inspectid != null and inspectid != ''">and ctuli.inspectid=#{inspectid}</if>
+           	<if test="status != null and status!=-1">status=#{status}</if>
+        </where>
+        limit 1
+    </select>
+    <update id="updateKitchen" parameterType="map">
+        update c_t_use_kitchen_inspect
+        <set>
+            <if test="updatetime !=null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid !=null and updateid != ''">updateid=#{updateid},</if>
+            <if test="delflag != null">delflag=#{delflag},</if>
+            <if test="opinion != null and opinion != ''">opinion=#{opinion},</if>
+            <if test="status != null and status!=-1 ">status=#{status},</if>
+        </set>
+        where inspectid=#{inspectid}
+    </update>
+    
+    
+    <!-- 查询餐前检查信息，报表 -->
+    <select id="getReportPrecheckInfo" parameterType="map" resultType="map">
+    	select 
+        	DATE_FORMAT(ctmt.comparetime,'%d') as comparetime,ifnull(sum(ctu.starlevel),0) as sumstar
+        from c_t_manage_time ctmt
+        left join (
+        	select
+        		 ctuli.createtime,ifnull(ctuli.avgstarlevel,0) as starlevel
+        	from c_t_use_beforemeal_inspect ctuli
+        	left join c_t_use_inspect_star ctus on ctus.inspectid=ctuli.inspectid
+        	where 
+        		ctus.type=0 and ctuli.delflag=0 and ctus.delflag=0 and ctuli.status=1
+        		<if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+<!--         		<if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 			    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt;= concat(#{endtime}," 23:59:59")</if> -->
+			group by ctuli.inspectid
+		 )  ctu on DATE_FORMAT(ctu.createtime,'%Y-%m-%d')=ctmt.comparetime
+        <where>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctmt.comparetime &gt;=#{starttime}</if> -->
+<!-- 		    <if test="endtime != null and endtime != ''">and ctmt.comparetime &lt;=#{endtime}</if> -->
+		    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctmt.comparetime,'%Y-%m')=#{starttime}</if>
+        </where>
+        group by ctmt.comparetime
+    </select>
+    <!-- 查询厨房检查，报表 -->
+    <select id="getReportKitChenCheckInfo" parameterType="map" resultType="map">
+    	select 
+        	DATE_FORMAT(ctmt.comparetime,'%d') as comparetime,ifnull(sum(ctu.starlevel),0) as sumstar
+        from c_t_manage_time ctmt
+        left join (
+        	select
+        		 ctuli.createtime,ifnull(ctuli.avgstarlevel,0) as starlevel
+        	from c_t_use_kitchen_inspect ctuli
+        	left join c_t_use_inspect_star ctus on ctus.inspectid=ctuli.inspectid
+        	where 
+        		ctus.type=0 and ctuli.delflag=0 and ctus.delflag=0 and ctuli.status=1
+        		<if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+<!--         		<if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 			    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt;= concat(#{endtime}," 23:59:59")</if> -->
+			group by ctuli.inspectid
+		 )  ctu on DATE_FORMAT(ctu.createtime,'%Y-%m-%d')=ctmt.comparetime
+        <where>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctmt.comparetime &gt;=#{starttime}</if> -->
+<!-- 		    <if test="endtime != null and endtime != ''">and ctmt.comparetime &lt;=#{endtime}</if> -->
+		    <if test="starttime != null and starttime != ''">and DATE_FORMAT(ctmt.comparetime,'%Y-%m')=#{starttime}</if>
+        </where>
+        group by ctmt.comparetime
+    </select>
+    <!-- 查询离店报告，报表 -->
+    <select id="getReportLeaveShopInfo" parameterType="map" resultType="map">
+    	select 
+        	DATE_FORMAT(ctmt.comparetime,'%d') as comparetime,ifnull(sum(ctu.starlevel),0) as sumstar
+        from c_t_manage_time ctmt
+        left join (
+        	select
+        		 ctuli.createtime,ifnull(ctuli.avgstarlevel,0) as starlevel
+        	from c_t_use_leaveshop_inspect ctuli
+        	left join c_t_use_inspect_star ctus on ctus.inspectid=ctuli.inspectid
+        	where 
+        		ctus.type=0 and ctuli.delflag=0 and ctus.delflag=0 and ctuli.status=1
+        		<if test="organizeid != null and organizeid != ''">and ctuli.organizeid=#{organizeid}</if>
+<!--         		<if test="starttime != null and starttime != ''">and ctuli.createtime &gt;= concat(#{starttime}," 00:00:00") </if> -->
+<!-- 			    <if test="endtime != null and endtime != ''">and ctuli.createtime &lt;= concat(#{endtime}," 23:59:59")</if> -->
+			group by ctuli.inspectid
+		 )  ctu on DATE_FORMAT(ctu.createtime,'%Y-%m-%d')=ctmt.comparetime
+        <where>
+<!-- 	        <if test="starttime != null and starttime != ''">and ctmt.comparetime &gt;=#{starttime}</if> -->
+<!-- 		    <if test="endtime != null and endtime != ''">and ctmt.comparetime &lt;=#{endtime}</if> -->
+				<if test="starttime != null and starttime != ''">and DATE_FORMAT(ctmt.comparetime,'%Y-%m')=#{starttime}</if>
+        </where>
+        group by ctmt.comparetime
+    </select>
+</mapper>

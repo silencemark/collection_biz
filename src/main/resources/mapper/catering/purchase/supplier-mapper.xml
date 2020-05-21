@@ -1,0 +1,141 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.purchase.SupplierMapper">
+     <select id="getSupplierList" parameterType="map" resultType="map">
+        select supplierid,companyid,supplierno,suppliername, ifnull(suppliertype,"")as suppliertype,contactsname,phone, ifnull(position,"")as position,provinceid,cityid,address,taxpayernum,bankname,
+        bankaccount,introduction,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,createid,updateid,DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,status 
+        from c_t_use_supplier
+        <where>
+            <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+            <if test="suppliername != null and suppliername != ''">and suppliername like concat('%',#{suppliername},'%')</if>
+            <if test="contactsname != null and contactsname != ''">and contactsname like concat('%',#{contactsname},'%')</if>
+            and delflag=0
+        </where>
+        order by createtime desc
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    <select id="getSupplierListNum" parameterType="map" resultType="int">
+        select count(0) from c_t_use_supplier
+        <where>
+            <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+            <if test="suppliername != null and suppliername != ''">and suppliername like concat('%',#{suppliername},'%')</if>
+            and delflag=0
+        </where>
+    </select>
+    <select id="getSupplierNumByCompany" parameterType="map" resultType="int">
+        select count(0) from c_t_use_supplier
+        <where>
+            <if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+            and to_days(createtime)=to_days(now())
+        </where>
+    </select>
+    <insert id="insertSupplier" parameterType="map">
+        insert into c_t_use_supplier
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="supplierid != null and supplierid != ''">supplierid,</if>
+	        <if test="companyid != null and companyid != ''">companyid,</if>
+	        <if test="supplierno != null and supplierno != ''">supplierno,</if>
+	        <if test="suppliername != null and suppliername != ''">suppliername,</if>
+	        <if test="suppliertype != null and suppliertype != ''">suppliertype,</if>
+	        <if test="createid != null and createid != ''">createid,</if>
+	        <if test="contactsname != null and contactsname != ''">contactsname,</if>
+	        <if test="phone != null and phone != ''">phone,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	        <if test="status != null">status,</if>
+	        <if test="position != null and position != ''">position,</if>
+	        <if test="provinceid != null and provinceid != ''">provinceid,</if>
+	        <if test="cityid != null and cityid != ''">cityid,</if>
+	        <if test="address != null and address != ''">address,</if>
+	        <if test="taxpayernum != null and taxpayernum != ''">taxpayernum,</if>
+	        <if test="bankname != null and bankname != ''">bankname,</if>
+	        <if test="bankaccount != null and bankaccount != ''">bankaccount,</if>
+	        <if test="introduction != null and introduction != ''">introduction,</if>
+	        <if test="delflag != null">delflag,</if>
+	        <if test="districtid != null">districtid,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="supplierid != null and supplierid != ''">#{supplierid},</if>
+	        <if test="companyid != null and companyid != ''">#{companyid},</if>
+	        <if test="supplierno != null and supplierno != ''">#{supplierno},</if>
+	        <if test="suppliername != null and suppliername != ''">#{suppliername},</if>
+	        <if test="suppliertype != null and suppliertype != ''">#{suppliertype},</if>
+	        <if test="createid != null and createid != ''">#{createid},</if>
+	        <if test="contactsname != null and contactsname != ''">#{contactsname},</if>
+	        <if test="phone != null and phone != ''">#{phone},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	        <if test="status != null">#{status},</if>
+	        <if test="position != null and position != ''">#{position},</if>
+	        <if test="provinceid != null and provinceid != ''">#{provinceid},</if>
+	        <if test="cityid != null and cityid != ''">#{cityid},</if>
+	        <if test="address != null and address != ''">#{address},</if>
+	        <if test="taxpayernum != null and taxpayernum != ''">#{taxpayernum},</if>
+	        <if test="bankname != null and bankname != ''">#{bankname},</if>
+	        <if test="bankaccount != null and bankaccount != ''">#{bankaccount},</if>
+	        <if test="introduction != null and introduction != ''">#{introduction},</if>
+	        <if test="delflag != null">#{delflag},</if>
+	        <if test="districtid != null">#{districtid},</if>
+	    </trim>
+    </insert>
+    <select id="getSupplierInfo" parameterType="map" resultType="java.util.Map">
+      select
+		 ctus.supplierid,
+		 ctus.companyid,
+		 ctus.supplierno,
+		 ctus.suppliername,
+		 ifnull(ctus.suppliertype,"")as suppliertype,
+		 ctus.contactsname,
+		 ctus.phone,
+		 ifnull(ctus.position,"")as position,
+		 ifnull(ctus.provinceid,"")as provinceid,
+		 ifnull(ctus.cityid,"")as cityid,
+		 ifnull(ctus.districtid,"")as districtid,
+		 ifnull(ctus.taxpayernum,"")as taxpayernum,
+		 ifnull(ctus.bankname,"")as bankname,
+		 ifnull(ctus.bankaccount,"")as bankaccount,
+		 ifnull(ctus.introduction,"")as introduction,
+		 ifnull(ctus.address,"")as address,
+		 ifnull(ctma.cname,"")as provincename,
+		 ifnull(ctma1.cname ,"")as cityname,
+		 ifnull(ctma2.cname ,"")as districtname,	 
+		 ifnull(DATE_FORMAT(ctus.createtime,'%Y-%m-%d %H:%i:%S') ,"")as createtime,
+		 ifnull(ctus.createid,"")as createid,
+		 ifnull( ctuu.headimage,"")as createheadimage, 
+		 ifnull(ctus.updateid,"")as updateid,
+		 ifnull( ctuu.realname,"")as createname, 
+		 ifnull( ctuu1.realname,"")as updatename, 
+		 ifnull( ctuu1.headimage,"")as updateheadimage, 
+		 ifnull(DATE_FORMAT(ctus.updatetime,'%Y-%m-%d %H:%i:%S'),"") as updatetime
+		 from c_t_use_supplier ctus
+		  left join c_t_manage_area ctma on ctus.provinceid=ctma.areaid
+		  left join c_t_manage_area ctma1 on ctus.cityid=ctma1.areaid
+		  left join c_t_manage_area ctma2 on ctus.districtid=ctma2.areaid
+		  left join c_t_use_userinfo ctuu on ctus.createid=ctuu.userid
+		  left join c_t_use_userinfo ctuu1 on ctus.updateid=ctuu1.userid
+       	<where>
+       	    and ctus.delflag = 0
+       	    <if test="supplierid != null and supplierid != ''">and ctus.supplierid=#{supplierid}</if>
+       	</where>
+       	limit 1
+    </select>
+    <update id="updateSupplier" parameterType="map">
+        update c_t_use_supplier
+        <set>
+	        <if test="suppliername != null and suppliername != ''">suppliername=#{suppliername},</if>
+	        <if test="suppliertype != null and suppliertype != ''">suppliertype=#{suppliertype},</if>
+	        <if test="contactsname != null and contactsname != ''">contactsname=#{contactsname},</if>
+	        <if test="phone != null and phone != ''">phone=#{phone},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="position != null and position != ''">position=#{position},</if>
+	        <if test="provinceid != null and provinceid != ''">provinceid=#{provinceid},</if>
+	        <if test="cityid != null and cityid != ''">cityid=#{cityid},</if>
+	        <if test="address != null and address != ''">address=#{address},</if>
+	        <if test="taxpayernum != null and taxpayernum != ''">taxpayernum=#{taxpayernum},</if>
+	        <if test="bankname != null and bankname != ''">bankname=#{bankname},</if>
+	        <if test="bankaccount != null and bankaccount != ''">bankaccount=#{bankaccount},</if>
+	        <if test="introduction != null and introduction != ''">introduction=#{introduction},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="districtid != null">districtid = #{districtid},</if>
+        </set>
+        where supplierid=#{supplierid}
+    </update>
+</mapper>

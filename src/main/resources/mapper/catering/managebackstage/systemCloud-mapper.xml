@@ -1,0 +1,106 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.managebackstage.SystemCloudMapper">
+
+	<!-- 查询管理方云盘 -->
+	<select id="getSystemCloudListInfo" parameterType="map" resultType="map">
+		select
+			cs.fileid,cs.filename,cs.memory,cs.filetype,cs.parentid,cs.createid,
+			ifnull(date_format(cs.updatetime,"%Y-%m-%d %H:%i"),date_format(cs.createtime,"%Y-%m-%d %H:%i")) as updatetime,
+			cs.type,cs.fileurl
+		from c_t_manage_systemcloud_file cs
+		<where>
+			<if test="filename != null and filename != ''">and locate(#{filename},cs.filename) > 0</if>
+			<if test="filetype != null and filetype != ''">and cs.filetype=#{filetype}</if>
+			<if test="parentid != null and parentid != ''">and cs.parentid=#{parentid}</if>
+			<if test="parentid == null or parentid == ''">and cs.parentid is NULL</if>
+			<if test="type != null and type != ''">and cs.type=#{type}</if>
+			and cs.delflag=0
+		</where>
+		order by cs.filetype desc,cs.createtime desc
+		<if test="startnum != null and rownum != ''">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<!-- 查询管理方云盘文件的总数 -->
+	<select id="getSystemCloudListCount" parameterType="map" resultType="int">
+		select
+			count(*)
+		from c_t_manage_systemcloud_file cs
+		<where>
+			<if test="filename != null and filename != ''">and locate(#{filename},cs.filename) > 0</if>
+			<if test="filetype != null and filetype != ''">and cs.filetype=#{filetype}</if>
+			<if test="parentid != null and parentid != ''">and cs.parentid=#{parentid}</if>
+			<if test="parentid == null or parentid == ''">and cs.parentid is NULL</if>
+			<if test="type != null and type != ''">and cs.type=#{type}</if>
+			and cs.delflag=0
+		</where>
+	</select>
+	
+	<!-- 查询父级文件夹的parentid -->
+	<select id="getFolderParentid" parameterType="map" resultType="string">
+		select
+			ifnull(parentid,delflag) as parentid
+		from c_t_manage_systemcloud_file 
+		where fileid=#{parentid}
+	</select>
+	
+	<!-- 修改管理方云盘信息 -->
+	<update id="updateSystemCloudInfo" parameterType="map">
+		update c_t_manage_systemcloud_file
+		<set>
+			<if test="filename != null and filename != ''">filename=#{filename},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+		</set>
+		where fileid=#{fileid}
+	</update>
+
+	<!-- 添加文件 -->
+	<insert id="insertSystemCloudInfo" parameterType="map">
+		insert into c_t_manage_systemcloud_file
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="fileid != null and fileid != ''">fileid,</if>
+			<if test="filename != null and filename != ''">filename,</if>
+			<if test="fileurl != null and fileurl != ''">fileurl,</if>
+			<if test="memory != null and memory != ''">memory,</if>
+			<if test="filetype != null and filetype != ''">filetype,</if>
+			<if test="parentid != null and parentid != ''">parentid,</if>
+			
+			<if test="createid != null and createid != ''">createid,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="type != null and type != ''">type,</if>
+			
+			<if test="delflag != null and delflag != ''">delflag,</if>
+			<if test="status != null and status != ''">status,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="fileid != null and fileid != ''">#{fileid},</if>
+			<if test="filename != null and filename != ''">#{filename},</if>
+			<if test="fileurl != null and fileurl != ''">#{fileurl},</if>
+			<if test="memory != null and memory != ''">#{memory},</if>
+			<if test="filetype != null and filetype != ''">#{filetype},</if>
+			<if test="parentid != null and parentid != ''">#{parentid},</if>
+			
+			<if test="createid != null and createid != ''">#{createid},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			
+			<if test="delflag != null and delflag != ''">#{delflag},</if>
+			<if test="status != null and status != ''">#{status},</if>
+		</trim>
+	</insert>
+
+	<!-- 查询云盘详细信息 -->
+	<select id="getSystemCloudDetailInfo" parameterType="map" resultType="map">
+		select
+			filename,memory,filetype,type
+		from c_t_manage_systemcloud_file
+		where fileid=#{fileid}
+		limit 1
+	</select>
+	
+</mapper>

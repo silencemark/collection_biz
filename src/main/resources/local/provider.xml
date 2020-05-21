@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans    
+        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd    
+        http://code.alibabatech.com/schema/dubbo
+		http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+ 
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    <dubbo:application name="hello-world-app"  />
+ 
+ 	<dubbo:provider timeout="1000000"/>
+    <!-- 使用multicast广播注册中心暴露服务地址
+    <dubbo:registry address="multicast://224.5.6.7:1234" />
+     -->
+
+    <!-- 用dubbo协议在20881端口暴露服务
+     -->
+    <dubbo:protocol name="dubbo" port="20882" /> 
+    <dubbo:registry check="false" address="zookeeper://127.0.0.1:2181" file="/home/wanghan/zookeeper/cache/dubbo.cache"/>    
+	
+    <!-- 和本地bean一样实现服务     -->
+   	<bean id="indexService" class="com.collection.service.impl.IndexServiceImpl"/>
+   	<bean id="companyService" class="com.collection.service.impl.CompanyServiceImpl"/>
+	<bean id="userInfoService" class="com.collection.service.impl.UserInfoServiceImpl"/>
+	<!-- 店面管理 -->
+	<bean id="storeFrontService" class="com.collection.service.impl.storefront.StoreFrontServiceImpl"/>
+	<!-- 采购管理 -->
+    <bean id="purchaseService" class="com.collection.service.impl.purchase.PurchaseServiceImpl"/>
+    <bean id="supplierService" class="com.collection.service.impl.purchase.SupplierServiceImpl"/>
+    <!-- 仓库管理 -->
+    <bean id="warehouseService" class="com.collection.service.impl.warehouse.WarehouseServiceImpl"/>
+    <!-- KPI星值审核管理 -->
+    <bean id="starAssessService" class="com.collection.service.impl.starassess.StarAssessServiceImpl"/>
+    <!-- 备忘录管理 -->
+    <bean id="memorandumService" class="com.collection.service.impl.memorandum.MemorandumServiceImpl"/>
+    <!--  OA办公管理 -->
+    <bean id="officeService" class="com.collection.service.impl.oa.OfficeServiceImpl"/>    
+    <!--  OA通知管理 -->
+    <bean id="noticeService" class="com.collection.service.impl.oa.NoticeServiceImpl"/>    
+    <!-- 工作表单 检查管理 -->
+    <bean id="inspectService" class="com.collection.service.impl.worksheet.InspectServiceImpl"/>
+    <!-- 工作表单 -->
+    <bean id="rewardInfoService" class="com.collection.service.impl.worksheet.RewardInfoServiceImpl"/>
+    <!-- 组织检查模板 -->
+    <bean id="organizeTemplateService" class="com.collection.service.impl.worksheet.OrganizeTemplateServiceImpl"/>
+    
+    <!--  OA日志管理 -->
+    <bean id="journalService" class="com.collection.service.impl.oa.JournalServiceImpl"/> 
+    <!--  OA通用审批-->
+    <bean id="approvalService" class="com.collection.service.impl.oa.ApprovalServiceImpl"/>
+    <!--  消息讨论组-->
+    <bean id="chatService" class="com.collection.service.impl.chat.ChatServiceImpl"/> 
+    <!-- 个人中心 -->
+    <bean id="personalService" class="com.collection.service.impl.personal.PersonalServiceImpl"/>
+    <!-- 每日报表 -->
+    <bean id="everydayReportService" class="com.collection.service.impl.storefront.EverydayReportServiceImpl"/>
+    
+    <!-- 工作表单检查项目 -->
+    <bean id="workSheetInspectService" class="com.collection.service.impl.worksheet.WorkSheetInspectServiceImpl"/>
+    
+    <!-- 管理方后台 -->
+    <bean id="systemService" class="com.collection.service.impl.SystemServiceImpl" />
+    <bean id="customerFileService" class="com.collection.service.impl.managebackstage.CustomerFileServiceImpl" />
+    
+    
+     <!-- 使用方后台，云盘 -->
+     <bean id="systemCloudService" class="com.collection.service.impl.managebackstage.SystemCloudServiceImpl" />
+     
+     <!-- 使用方后台，扩容申请 -->
+     <bean id="cloudCapacityService" class="com.collection.service.impl.managebackstage.CloudCapacityServiceImpl" />
+    
+    
+    <!-- 声明需要暴露的服务接口     -->
+    <dubbo:service interface="com.collection.service.IndexService" ref="indexService" />
+    <dubbo:service interface="com.collection.service.CompanyService" ref="companyService" />
+    <dubbo:service interface="com.collection.service.UserInfoService" ref="userInfoService" />
+    <!-- 店面管理 -->
+	<dubbo:service interface="com.collection.service.storefront.StoreFrontService" ref="storeFrontService" />
+	<!-- 采购管理 -->
+	<dubbo:service interface="com.collection.service.purchase.PurchaseService" ref="purchaseService" />
+    <dubbo:service interface="com.collection.service.purchase.SupplierService" ref="supplierService" />
+    <!-- 仓库管理 -->
+    <dubbo:service interface="com.collection.service.warehouse.WarehouseService" ref="warehouseService" />
+    <!-- KPI星值审核管理 -->
+    <dubbo:service interface="com.collection.service.starassess.StarAssessService" ref="starAssessService" />
+    <!-- 备忘录管理 -->
+    <dubbo:service interface="com.collection.service.memorandum.MemorandumService" ref="memorandumService" />
+    <!--  OA办公管理 -->
+    <dubbo:service interface="com.collection.service.oa.OfficeService" ref="officeService" />
+    <!--  OA通知管理 -->
+    <dubbo:service interface="com.collection.service.oa.NoticeService" ref="noticeService" />
+    <!-- 工作表单 检查管理 -->
+    <dubbo:service interface="com.collection.service.worksheet.InspectService" ref="inspectService" />
+    <!-- 工作表单 -->
+    <dubbo:service interface="com.collection.service.worksheet.RewardInfoService" ref="rewardInfoService" />
+    <!-- 组织检查模板 -->
+    <dubbo:service interface="com.collection.service.worksheet.OrganizeTemplateService" ref="organizeTemplateService" />
+    
+    <!--  OA日志管理 -->
+    <dubbo:service interface="com.collection.service.oa.JournalService" ref="journalService" />
+    <!--  OA通用审批-->
+    <dubbo:service interface="com.collection.service.oa.ApprovalService" ref="approvalService" />
+     <!--  消息讨论组-->
+    <dubbo:service interface="com.collection.service.chat.ChatService" ref="chatService" />
+    <!-- 个人中心 -->
+    <dubbo:service interface="com.collection.service.personal.PersonalService" ref="personalService" />
+    <!-- 每日报表 -->
+    <dubbo:service interface="com.collection.service.storefront.EverydayReportService" ref="everydayReportService" />
+    
+    <!-- 工作表单检查项目 -->
+    <dubbo:service interface="com.collection.service.worksheet.WorkSheetInspectService" ref="workSheetInspectService" />
+    
+    <!-- 管理方后台管理 -->
+    <dubbo:service interface="com.collection.service.SystemService" ref="systemService" />
+    <dubbo:service interface="com.collection.service.managebackstage.CustomerFileService" ref="customerFileService" />
+    
+    
+     <!-- 使用方后台，云盘 -->
+     <dubbo:service interface="com.collection.service.managebackstage.SystemCloudService" ref="systemCloudService" />
+     
+     <!-- 使用方后台，扩容申请 -->
+    <dubbo:service interface="com.collection.service.managebackstage.CloudCapacityService" ref="cloudCapacityService" />
+    
+</beans>

@@ -1,0 +1,1112 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.personal.PersonalMapper">
+	<!-- 修改用户信息 -->
+	<update id="updateUserInfo" parameterType="map">
+	    update c_t_use_userinfo
+	    <set>
+	        <if test="delflag != null ">delflag=#{delflag},</if>
+	        <if test="password != null and password != ''">password=#{password},</if>
+	        <if test="email != null and email != ''">email=#{email},</if>
+	        <if test="isshowphone != null ">isshowphone=#{isshowphone},</if>
+	        <if test="realname != null and realname != ''">realname=#{realname},</if>
+	        <if test="sex != null">sex=#{sex},</if>
+	        <if test="birthday != null and birthday != ''">birthday=#{birthday},</if>
+	        <if test="email != null and email != ''">email=#{email},</if>
+	        <if test="headimage != null and headimage != ''">headimage=#{headimage},</if>
+	        <if test="isfristlogin != null and isfristlogin != ''">isfristlogin=#{isfristlogin},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="isinvite != null ">isinvite=#{isinvite},</if>
+	        <if test="companyid != null and companyid != ''">companyid=#{companyid},</if>
+	        <if test="invitetime != null and invitetime != ''">invitetime=#{invitetime},</if>
+	        <if test="logintime != null and logintime != ''">logintime=#{logintime},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	    </set>
+	    where userid=#{userid} and delflag = 0
+	</update>
+	
+	<!-- 获取用户信息 -->
+	<select id="getUserInfo" parameterType="map" resultType="map">
+	    select ctuu.userid,password,ctuu.username,ctuu.phone,ctuu.isshowphone,ctuu.email,ctuu.realname,ctuu.sex,ctuu.birthday,ctuu.headimage,ctuu.isfristlogin,ctuu.status,ctuu.delflag,DATE_FORMAT(ctuu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,ctuu.isinvite,ctuu.companyid,DATE_FORMAT(ctuu.invitetime,'%Y-%m-%d %H:%i:%S') as invitetime,DATE_FORMAT(ctuu.logintime,'%Y-%m-%d %H:%i:%S') as logintime, DATE_FORMAT(ctuu.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,ctuu.updateid,
+	    ctuc.datacode,ctuc.companyname,ctuu.position
+	    from c_t_use_userinfo ctuu
+	    left join c_t_use_company ctuc on ctuu.companyid=ctuc.companyid
+	    <where>
+	        <if test="userid != null and userid != ''">and ctuu.userid=#{userid}</if>
+	    </where>
+	    limit 1
+	</select>
+	
+	<!-- 获取当前用户kpi星值 总数-->
+	<select id="getSumKPIStar" parameterType="map" resultType="int">
+	   select sum(st.sumstar) as sumstars from  (
+	  (select a.companyid,a.organizeid,a.sumstar from c_t_use_evaluate a where  a.delflag = 0 and a.result = 1 )
+	    union all 
+	  (select  b.companyid,b.organizeid,b.sumstar  from c_t_use_overallvaluate b  where  b.delflag = 0 and b.result = 1 )
+	  ) as st
+	  <where>
+	    <if test="companyid != null and companyid != null">and st.companyid = #{companyid}</if>
+	    <if test="organizeid != null and organizeid != null">and st.organizeid = #{organizeid}</if>
+	  </where>
+	</select>
+	
+	<!-- 我的首页获取当前用户kpi星值 总数-->
+	<select id="getSumKPIXing" parameterType="map" resultType="int">
+	   select  ifnull(sum(st.sumstar),0) as sumstars from  (
+	  (select a.companyid,a.createid,a.organizeid,a.sumstar from c_t_use_evaluate a where  a.delflag = 0 and a.result = 1 )
+	    union all 
+	  (select  b.companyid,b.createid,b.organizeid,b.sumstar  from c_t_use_overallvaluate b  where  b.delflag = 0 and b.result = 1 )
+	  ) as st
+	  <where>
+	    <if test="companyid != null and companyid != null">and st.companyid = #{companyid}</if>
+	    <if test="createid != null and createid != null">and st.createid = #{createid}</if>
+	  </where>
+	</select>
+	
+	
+	<!-- 查询系统公告总记录数 -->
+	<select id="getSystemMessageCountByUserId" parameterType="map" resultType="int">
+	 select count(0) from c_t_use_system_message
+        <where>
+            <if test="messageid != null and messageid != ''">and messageid=#{messageid}</if>
+            <if test="title != null and title != ''">and title like concat('%',#{title},'%')</if>
+               and delflag =0
+        </where>
+	</select>
+	
+	<!-- 查询系统公告列表  ,详情-->
+	<select id="getSystemMessageListByUserId" parameterType="map" resultType="map">
+	   select messageid,title,content,createid,delflag,date_format(createtime,"%Y-%m-%d")as createtime,
+		date_format(updatetime,"%Y-%m-%d %h:%i:%s")as updatetime,updateid,status from c_t_use_system_message
+        <where>
+            <if test="messageid != null and messageid != ''">and messageid=#{messageid}</if>
+            <if test="title != null and title != ''">and title like concat('%',#{title},'%')</if>
+            and delflag =0
+        </where>
+           order by createtime desc
+         <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    
+	</select>
+	
+	<!-- 查询系统公告详情-->
+	<select id="getSystemMessageNoticeById" parameterType="map" resultType="map">
+	  select a.title,a.content,date_format(a.createtime,"%Y-%m-%d %h:%i:%s")as createtime
+	  from c_t_use_system_message  a 
+	  where messageid = #{messageid}
+	</select>
+	
+     <update id="updataSystemMessageDetail" parameterType="map">
+        update c_t_use_system_message
+        <set>
+			<if test="title != null and title != ''">title=#{title},</if>
+			<if test="content != null and content != ''">content=#{content},</if>
+			<if test="createid != null and createid != ''">createid=#{createid},</if>	
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="createtime != null and createtime != ''">createtime=#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+			<if test="status != null">status=#{status},</if>
+        </set>
+        where messageid=#{messageid}
+    </update>
+    
+	<!-- 根据公司或者组织查询顾客满意总记录条数 -->
+	<select id="getEvaluateTotalRecode" parameterType="map" resultType="int">
+	  select   count(*)
+	   from  c_t_use_store_evaluate 
+	   <where>
+	    delflag = 0 
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+	    <if test="organizeid != null and organizeid != null">and   organizeid = #{organizeid}</if>
+	   </where>
+	 
+	</select>
+	<!-- 根据公司或者组织查询顾客各项指标总评分 -->
+	<select id="getEvluateCount" parameterType="map"  resultType="map">
+	    select  a.evaluateid,a.companyid,a.organizeid,sum(a.tastescore)as tastescore,sum(a.environmentscore) as environmentscore,
+        sum(a.servicescore) as servicescore,sum(a.pricescore) as pricescore ,sum(a.averagescore) as  averagescore,ctuo.address
+        from  c_t_use_store_evaluate a
+        left join c_t_use_organize ctuo on  a.organizeid=ctuo.organizeid
+       <where>
+		    a.delflag = 0 
+		    <if test="companyid != null and companyid != null">and  a.companyid = #{companyid}</if>
+		    <if test="organizeid != null and organizeid != null">and a.organizeid = #{organizeid}</if>
+	   </where>
+	</select>
+	
+ 
+	<!-- 查询当前公司总人数 -->
+	<select id="getAllPersonalCount" parameterType="map" resultType="int">
+	  select count(*) from c_t_use_organize_userinfo
+	  <where> 
+	    
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		<if test="organizeidlist != null">
+			<foreach collection="organizeidlist" item="item" open="and organizeid in(" close=")" separator=",">'${item}'</foreach>
+		</if>
+		and  delflag = 0 
+      </where>
+	</select>
+ 
+ 
+ 
+ 	<!-- 查询组织是否存在 -->
+	<select id="getAllOrganizelCount" parameterType="map" resultType="int">
+	  select count(*) from c_t_use_organize_userinfo
+	  <where> 
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		<if test="organizeid != null and organizeid != null">and organizeid = #{organizeid}</if>
+		<if test="userid != null and userid != null">and userid = #{userid}</if>
+		 and delflag = 0 
+      </where>
+	</select>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+	<!-- 更换手机号 -->
+	<update id="updateUserInfoPhoneAndPwd" parameterType="map">
+		update c_t_use_userinfo
+		<set>
+			<if test="phone != null and phone != ''">phone=#{phone},</if>
+			<if test="new_password != null and new_password != ''">password=#{new_password},</if>
+			<if test="username != null and username != ''">username=#{username}</if>
+		</set>
+		<where>
+			userid=#{userid}
+			<if test="password != null and password != ''">and password=#{password}</if>
+		</where>
+	</update>
+	
+	<!-- 添加意见反馈 -->
+	<insert id="insertFeedBackInfo" parameterType="map">
+		insert into c_t_use_feedback
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="feedbackid != null and feedbackid != ''">feedbackid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="description != null and description != ''">description,</if>
+			<if test="isread != null">isread,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+			
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="status != null">status,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="feedbackid != null and feedbackid != ''">#{feedbackid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="description != null and description != ''">#{description},</if>
+			<if test="isread != null">#{isread},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+			
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="status != null">#{status},</if>
+		</trim>
+	</insert>
+	
+	<!-- 查询意见反馈信息 -->
+	<select id="getFeedBackListInfo" parameterType="map" resultType="map">
+		select 
+			feedbackid,companyid,description,isread,date_format(createtime,"%Y-%m-%d  %h:%i:%s")as createtime
+		from c_t_use_feedback 
+		<where>
+			<if test="feedbackid != null and feedbackid != ''">and feedbackid=#{feedbackid}</if>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="createid != null and createid != ''">and createid=#{createid}</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+		</where>
+		order by createtime desc
+		<if test="startnum != null and rownum">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<!-- 查询意见反馈的总数 -->
+	<select id="getFeedBackListCount" parameterType="map" resultType="int">
+		select 
+			count(*)
+		from c_t_use_feedback 
+		<where>
+			<if test="feedbackid != null and feedbackid != ''">and feedbackid=#{feedbackid}</if>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="createid != null and createid != ''">and createid=#{createid}</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+		</where>
+	</select>
+	
+	<!-- 查询意见反馈的回复 -->
+	<select id="getFeedBackReplyListInfo" parameterType="map" resultType="map">
+		select 
+			replyid,feedbackid,content,createid,date_format(createtime,"%Y-%m-%d %h:%i:%s")as createtime
+		from c_t_use_feedback_reply 
+		<where>
+			<if test="feedbackid != null and feedbackid != ''">and feedbackid=#{feedbackid}</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+		</where>
+		order by createtime desc
+	</select>
+	
+	<!-- 修改返回信息是否已读 -->
+	<select id="getUpdateFeedBackDetailInfo" parameterType="map" resultType="map">
+	  update c_t_use_feedback 
+	    <set>
+	        <if test="isread != null ">isread=#{isread},</if> 
+	    </set>
+		<where>
+			<if test="feedbackid != null and feedbackid != ''">and feedbackid=#{feedbackid}</if>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="createid != null and createid != ''">and createid=#{createid}</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+		</where>
+	</select>
+	
+	<select id="getVerificationPwd" parameterType="map" resultType="map">
+		select
+			userid,realname,password,email,headimage,companyid
+		from c_t_use_userinfo
+		<where>
+			<if test="userid != null and userid != ''">and userid=#{userid}</if>
+			<if test="password != null and password != ''">and password=#{password}</if>
+
+		</where>
+		limit 1
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 查询公司信息 -->
+	<select id="getCompanyBasicInfo" parameterType="map" resultType="map">
+		select
+			companyid,companyname
+		from c_t_use_company
+		<where>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+		</where>
+		limit 1
+	</select>
+	<!-- 修改公司名称 -->
+	<update id="updateCompanyNameInfo" parameterType="map">
+		update c_t_use_company
+		set companyname=#{companyname}
+		where companyid=#{companyid}
+	</update>
+	
+	<!-- 查询公司的组织架构信息 -->
+	<select id="getOrganizeListInfo" parameterType="map" resultType="map">
+		select organizeid,datacode,companyid,organizename,type,parentid,address,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,updatetime,updateid,status,childnum,usernum
+		from c_t_use_organize	
+		<where>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="type != null and type != ''">and type=#{type}</if>
+			<if test="parentid != null">and parentid=#{parentid}</if>
+			<if test="parentid == null">and parentid is null</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+			<if test="search != null and search != ''">and locate(#{search},organizename) > 0</if>
+		</where>
+		order by priority
+	</select>
+	
+	<!-- 查询组织架构详情 -->
+	<select id="getOrganizeDetailInfo" parameterType="map" resultType="map">
+		select
+			organizeid,datacode,companyid,organizename,type,address
+		from c_t_use_organize
+		<where>
+			<if test="organizeid != null and organizeid != ''">and organizeid=#{organizeid}</if>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="delflag != null">and delflag=#{delflag}</if>
+		</where>
+		limit 1
+	</select>
+	
+
+	<!-- 查询部门下级是否有店面 -->
+	<select id="selectOrganizeTypelower" resultType="int" parameterType="map">
+	    select count(0) from c_t_use_organize
+	    <where>
+	        <if test="lastcompanyid !=null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+	        <if test="lastdatacode != null and lastdatacode != ''">and datacode  like concat(#{lastdatacode},"%")</if>
+	       	<if test="lastorganizeid != null and lastorganizeid != ''">and organizeid  != #{lastorganizeid}</if>
+	       and  type=3 and delflag=0 
+	    </where>
+	</select>
+	
+		<!-- 查询部门上级是否有店面 -->
+	<select id="selectOrganizeType" resultType="int" parameterType="map">
+	    select count(0) from c_t_use_organize
+	    <where>
+	        <if test="lastcompanyid != null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+	        <if test="resourcetypes != null">
+				<foreach collection="resourcetypes" item="item" open="and datacode in(" close=")" separator=",">
+					${item}
+				</foreach>
+			</if>
+	       and  type=3 and delflag=0 
+	    </where>
+	</select>
+	
+	<!-- 查询子集datacode -->
+	<select id="queryDataCode" resultType="String" parameterType="map">
+	   SELECT datacode  FROM c_t_use_organize
+	    <where>
+	        <if test="lastcompanyid !=null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+	        <if test="updataorganizeid != null and updataorganizeid != ''">and parentid =#{updataorganizeid}</if>
+	      and delflag=0 
+	    </where>
+	    ORDER BY datacode DESC limit 1
+	</select>
+		
+	<!-- 修改组织架构+1-->
+	<update id="updateOrganizeInfoAdd" parameterType="map">
+		update c_t_use_organize set childnum=childnum+1
+		<where>
+			organizeid=#{updataorganizeid}
+			<if test="lastcompanyid != null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+		</where>
+	</update>
+	
+	<!-- 修改组织架构父级-1-->
+	<update id="updateOrganizeInfoSub" parameterType="map">
+		update c_t_use_organize set  childnum=childnum-1
+		<where>
+			<if test="lastcompanyid != null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+			and organizeid in (
+					select parentid from (select * from c_t_use_organize) a
+					<where>
+						<if test="lastcompanyid != null and lastcompanyid != ''">and a.companyid=#{lastcompanyid}</if>
+						<if test="lastorganizeid != null and lastorganizeid != ''">and a.organizeid=#{lastorganizeid}</if>
+					</where>		
+				)
+		</where>
+	</update>
+	
+	<!-- 修改当前组织下面的子级的datacode -->
+	<update id="updateOrganizeInfoModifyCode" parameterType="map">
+	update  c_t_use_organize  set datacode = concat(#{datacode},substring(datacode,LENGTH(#{lastdatacode})+1))
+		<where>
+			<if test="lastcompanyid != null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+			 and organizeid in (
+					select organizeid from (select * from c_t_use_organize) a
+					<where>
+						<if test="lastcompanyid != null and lastcompanyid != ''">and a.companyid=#{lastcompanyid}</if>
+						and a.datacode like concat(#{lastdatacode},'%') 
+					</where>		
+				)
+		</where>
+	</update>
+	
+	
+	<!-- 修改组织架构信息 -->
+	<update id="updateOrganizeInfo" parameterType="map">
+		update c_t_use_organize
+		<set>
+			<if test="organizename != null and organizename != ''">organizename=#{organizename},</if>
+			<if test="updatatype != null and updatatype != ''">type=#{updatatype},</if>
+			<if test="updataorganizeid != null">parentid=#{updataorganizeid},</if>
+			<if test="datacode != null">datacode=#{datacode},</if>
+			<if test="address != null and address != ''">address=#{address},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="priority != null and priority != ''">priority=#{priority},</if>
+		</set>
+		<where>
+			organizeid=#{lastorganizeid}
+			<if test="lastcompanyid != null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+		</where>
+	</update>
+	
+	<!-- 查询修改后的组织是否等于原本组织 -->
+	<select id="selectOrgaParent" resultType="int" parameterType="map">
+	   SELECT count(0)  FROM c_t_use_organize where organizeid=#{parentid}  and organizeid= #{updataorganizeid} and delflag=0 
+	</select>
+	
+	<!-- 查询子级 -->
+	<select id="selectDataCode" resultType="int" parameterType="map">
+	   SELECT count(0)  FROM c_t_use_organize
+	    <where>
+	        <if test="lastcompanyid !=null and lastcompanyid != ''">and companyid=#{lastcompanyid}</if>
+	        <if test="dcode != null and dcode != ''">and datacode like concat(#{dcode},'%') </if>
+	      and delflag=0 
+	    </where>
+	</select>
+	
+	
+	
+	<!-- 新增公司组织架构信息 -->
+	<insert id="insertOrganizeInfo" parameterType="map">
+		insert into c_t_use_organize
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="organizeid != null and organizeid != ''">organizeid,</if>
+			<if test="datacode != null and datacode != ''">datacode,</if>
+			<if test="lastcompanyid != null and lastcompanyid != ''">companyid,</if>
+			<if test="organizename != null and organizename != ''">organizename,</if>
+			<if test="type != null and type != ''">type,</if>		
+			<if test="updataorganizeid != null">parentid,</if>
+			<if test="address != null and address != ''">address,</if>
+			<if test="childnum != null and childnum != ''">childnum,</if>
+			<if test="usernum != null and usernum != ''">usernum,</if>
+			<if test="delfalg != null">delfalg,</if>
+			<if test="qrcode != null and qrcode != ''">qrcode,</if>
+			<if test="priority != null and priority != ''">priority,</if>
+			createtime
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+			<if test="datacode != null and datacode != ''">#{datacode},</if>
+			<if test="lastcompanyid != null and lastcompanyid != ''">#{lastcompanyid},</if>
+			<if test="organizename != null and organizename != ''">#{organizename},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="updataorganizeid != null">#{updataorganizeid},</if>
+			<if test="address != null and address != ''">#{address},</if>
+			<if test="childnum != null and childnum != ''">#{childnum},</if>
+			<if test="usernum != null and usernum != ''">#{usernum},</if>
+			<if test="delfalg != null">#{delfalg},</if>
+			<if test="qrcode != null and qrcode != ''">#{qrcode},</if>
+			<if test="priority != null and priority != ''">#{priority},</if>
+			now()
+		</trim>
+	</insert>
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 查询组织架构的人员 -->
+	<select id="getOrganizeUserListInfo" parameterType="map" resultType="map">
+		select
+			cou.manageid,cou.organizeid,cou.companyid,cou.identitytype,cou.identityname,
+			cu.userid,cu.username,cu.realname,cu.status,cu.isinvite,ifnull(cu.headimage,"") as headimage
+		from c_t_use_organize_userinfo cou
+		left join c_t_use_userinfo cu on cou.userid=cu.userid
+		<where>
+			<if test="organizeid != null and organizeid　!= ''">and cou.organizeid=#{organizeid}</if>
+			<if test="companyid != null and companyid != ''">and cou.companyid=#{companyid}</if>
+			<if test="status != null">and cu.status=#{status}</if>
+			<if test="search != null and search != ''">and locate(#{search},cu.realname) > 0</if>
+			<if test="delflag != null">and cou.delflag=#{delflag}</if>
+			<if test="delflag != null">and cu.delflag=#{delflag}</if>
+			and cou.delflag = 0
+		</where>
+		order by cou.createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<!-- 查询组织架构人员详细信息 -->
+	<select id="getOrganizeUserDetailInfo" parameterType="map" resultType="map">
+		select
+			cou.manageid,cou.organizeid,cou.companyid,cu.userid,cu.realname,
+			cu.phone,cu.position,ifnull(co.organizename,cc.companyname) as organizename
+		from c_t_use_organize_userinfo cou
+		left join c_t_use_userinfo cu on cou.userid=cu.userid
+		left join c_t_use_organize co on co.organizeid=cou.organizeid
+		left join c_t_use_company cc on cc.companyid=cou.organizeid
+		<where>
+			<if test="manageid != null and manageid　!= ''">and cou.organizeid=#{manageid}</if>
+			<if test="companyid != null and companyid != ''">and cou.companyid=#{companyid}</if>
+			cou.delflag=0
+		</where>
+		limit 1
+	</select>
+	
+	<!-- 修改用户基本信息 -->
+	<update id="updateUserBasicInfo" parameterType="map">
+		 update c_t_use_userinfo
+	    <set>
+	        <if test="delflag != null ">delflag=#{delflag},</if>
+	        <if test="realname != null and realname != ''">realname=#{realname},</if>
+	        <if test="phone != null and phone != ''">phone=#{phone},</if>
+	        <if test="sex != null">sex=#{sex},</if>
+	        <if test="birthday != null">birthday=#{birthday},</if>
+	        <if test="isshowphone != null">isshowphone=#{isshowphone},</if>
+	         <if test="email != null">email=#{email},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="isinvite != null ">isinvite=#{isinvite},</if>
+	        <if test="invitetime != null and invitetime != ''">invitetime=#{invitetime},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	        <if test="position != null">position=#{position},</if>
+	        <if test="password != null and password != ''">password=#{password},</if>
+	         <if test="headimage != null and headimage != ''">headimage=#{headimage},</if>
+	    </set>
+	    where
+	    	userid=#{userid}
+	    	<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	</update>
+	<!-- 修改用户基本信息 -->
+	<update id="updateUserBasicInfoByUserIdList" parameterType="map">
+		 update c_t_use_userinfo
+	    <set>
+	        <if test="delflag != null ">delflag=#{delflag},</if>
+	        <if test="realname != null and realname != ''">realname=#{realname},</if>
+	        <if test="phone != null and phone != ''">phone=#{phone},</if>
+	        <if test="sex != null">sex=#{sex},</if>
+	        <if test="birthday != null">birthday=#{birthday},</if>
+	        <if test="isshowphone != null">isshowphone=#{isshowphone},</if>
+	         <if test="email != null">email=#{email},</if>
+	        <if test="status != null">status=#{status},</if>
+	        <if test="isinvite != null ">isinvite=#{isinvite},</if>
+	        <if test="invitetime != null and invitetime != ''">invitetime=#{invitetime},</if>
+	        <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+	        <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+	        <if test="position != null and position != ''">position=#{position},</if>
+	        <if test="password != null and password != ''">password=#{password},</if>
+	         <if test="headimage != null and headimage != ''">headimage=#{headimage},</if>
+	    </set>
+	    where 
+			<foreach collection="useridlist" item="item" open="userid in(" close=")" separator=",">'${item}'</foreach>
+	    	<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+	</update>
+	
+		<!-- 修 修改用户所属的部门的usernum-1 -->
+	<update id="updateUserOrganize" parameterType="map">
+			update c_t_use_organize set usernum=usernum-#{usernum}
+			 <where>
+		    	<if test="organizeid != null and organizeid != ''">and organizeid=#{organizeid}</if>
+		    	<if test="organizelist != null and organizelist != ''">
+		    		<foreach collection="organizelist" item="item" open="and organizeid in (" close=")" separator=",">'${item}'</foreach>
+		    	</if>
+	   		</where>
+	</update>
+	
+			<!-- 修 修改用户所属的部门的usernum=1 -->
+	<update id="updateUserOrganizeAdd" parameterType="map">
+			update	 c_t_use_organize set usernum=ifNull(usernum,0)+#{usernum}
+			 <where>
+		    	<if test="organizeid != null and organizeid != ''">and organizeid=#{organizeid}</if>
+	   		</where>
+	</update>
+	
+	<!-- 修改组织人员信息 -->
+	<update id="updateOrganizeUserInfo" parameterType="map">
+		update c_t_use_organize_userinfo
+		<set>
+			<if test="organizeid != null and organizeid != ''">organizeid=#{organizeid},</if>
+			<if test="delflag != null">delflag=#{delflag},</if>
+		</set>
+		<where>
+			<if test="manageid != null and manageid != ''">and manageid=#{manageid}</if>
+			<if test="manageidlist != null">
+				<foreach collection="manageidlist" item="item" open="and manageid in(" close=")" separator=",">'${item}'</foreach>
+			</if>
+		</where>
+	</update>
+	
+	
+		
+		<!-- 查询当前用户所属组织下的全部人员的详细信息 -->
+		<select id="selectUserByOrganizeid"  resultType="map" parameterType="map">
+			select ctou.identitytype,ctou.identityname,ctuo.organizename,ctuo.organizeid,ctou.manageid,ctuu.* 
+			from c_t_use_organize_userinfo ctou
+			left join c_t_use_userinfo ctuu on ctou.userid=ctuu.userid
+			left join c_t_use_organize ctuo on ctou.organizeid=ctuo.organizeid
+			where ctou.organizeid in(
+				select c.organizeid from c_t_use_organize_userinfo c
+				<where>
+					<if test="userid != null and userid != ''">and c.userid=#{userid}</if>
+					c.delflag=0
+				</where>
+			)
+			 and ctou.delflag=0 and ctuu.delflag=0 and ctuu.status=0
+		</select>
+	
+		<!-- 查询manganid信息 -->
+	<select id="selectDataManageid"  resultType="String" parameterType="map">
+		select manageid from c_t_use_organize_userinfo
+		<where>
+			<if test="organizeid != null and porganizeid != ''">and organizeid=#{organizeid}</if>
+			<if test="userid != null and userid != ''">and userid=#{userid}</if>
+			and delflag=0
+		</where>
+		LIMIT 1
+	</select>
+		<insert id="insertUserInfo" parameterType="map">
+		insert into c_t_use_userinfo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userid != null and userid != ''">userid,</if>
+			<if test="username != null and username != ''">username,</if>
+			<if test="phone != null and phone != ''">phone,</if>
+			<if test="password != password">password,</if>
+			<if test="isshowphone != null and isshowphone != ''">isshowphone,</if>
+			
+			<if test="email != null and email != ''">email,</if>
+			<if test="realname != null and realname != ''">realname,</if>
+			<if test="sex != null and sex != ''">sex,</if>
+			<if test="birthday != null and birthday != ''">birthday,</if>
+			<if test="headimage != null and headimage != ''">headimage,</if>
+			<if test="isfristlogin != null and isfristlogin != ''">isfristlogin,</if>
+			<if test="status != null">status,</if>
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="isinvite != null and isinvite != ''">isinvite,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="invitetime != null and invitetime != ''">invitetime,</if>
+			<if test="logintime != null and logintime != ''">logintime,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="position != null and position != ''">position,</if>
+			<if test="managerole != null and managerole != ''">managerole,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="userid != null and userid != ''">#{userid},</if>
+			<if test="username != null and username != ''">#{username},</if>
+			<if test="phone != null and phone != ''">#{phone},</if>
+			<if test="password != password">#{password},</if>
+			<if test="isshowphone != null and isshowphone != ''">#{isshowphone},</if>
+			
+			<if test="email != null and email != ''">#{email},</if>
+			<if test="realname != null and realname != ''">#{realname},</if>
+			<if test="sex != null and sex != ''">#{sex},</if>
+			<if test="birthday != null and birthday != ''">#{birthday},</if>
+			<if test="headimage != null and headimage != ''">#{headimage},</if>
+			<if test="isfristlogin != null and isfristlogin != ''">#{isfristlogin},</if>
+			<if test="status != null">#{status},</if>
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="isinvite != null and isinvite != ''">#{isinvite},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="invitetime != null and invitetime != ''">#{invitetime},</if>
+			<if test="logintime != null and logintime != ''">#{logintime},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="position != null and position != ''">#{position},</if>
+			<if test="managerole != null and managerole != ''">#{managerole},</if>
+		</trim>
+	</insert>
+	
+	
+	<!-- 添加组织用户信息 -->
+	<insert id="insertOrganizeUserInfo" parameterType="map">
+		insert into c_t_use_organize_userinfo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="manageid != null and manageid != ''">manageid,</if>
+			<if test="organizeid != null and organizeid != ''">organizeid,</if>
+			<if test="userid != null and userid != ''">userid,</if>
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="identitytype != null and identitytype != ''">identitytype,</if>
+			<if test="identityname != null and identityname != ''">identityname,</if>
+			<if test="status != null">status,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="manageid != null and manageid != ''">#{manageid},</if>
+			<if test="organizeid != null and organizeid != ''">#{organizeid},</if>
+			<if test="userid != null and userid != ''">#{userid},</if>
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="identitytype != null and identitytype != ''">#{identitytype},</if>
+			<if test="identityname != null and identityname != ''">#{identityname},</if>
+			<if test="status != null">#{status},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+		</trim>
+	</insert>
+	
+	<!-- 查询权限信息 -->
+	<select id="getAuthorityListInfo" parameterType="map" resultType="map">
+		select
+			powerid,datacode,parentid,`function`,powername,info,edition
+		from c_t_use_power
+		<where>
+			<if test="powerid != null and powerid != ''">and powerid=#{powerid}</if>
+			<if test="parentid != null and parentid != ''">and parentid=#{parentid}</if>
+			and delflag=0
+		</where>
+		order by createtime desc
+	</select>
+	
+	<!-- 添加用户权限信息 -->
+	<insert id="insertUserPowerInfo" parameterType="map">
+		insert into c_t_use_power_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="poweruserid != null and poweruserid != ''">poweruserid,</if>
+			<if test="powerid != null and powerid != ''">powerid,</if>
+			<if test="status != null">status,</if>
+			<if test="ownerid != null and ownerid != ''">ownerid,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+			
+			<if test="delflag != null">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updatetime != null and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="poweruserid != null and poweruserid != ''">#{poweruserid},</if>
+			<if test="powerid != null and powerid != ''">#{powerid},</if>
+			<if test="status != null">#{status},</if>
+			<if test="ownerid != null and ownerid != ''">#{ownerid},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+			
+			<if test="delflag != null">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updatetime != null and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+		</trim>
+	</insert>
+	
+	
+	<!-- 查询用户管理区域 -->
+	<select id="getPersonalReleaseByUserId" parameterType="map" resultType="map">
+		select organizeid from c_t_use_release_range 
+		<where>
+			<if test="resourceid != null and resourceid != ''">and resourceid=#{resourceid}</if>
+			and delflag=0 and resourcetype=12
+		</where>
+	</select>
+	
+		
+	<!-- 查询用户所属区域 -->
+	<select id="getPersonalUsreByUserId" parameterType="map" resultType="map">
+			select ctuo.organizeid 
+			from c_t_use_organize_userinfo ctou
+			left join c_t_use_userinfo ctuu on ctou.userid=ctuu.userid
+			left join c_t_use_organize ctuo on ctou.organizeid=ctuo.organizeid
+		<where>
+			<if test="userid != null and userid != ''">and ctuu.userid=#{userid}</if>
+			and ctou.delflag=0 and ctuu.delflag=0 
+		</where>
+	</select>
+	
+	
+	<!-- 查询当前公司所有用户 -->
+	<select id="getUserInfoAll"  resultType="map" parameterType="map">
+		select ctou.identitytype,ctou.identityname,ctuo.organizename,ctuo.organizeid,ctou.manageid,ctuu.* 
+		from c_t_use_organize_userinfo ctou
+		left join c_t_use_userinfo ctuu on ctou.userid=ctuu.userid
+		left join c_t_use_organize ctuo on ctou.organizeid=ctuo.organizeid
+		where ctou.organizeid in(
+		<where>
+			<if test="companyid != null and companyid != ''">and ctou.companyid=#{companyid}</if>
+			and ctou.delflag=0 and ctuu.delflag=0
+		</where>
+		
+	</select>
+		
+
+
+		<!-- 查询出权限管理 -->
+	<select id="getPowerAll"  resultType="map" parameterType="map">
+		select  ctupc.powercompanyid,ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,date_format(ctup.createtime,'%Y-%m-%d %H:%i')as createtime,ctup.childnum,ctupc.status,ctupc.result
+		from c_t_use_power_company ctupc LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+		<where>
+			<if test="powerid != null and powerid != ''">and ctup.powerid=#{powerid}</if>
+			<if test="parentid != null and parentid != ''">and ctup.parentid=#{parentid}</if>
+			<if test="result != null ">and ctupc.result=#{result}</if>
+			<if test="status != null ">and ctupc.status=#{status}</if>
+			<if test="isone != null and isone != ''">and ctup.powerid like concat("%",'000000',"%")</if>
+			<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>
+			<if test="parentidlist != null">
+				<foreach collection="parentidlist" item="item" open="and ctup.parentid in(" close=")" separator=",">'${item}'</foreach>
+			</if>
+			and ctup.delflag=0 and ctupc.delflag=0 
+		</where>
+	</select>
+	
+			
+		<!-- 查询人员已有的权限管理 -->
+	<select id="getPowerByUserId"  resultType="map" parameterType="map">		
+			select  ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,ctup.createtime,ctup.childnum,ctupc.* 
+			from c_t_use_power_company ctupc 
+			LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+			LEFT JOIN c_t_use_power_user ctupu on ctupc.powerid = ctupu.powerid
+			<where>
+				<if test="powerid != null and powerid != ''">and ctupu.powerid=#{powerid}</if>
+				<if test="ownerid != null and ownerid != ''">and ctupu.ownerid=#{ownerid}</if>
+				<if test="delflag != null">and ctupu.delflag=#{delflag}</if>
+				<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>
+				<if test="status != null ">and ctupc.status=#{status}</if>
+				and ctup.delflag=0 and ctupc.delflag=0 
+			</where>
+			GROUP BY ctup.powerid
+	</select>
+
+	<!-- 删除权限管理 -->
+	<update id="getdeletePowerByUserId" parameterType="map">
+		update c_t_use_power_user 
+		<set>
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="updatetime != null">updatetime=#{updatetime},</if>
+			<if test="updateid != null">updateid=#{updateid},</if>
+		</set>
+		<where>
+				<if test="powerid != null and powerid != ''">and powerid=#{powerid}</if>
+				<if test="ownerid != null and ownerid != ''">and ownerid=#{ownerid}</if>
+				<if test="poweruserid != null and poweruserid != ''">and poweruserid=#{poweruserid}</if>
+		</where>
+	</update>
+			<!-- 查询当前组织下所有的organizeid -->
+	<select id="getOrganizeidAll"  resultType="map" parameterType="map">
+		select organizeid from c_t_use_organize	where datacode like concat((select datacode from  c_t_use_organize where organizeid=#{organizeid}),'%') 
+	</select>
+	
+	<!-- 查询人员已有的权限管理 -->
+	<select id="getPowerUserByPowerId"  resultType="map" parameterType="map">		
+		select cpu.poweruserid,cpu.powerid,cpu.status,cpu.ownerid,cuu.realname,cuu.userid from c_t_use_power_user cpu  
+		left join c_t_use_organize_userinfo cou on cou.userid=cpu.ownerid
+		left join c_t_use_userinfo cuu  on cuu.userid=cou.userid    
+		<where>
+<!-- 			<if test="organizeid != null and organizeid != ''">and cou.organizeid=#{organizeid}</if> -->
+			<if test="ownerid != null and ownerid != ''">and cpu.ownerid!=#{ownerid}</if>
+			<if test="poweridlist != null">
+				<foreach collection="poweridlist" item="item" open="and cpu.powerid in(" close=")" separator=",">'${item}'</foreach>
+			</if>
+			<if test="organizeidlist != null">
+				<foreach collection="organizeidlist" item="item" open="and cou.organizeid in(" close=")" separator=",">'${item}'</foreach>
+			</if>
+			and  cuu.delflag=0 and cpu.delflag=0 and cou.delflag=0
+		</where>
+		GROUP BY cpu.poweruserid
+	</select>
+		
+		<!-- 查询出企业权限管理一级菜单 -->
+	<select id="getPowerOne"  resultType="map" parameterType="map">
+		select powerid,`function`,powername,info,edition,delflag,childnum from c_t_use_power where delflag=0  and ISNULL(parentid) or  parentid = ''
+	</select>
+	
+		<!-- 查询出权限管理二级菜单 -->
+	<select id="getPowerTwo"  resultType="map" parameterType="map">
+	select * from (
+		select  ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,ctup.createtime,ctup.childnum,
+		ctupc.powercompanyid,	ctupc.companyid,	ctupc.result,	ctupc.status,	ctupc.createid,ctupc.updatetime,ctupc.updateid
+		from c_t_use_power_company ctupc LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+		<where>
+			 ctup.delflag=0   and ctupc.delflag=0 and ctup.parentid  IS NOT NULL and ctup.parentid  != ''
+			<if test="powerid != null and powerid != ''">and ctup.powerid=#{powerid}</if>
+			<if test="result != null">and ctupc.result=#{result}</if>
+			<if test="status != null">and ctupc.status=#{status}</if>
+			<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>	
+		</where>	
+		
+		UNION all
+		
+		select  ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,ctup.createtime,ctup.childnum,
+		ctupc.powercompanyid,	ctupc.companyid,	ctupc.result,	ctupc.status,	ctupc.createid,ctupc.updatetime,ctupc.updateid
+		from c_t_use_power_company ctupc LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+		<where>
+			 ctup.delflag=0   and ctupc.delflag=0 and ctup.parentid  IS NOT NULL and ctup.parentid  != '' and  ctup.edition = 1
+			<if test="powerid != null and powerid != ''">and ctup.powerid=#{powerid}</if>
+			<if test="status != null">and ctupc.status=#{status}</if>
+			<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>
+		</where>	
+	)a
+	<if test="isparentid != null"> GROUP BY a.parentid</if>
+	</select>
+		<!-- 查询出权限管理公司下一级菜单下已有二级菜单的子集个数 -->
+	<select id="getPowerOneCount"  resultType="int" parameterType="map">
+	select count(0) from (
+		select  ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,ctup.createtime,ctup.childnum,
+		ctupc.powercompanyid,	ctupc.companyid,	ctupc.result,	ctupc.status,	ctupc.createid,ctupc.updatetime,ctupc.updateid
+		from c_t_use_power_company ctupc LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+		<where>
+			 ctup.delflag=0   and ctupc.delflag=0 
+			<if test="powerid != null and powerid != ''">and ctup.powerid=#{powerid}</if>
+			<if test="result != null">and ctupc.result=#{result}</if>
+			<if test="status != null">and ctupc.status=#{status}</if>
+			<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>	
+			<if test="parentid != null and parentid != '' ">and ctup.parentid=#{parentid}</if>
+		</where>	
+		
+		UNION all
+		
+		select  ctup.powerid,ctup.parentid,ctup.`function`,ctup.powername,ctup.info,ctup.edition,ctup.createtime,ctup.childnum,
+		ctupc.powercompanyid,	ctupc.companyid,	ctupc.result,	ctupc.status,	ctupc.createid,ctupc.updatetime,ctupc.updateid
+		from c_t_use_power_company ctupc LEFT JOIN c_t_use_power ctup on ctupc.powerid = ctup.powerid
+		<where>
+			 ctup.delflag=0   and ctupc.delflag=0  and  ctup.edition = 1
+			<if test="powerid != null and powerid != ''">and ctup.powerid=#{powerid}</if>
+			<if test="status != null">and ctupc.status=#{status}</if>
+			<if test="companyid != null and companyid != ''">and ctupc.companyid=#{companyid}</if>
+			<if test="parentid != null and parentid != '' ">and ctup.parentid=#{parentid}</if>
+		</where>	
+	)a
+	</select>
+	
+	
+	<select id="getUserListByOrganize" parameterType="map" resultType="map">
+	     select ctuou.identitytype,ctuou.identityname,ctuo.organizename,ctuo.organizeid,ctuou.manageid,ctuu.*,
+	     date_format(ctuu.createtime,'%Y-%m-%d %H:%i:%S') as new_createtime,date_format(ctuu.logintime,'%Y-%m-%d %H:%i:%S') as new_logintime
+ 		from c_t_use_organize_userinfo ctuou
+	    left join c_t_use_userinfo  ctuu on ctuou.userid=ctuu.userid
+	    left join c_t_use_organize ctuo on ctuou.organizeid=ctuo.organizeid
+	    <where>
+	        <if test="organizeid != null and organizeid != ''">and ctuou.organizeid=#{organizeid}</if>
+	        <if test="searchrealname != null and searchrealname != ''">and ctuu.realname like concat("%",#{searchrealname},"%")</if>
+	        <if test="organizes != null">
+	            <foreach collection="organizes" item="item" open="and ctuou.organizeid in (" close=")" separator=",">
+	                '${item}'
+	            </foreach>
+	        </if>
+	        <if test="managerole != null and managerole != ''">and ctuu.managerole=#{managerole}</if>
+	         <if test="status != null">and ctuu.status=#{status}</if>
+	          <if test="isinvite != null">and ctuu.isinvite=#{isinvite}</if>
+	        and ctuou.delflag=0  and ctuu.delflag=0 
+	    </where>
+	    group by  ctuu.userid
+	</select>
+	
+		<!-- 查询出该公司权限是否存在 -->
+	<select id="selectPowerCompany"  resultType="map" parameterType="map">
+		select powercompanyid,companyid,powerid,result,status,createid  from c_t_use_power_company
+		<where>
+			<if test="powerid != null and powerid != ''">and powerid=#{powerid}</if>
+			<if test="result != null">and result=#{result}</if>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="powercompanyid != null and powercompanyid != ''">and powercompanyid=#{powercompanyid}</if>
+		</where>
+	</select>
+	
+			<!-- 修改公司权限管理 -->
+	<update id="getUpdatPowerCompanyByid" parameterType="map">
+		update c_t_use_power_company 
+		<set>
+			<if test="delflag != null">delflag=#{delflag},</if>
+			<if test="status != null">status=#{status},</if>
+			<if test="result != null">result=#{result},</if>
+			<if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+			<if test="updateid != null and updateid !='' ">updateid=#{updateid},</if>
+		</set>
+		<where>
+				<if test="powerid != null and powerid != ''">and powerid=#{powerid}</if>
+				<if test="powercompanyid != null and powercompanyid != ''">and powercompanyid=#{powercompanyid}</if>
+		</where>
+	</update>
+	
+		<!-- 添加企业权限 -->
+	<insert id="insertPowerCompany" parameterType="map">
+		insert into c_t_use_power_company
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="powercompanyid != null and powercompanyid != ''">powercompanyid,</if>
+			<if test="companyid != null and companyid != ''">companyid,</if>
+			<if test="powerid != null and powerid != ''">powerid,</if>
+			<if test="result != null">result,</if>
+			<if test="status != null ">status,</if>
+			
+			<if test="createid != null and createid != ''">createid,</if>
+			<if test="delflag != null and delflag != ''">delflag,</if>
+			<if test="createtime != null and createtime != ''">createtime,</if>
+			<if test="updatetime != null  and updatetime != ''">updatetime,</if>
+			<if test="updateid != null and updateid != ''">updateid,</if>
+			<if test="createid != null and createid != ''">createid,</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="powercompanyid != null and powercompanyid != ''">#{powercompanyid},</if>
+			<if test="companyid != null and companyid != ''">#{companyid},</if>
+			<if test="powerid != null and powerid != ''">#{powerid},</if>
+			<if test="result != null">#{result},</if>
+			<if test="status != null ">#{status},</if>
+			
+			<if test="createid != null and createid != ''">#{createid},</if>
+			<if test="delflag != null and delflag != ''">#{delflag},</if>
+			<if test="createtime != null and createtime != ''">#{createtime},</if>
+			<if test="updatetime != null  and updatetime != ''">#{updatetime},</if>
+			<if test="updateid != null and updateid != ''">#{updateid},</if>
+			<if test="createid != null and createid != ''">#{createid},</if>
+		</trim>
+	</insert>
+	
+			<!-- 查询出该公司权限是否存在 -->
+	<select id="getUserInfoCount"  resultType="int" parameterType="map">
+		select count(0)  from c_t_use_userinfo
+		<where>
+			<if test="companyid != null and companyid != ''">and companyid=#{companyid}</if>
+			<if test="phone != null and phone != ''">and phone=#{phone}</if>
+			and delflag=0
+		</where>
+	</select>
+	<!-- 查询权限下已有权限的人员 -->
+	<select id="getPowerUser"  resultType="map" parameterType="map">
+		select poweruserid,powerid,status,ownerid,createid,delflag,updateid
+		from c_t_use_power_user
+		where powerid = #{powerid}
+		and delflag = 0
+	</select>
+	
+		<!-- 查询当前登陆者的管理区域 -->
+	<select id="getOrganizeUserId" parameterType="map" resultType="map">
+	 	 select organizeid from c_t_use_organize_userinfo
+	  <where> 
+	    <if test="userid != null and userid != null">and  userid = #{userid}</if>
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		and  delflag = 0 
+      </where>
+	</select>
+	
+		<!-- 查询当前登陆者的管理区域datacode -->
+	<select id="getDatacodeByOrgid" parameterType="map" resultType="map">
+	  select datacode from c_t_use_organize
+	  <where> 
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		<if test="organizeidlist != null">
+			<foreach collection="organizeidlist" item="item" open="and organizeid in(" close=")" separator=",">'${item}'</foreach>
+		</if>
+		and  delflag = 0 
+      </where>
+	</select>
+	
+			<!-- 查询当前登陆者的管理区域上級 organizeid -->
+	<select id="getOrganizeByDataCodeList" parameterType="map" resultType="map">
+	  select organizeid from c_t_use_organize
+	  <where>  
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		<if test="datacodelist != null">
+			<foreach collection="datacodelist" item="item" open="and datacode in(" close=")" separator=",">'${item}'</foreach>
+		</if>
+		and  delflag = 0 
+      </where>
+	</select>
+	
+		<!-- 查询当前登陆者的管理区域下級 organizeid -->
+	<select id="getOrganizeByDataCode" parameterType="map" resultType="map">
+	  select organizeid from c_t_use_organize
+	  <where>  
+	    <if test="companyid != null and companyid != null">and  companyid = #{companyid}</if>
+		<if test="datacode != null and datacode != null">and datacode like concat(#{datacode},"%")</if>
+		and  delflag = 0 
+      </where>
+	</select>
+	<update id="deleteUserorganize" parameterType="map">
+	    update c_t_use_organize_userinfo set delflag=1 where userid=#{userid} 
+	</update>
+	
+	
+	<!-- 查询第一个管理方管理员信息 -->
+	<select id="getManageUserInfo" parameterType="map" resultType="map">
+		select 
+			userid,phone,realname
+		from c_t_manage_user
+		where status=1 and delflag=0
+		order by createtime asc
+		limit 1
+	</select>
+</mapper>
