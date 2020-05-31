@@ -85,6 +85,7 @@
             <list>
                 <!-- 表示在**/包或以下所有目录中，以-resultmap.xml结尾所有文件 放resource-->
                 <value>classpath:mapper/**/*-mapper.xml</value>
+                <value>classpath:mapper/**/*MapperImpl.xml</value>
                 <value>classpath:mapper/**/*-resultMap.xml</value>
             </list>
         </property>

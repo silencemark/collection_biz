@@ -21,6 +21,17 @@
     <dubbo:registry check="false" address="zookeeper://127.0.0.1:2181" file="/home/wanghan/zookeeper/cache/dubbo.cache"/>    
 	
     <!-- 和本地bean一样实现服务     -->
+    <!-- add by silence 2020-05-26--> 
+    <bean id="appLoginService" class="com.collection.service.impl.AppLoginServiceImpl"/>
+    
+    
+    <!-- 声明需要暴露的服务接口     -->
+    <dubbo:service interface="com.collection.service.IAppLoginService" ref="appLoginService" />
+    
+    
+    
+    
+    
    	<bean id="indexService" class="com.collection.service.impl.IndexServiceImpl"/>
    	<bean id="companyService" class="com.collection.service.impl.CompanyServiceImpl"/>
 	<bean id="userInfoService" class="com.collection.service.impl.UserInfoServiceImpl"/>

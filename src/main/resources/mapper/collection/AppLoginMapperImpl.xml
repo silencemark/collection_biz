@@ -1,0 +1,70 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IAppLoginMapper">
+
+	<select id="login" parameterType="map" resultType="map">
+	    select userid,password,phone,nickname,status,delflag,DATE_FORMAT(ctau.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,DATE_FORMAT(ctau.createtime,'%Y-%m-%d %H:%i:%S') as createtime
+	    from  c_t_app_userinfo ctau
+	    <where>
+	        <if test="phone != null and phone != ''">and ctau.phone=#{phone}</if>
+	        <if test="nickname != null and nickname != ''">and ctau.nickname=#{nickname}</if>
+	        <if test="password != null and password != ''">and ctau.password=#{password}</if>
+	        and ctau.delflag=0
+	    </where>
+	</select>
+	
+	<select id="checkPhone" parameterType="map" resultType="map">
+	    select * from  c_t_app_userinfo 
+	    <where>
+	        <if test="phone != null and phone != ''">and phone=#{phone}</if>
+	    </where>
+	</select>
+
+	<insert id="insertUserInfo" parameterType="map">
+	 	insert into c_t_app_userinfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">userid,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="nickname != null and nickname != ''">nickname,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">#{userid},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="nickname != null and nickname != ''">#{nickname},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+        </trim>
+	
+	</insert>	
+	
+	<select id="getParentIdByInviteCode" resultType="int" parameterType="map">
+		select userid from c_t_app_userinfo 
+		<where>
+			<if test="invitecode != null and invitecode != ''">and invitecode=#{invitecode}</if>
+		</where>
+		limit 1
+	</select>
+	
+	<update id="updateUserInfo" parameterType="map">
+	   update c_t_app_userinfo 
+	   <set>
+	      <if test="password != null and password != ''">password = #{password},</if>
+	   </set>
+	   <where>
+	   	   <if test="phone != null and phone != ''">and phone=#{phone}</if>
+	   	   <if test="userid != null and userid != ''">and userid=#{userid}</if>
+	   </where>
+	</update>
+	
+	<select id="getUserInfo" resultType="map" parameterType="map">
+		select ctau.userid, ctau.phone, ctau.password, ctau.nickname, ctau.status, ctau.invitecode, ctau.delflag, ctau.parentid, ctau.levelid, ctau.xgocoin, ctau.sumprofit, ctau.sumassets, ctau.growthvalue, DATE_FORMAT(ctau.updatetime,'%Y-%m-%d %H:%i:%S')  as updatetime, DATE_FORMAT(ctau.createtime,'%Y-%m-%d %H:%i:%S') as createtime 
+		from c_t_app_userinfo ctau 
+		<where>
+			<if test="phone != null and phone != ''">and ctau.phone=#{phone}</if>
+			<if test="userid != null and userid != ''">and ctau.userid=#{userid}</if>
+		</where>
+		limit 1
+	</select>
+	
+</mapper>
