@@ -24,12 +24,13 @@
     <!-- add by silence 2020-05-26--> 
     <bean id="appLoginService" class="com.collection.service.impl.AppLoginServiceImpl"/>
     <bean id="appIndexService" class="com.collection.service.impl.AppIndexServiceImpl"/>
+    <bean id="appVipCardService" class="com.collection.service.impl.AppVipCardServiceImpl"/>
     
     
     <!-- 声明需要暴露的服务接口     -->
     <dubbo:service interface="com.collection.service.IAppLoginService" ref="appLoginService" />
     <dubbo:service interface="com.collection.service.IAppIndexService" ref="appIndexService" />
-    
+    <dubbo:service interface="com.collection.service.IAppVipCardService" ref="appVipCardService" />
     
     
     
@@ -45,23 +46,12 @@
     <bean id="warehouseService" class="com.collection.service.impl.warehouse.WarehouseServiceImpl"/>
     <!-- KPI星值审核管理 -->
     <bean id="starAssessService" class="com.collection.service.impl.starassess.StarAssessServiceImpl"/>
-    <!-- 备忘录管理 -->
-    <bean id="memorandumService" class="com.collection.service.impl.memorandum.MemorandumServiceImpl"/>
-    <!--  OA办公管理 -->
-    <bean id="officeService" class="com.collection.service.impl.oa.OfficeServiceImpl"/>    
-    <!--  OA通知管理 -->
-    <bean id="noticeService" class="com.collection.service.impl.oa.NoticeServiceImpl"/>    
     <!-- 工作表单 检查管理 -->
     <bean id="inspectService" class="com.collection.service.impl.worksheet.InspectServiceImpl"/>
     <!-- 工作表单 -->
     <bean id="rewardInfoService" class="com.collection.service.impl.worksheet.RewardInfoServiceImpl"/>
     <!-- 组织检查模板 -->
     <bean id="organizeTemplateService" class="com.collection.service.impl.worksheet.OrganizeTemplateServiceImpl"/>
-    
-    <!--  OA日志管理 -->
-    <bean id="journalService" class="com.collection.service.impl.oa.JournalServiceImpl"/> 
-    <!--  OA通用审批-->
-    <bean id="approvalService" class="com.collection.service.impl.oa.ApprovalServiceImpl"/>
     <!--  消息讨论组-->
     <bean id="chatService" class="com.collection.service.impl.chat.ChatServiceImpl"/> 
     <!-- 个人中心 -->
@@ -97,12 +87,6 @@
     <dubbo:service interface="com.collection.service.warehouse.WarehouseService" ref="warehouseService" />
     <!-- KPI星值审核管理 -->
     <dubbo:service interface="com.collection.service.starassess.StarAssessService" ref="starAssessService" />
-    <!-- 备忘录管理 -->
-    <dubbo:service interface="com.collection.service.memorandum.MemorandumService" ref="memorandumService" />
-    <!--  OA办公管理 -->
-    <dubbo:service interface="com.collection.service.oa.OfficeService" ref="officeService" />
-    <!--  OA通知管理 -->
-    <dubbo:service interface="com.collection.service.oa.NoticeService" ref="noticeService" />
     <!-- 工作表单 检查管理 -->
     <dubbo:service interface="com.collection.service.worksheet.InspectService" ref="inspectService" />
     <!-- 工作表单 -->

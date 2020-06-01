@@ -8,13 +8,11 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.collection.dao.managebackstage.CustomerFileMapper;
-import com.collection.dao.oa.OfficeMapper;
 import com.collection.service.managebackstage.CustomerFileService;
 
 public class CustomerFileServiceImpl implements CustomerFileService{
 
 	@Autowired CustomerFileMapper customerFileMapper;
-	@Autowired OfficeMapper officeMapper;
 	
 	/**
 	 * 添加文件上传记录
@@ -48,8 +46,6 @@ public class CustomerFileServiceImpl implements CustomerFileService{
 		}
 		paramMap.put("usedmemory", map.get("size"));
 		paramMap.put("companyid", map.get("companyid"));
-		this.officeMapper.updateCompanyCloudUseMemoryInfo(paramMap);
-		
 	}
 
 }
