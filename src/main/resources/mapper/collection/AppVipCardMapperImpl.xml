@@ -1,0 +1,81 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IAppVipCardMapper">
+
+	<select id="getVipCardList" resultType="map" parameterType="map">
+		select * from (SELECT
+				membertypeid,
+				typename,
+				cardicon,
+				minprice,
+				maxprice,
+				xgocoin,
+				starttime,
+				endtime,
+				commentstartdays,
+				watchdays,
+				commentcount,
+				yield,
+				forder,
+				DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+				createid,
+				DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+				updateid,
+				case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') <= now() AND
+									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') > now()
+						THEN  1
+						ELSE  0
+				END as isbuy,
+				timestampdiff(SECOND,now(),STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i')) as secondbuy
+			FROM
+				c_t_app_membertype) A
+			order by isbuy, forder
+	</select>
+	
+	<select id="getWaitPayCard" parameterType="map" resultType="map">
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			timestampdiff(SECOND,now(),date_add(createtime, interval 1 hour)) as remaintime,
+			DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%s') as createtime,
+			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - commentcount) remaincount,
+			commentcountx
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.createtime > date_add(now(), interval -1 hour) 
+			and or.status = 1
+			and or.buyuserid = userid
+	</select>
+	
+	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
+		select or.orderid, mc.cardimg, mc.introduction, mc.description, or.ordernum,
+		DATE_FORMAT(or.createtime,'%Y-%m-%d %H:%i:%S') as buytime, mc.price,us.xgocoin,
+		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname
+		from c_t_app_order  or
+		left join c_t_app_membercard mc on or.cardid = mc.cardid
+		left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+		left join c_t_app_userinfo us on or.buyuserid = us.userid
+		left join c_t_app_paymentmethod pay on or.selluserid = pay.userid
+		<where>
+			<if test="orderid != null and orderid != ''">and or.orderid=#{orderid}</if>
+			and or.status = 1
+		</where>  
+	</select>
+	
+	<update id="payVipCard" parameterType="map">
+		update c_t_app_order
+		<set>
+	      <if test="status != null">status = #{status},</if>
+	      <if test="payorder != null && payorder != ''">payorder = #{payorder},</if>
+	   </set>
+	   where orderid = #{orderid}
+	</update>
+	
+	<select id="getContactPhone" parameterType="map" resultType="map">
+		select ce.realname,us.phone, pm.weixinnum c_t_app_certification ce
+		left join c_t_app_userinfo us on ce.userid = us.userid
+		left join c_t_app_paymentmethod pm on ce.userid = pm.userid
+		where ce.userid = #{userid} and ce.status = 1 
+		limit 1
+	</select>
+</mapper>
