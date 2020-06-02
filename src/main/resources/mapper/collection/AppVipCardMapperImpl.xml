@@ -34,17 +34,44 @@
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
 		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
 			timestampdiff(SECOND,now(),date_add(createtime, interval 1 hour)) as remaintime,
-			DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%s') as createtime,
-			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mt.typename,
-			(mt.commentcount - commentcount) remaincount,
-			commentcountx
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
 			 c_t_app_order or
 			left join c_t_app_membercard mc on or.cardid = mc.cardid
 			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
 			where or.createtime > date_add(now(), interval -1 hour) 
 			and or.status = 1
-			and or.buyuserid = userid
+			and or.buyuserid = #{userid}
+		union 
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			timestampdiff(SECOND,now(),date_add(buytime, interval 1 hour)) as remaintime,
+			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.buytime > date_add(now(), interval -1 hour) 
+			and or.status = 2
+			and or.buyuserid = #{userid}
+		union 
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			0,
+			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.status = 4
+			and or.buyuserid = #{userid}
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
@@ -78,4 +105,80 @@
 		where ce.userid = #{userid} and ce.status = 1 
 		limit 1
 	</select>
+	
+	<select id="getSaleCardList" parameterType="map" resultType="map">
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			timestampdiff(SECOND,now(),date_add(or.createtime, interval 1 hour)) as remaintime,
+			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.createtime > date_add(now(), interval -1 hour) 
+			and or.status = 1
+			and or.selluserid = #{userid}
+		union 
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			timestampdiff(SECOND,now(),date_add(or.buytime, interval 1 hour)) as remaintime,
+			DATE_FORMAT(buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.buytime > date_add(now(), interval -1 hour) 	
+			and or.status = 2
+			and or.selluserid = #{userid}
+		union 
+		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+			0,
+			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mt.typename,
+			(mt.commentcount - or.commentcount) remaincount,
+			mt.yield
+			 c_t_app_order or
+			left join c_t_app_membercard mc on or.cardid = mc.cardid
+			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+			where or.status = 0
+			and or.selluserid = #{userid}
+	</select>
+	
+	<select id="getExamineInfo" parameterType="map" resultType="map">
+		select or.orderid,mc.cardimg,or.ordernum, DATE_FORMAT(or.selltime,'%Y-%m-%d %H:%i:%s') as selltime, or.sellprice,
+		timestampdiff(SECOND,now(),date_add(or.buytime, interval 1 hour)) as remaintime,
+		or.payorder,ce.realname,us.phone, pm.weixinnum
+		 from c_t_app_order or
+		left join c_t_app_membercard mc on or.cardid = mc.cardid
+		left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
+		left join  c_t_app_certification ce on or.buyuserid = ce.userid 
+		left join c_t_app_userinfo us on ce.userid = us.userid
+		left join c_t_app_paymentmethod pm on ce.userid = pm.userid
+		where or.orderid= #{orderid}
+		and selluserid = #{userid}
+	</select>
+	
+	<update id="examinePast" parameterType="map">
+		update c_t_app_order
+		set status = 3 
+		where orderid = #{orderid}
+	</update>
+	
+	<select id="getUserVipCount" parameterType="map" resultType="int">
+		select count(0) from orderid
+		<where>
+			<if test="status != null and status != ''">and status >= #{status} </if>
+			<if test="buyuserid != null and buyuserid != ''">and buyuserid = #{buyuserid} </if>
+			<if test="selluserid != null and selluserid != ''">and selluserid = #{selluserid} </if>
+		</where>  
+	</select>
+	
+	<update id="updateLevel" parameterType="map">
+		update c_t_app_userinfo set levelid = #{levelid} where userid = #{userid}
+	</update>
 </mapper>
