@@ -3,7 +3,7 @@
 
 	<select id="getVipCardList" resultType="map" parameterType="map">
 		select * from (SELECT
-				membertypeid,
+				cardid,
 				typename,
 				cardicon,
 				minprice,
@@ -20,80 +20,73 @@
 				createid,
 				DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
 				updateid,
-				case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') <= now() AND
-									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') > now()
+				case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') &lt;= now() AND
+									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') &gt; now()
 						THEN  1
 						ELSE  0
 				END as isbuy,
 				timestampdiff(SECOND,now(),STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i')) as secondbuy
 			FROM
-				c_t_app_membertype) A
+				c_t_app_membercard) A
 			order by isbuy, forder
 	</select>
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
 			timestampdiff(SECOND,now(),date_add(createtime, interval 1 hour)) as remaintime,
-			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
-			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.createtime > date_add(now(), interval -1 hour) 
-			and or.status = 1
-			and or.buyuserid = #{userid}
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.createtime  &gt; date_add(now(), interval -1 hour) 
+			and ao.status = 1
+			and ao.buyuserid = #{userid}
 		union 
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
 			timestampdiff(SECOND,now(),date_add(buytime, interval 1 hour)) as remaintime,
-			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
-			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.buytime > date_add(now(), interval -1 hour) 
-			and or.status = 2
-			and or.buyuserid = #{userid}
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.buytime  &gt; date_add(now(), interval -1 hour) 
+			and ao.status = 2
+			and ao.buyuserid = #{userid}
 		union 
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
 			0,
-			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
-			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.status = 4
-			and or.buyuserid = #{userid}
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.status = 4
+			and ao.buyuserid = #{userid}
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
-		select or.orderid, mc.cardimg, mc.introduction, mc.description, or.ordernum,
-		DATE_FORMAT(or.createtime,'%Y-%m-%d %H:%i:%S') as buytime, mc.price,us.xgocoin,
+		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,
+		DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime, mc.price,us.xgocoin,
 		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname
 		from c_t_app_order  or
-		left join c_t_app_membercard mc on or.cardid = mc.cardid
-		left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-		left join c_t_app_userinfo us on or.buyuserid = us.userid
-		left join c_t_app_paymentmethod pay on or.selluserid = pay.userid
-		<where>
-			<if test="orderid != null and orderid != ''">and or.orderid=#{orderid}</if>
-			and or.status = 1
-		</where>  
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_userinfo us on ao.buyuserid = us.userid
+		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
+		where ao.orderid=#{orderid} and ao.status = 1
 	</select>
 	
 	<update id="payVipCard" parameterType="map">
 		update c_t_app_order
 		<set>
 	      <if test="status != null">status = #{status},</if>
-	      <if test="payorder != null && payorder != ''">payorder = #{payorder},</if>
+	      <if test="payorder != null">payorder = #{payorder},</if>
 	   </set>
 	   where orderid = #{orderid}
 	</update>
@@ -107,60 +100,56 @@
 	</select>
 	
 	<select id="getSaleCardList" parameterType="map" resultType="map">
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
-			timestampdiff(SECOND,now(),date_add(or.createtime, interval 1 hour)) as remaintime,
-			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
-			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.createtime > date_add(now(), interval -1 hour) 
-			and or.status = 1
-			and or.selluserid = #{userid}
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+			timestampdiff(SECOND,now(),date_add(ao.createtime, interval 1 hour)) as remaintime,
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.createtime  &gt; date_add(now(), interval -1 hour) 
+			and ao.status = 1
+			and ao.selluserid = #{userid}
 		union 
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
-			timestampdiff(SECOND,now(),date_add(or.buytime, interval 1 hour)) as remaintime,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+			timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.buytime > date_add(now(), interval -1 hour) 	
-			and or.status = 2
-			and or.selluserid = #{userid}
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.buytime  &gt; date_add(now(), interval -1 hour) 	
+			and ao.status = 2
+			and ao.selluserid = #{userid}
 		union 
-		select or.ordernum, or.orderid,or.cardid,or.buyuserid, or.selluserid,or.surpluswatchdays,or.commentcount,or.status,or.ordertype,or.sellprice,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
 			0,
-			DATE_FORMAT(or.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
-			DATE_FORMAT(or.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
-			mt.typename,
-			(mt.commentcount - or.commentcount) remaincount,
-			mt.yield
-			 c_t_app_order or
-			left join c_t_app_membercard mc on or.cardid = mc.cardid
-			left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-			where or.status = 0
-			and or.selluserid = #{userid}
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			 from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.status = 0
+			and ao.selluserid = #{userid}
 	</select>
 	
 	<select id="getExamineInfo" parameterType="map" resultType="map">
-		select or.orderid,mc.cardimg,or.ordernum, DATE_FORMAT(or.selltime,'%Y-%m-%d %H:%i:%s') as selltime, or.sellprice,
-		timestampdiff(SECOND,now(),date_add(or.buytime, interval 1 hour)) as remaintime,
-		or.payorder,ce.realname,us.phone, pm.weixinnum
-		 from c_t_app_order or
-		left join c_t_app_membercard mc on or.cardid = mc.cardid
-		left join c_t_app_membertype mt on mc.membertpeid = mt.membertypeid
-		left join  c_t_app_certification ce on or.buyuserid = ce.userid 
+		select ao.orderid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,mc.price,
+		timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
+		ao.payorder,ce.realname,us.phone, pm.weixinnum
+		 from c_t_app_order ao
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join  c_t_app_certification ce on ao.buyuserid = ce.userid 
 		left join c_t_app_userinfo us on ce.userid = us.userid
 		left join c_t_app_paymentmethod pm on ce.userid = pm.userid
-		where or.orderid= #{orderid}
-		and selluserid = #{userid}
+		where ao.orderid= #{orderid}
+		and ao.selluserid = #{userid}
 	</select>
 	
 	<update id="examinePast" parameterType="map">
@@ -180,5 +169,143 @@
 	
 	<update id="updateLevel" parameterType="map">
 		update c_t_app_userinfo set levelid = #{levelid} where userid = #{userid}
+	</update>
+	
+	<select id="getElderid" parameterType="map" resultType="map">
+		select parentid as grandpaid,userid as parentid from c_t_app_userinfo where userid=(select parentid from c_t_app_userinfo where userid = #{userid})
+	</select>
+	
+	<update id="addParentGrowthValue" parameterType="map">
+		update c_t_app_userinfo
+		set growthvalue = growthvalue + #{growthvalue}
+		where userid = #{userid}
+	</update>
+	
+	<update id="addParentsAndGrandPa" parameterType="map">
+		update c_t_app_userinfo
+		set sumprofit = sumprofit + #{profitprice}
+		where userid = #{userid}
+	</update>
+	
+	<insert id="insertTeamProfit" parameterType="map">
+		insert into c_t_app_teamprofit
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="parentid != null and parentid != ''">parentid,</if>
+	        <if test="parentprofit != null and parentprofit != ''">parentprofit,</if>
+	        <if test="grandfatherid != null and grandfatherid != ''">grandfatherid,</if>
+	        <if test="grandfatherprofit != null and grandfatherprofit != ''">grandfatherprofit,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="parentid != null and parentid != ''">#{parentid},</if>
+	        <if test="parentprofit != null and parentprofit != ''">#{parentprofit},</if>
+	        <if test="grandfatherid != null and grandfatherid != ''">#{grandfatherid},</if>
+	        <if test="grandfatherprofit != null and grandfatherprofit != ''">#{grandfatherprofit},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	
+	<update id="addMySumassets" parameterType="map">
+		update c_t_app_userinfo
+		set sumassets = sumassets + #{profitprice}
+		where userid = #{userid} 
+	</update>
+	
+	<select id="getMyCardList" parameterType="map" resultType="map">
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
+			mc.typename,
+			timestampdiff(day,now(),ao.duetime) as remaindays,
+			(mc.commentcount - ao.commentcount) remaincount,
+			mc.yield
+			from c_t_app_order ao
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.status in (3 , 4 )
+			and ao.buyuserid = #{userid}
+	</select>
+	
+	<select id="getMemberCardInfo" parameterType="map" resultType="map">
+		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
+			DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
+			ao.commentcount as alreadycount,
+			mc.commentstartdays，
+			mc.commentcount,
+			mc.price
+		from c_t_app_order  ao
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_userinfo us on ao.buyuserid = us.userid
+		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
+			where ao.status = 3
+			and ao.orderid = #{orderid}
+	</select> 
+	
+	<select id="getMovieByCardId" parameterType="map" resultType="map">
+		select movieid, cardid, coverimg, title, description,httputl,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%s') as createtime 
+		from c_t_app_membermovie 
+		where cardid = #{cardid}
+		and status = 1
+	</select>
+	
+	<select id="getSellCardInfo" parameterType="map" resultType="map">
+		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
+			DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime,
+			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
+			ao.commentcount as alreadycount,
+			mc.commentstartdays,
+			mc.commentcount,
+			(mc.price + ao.profitprice) as maxprice
+		from c_t_app_order  ao
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_userinfo us on ao.buyuserid = us.userid
+		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
+		where (ao.status = 4 or duetime > now())
+		and ao.orderid = #{orderid}
+	</select>
+	
+	<update id="updateCardOrderStatus" parameterType="map">
+		update c_t_app_order set status = #{status} where orderid = #{orderid}
+	</update>
+	
+	<select id="getMemberCardByPrice" parameterType="map" resultType="map">
+		select cardid,typename,type,cardicon,cardimg,xgocoin,minprice,maxprice,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,
+		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime
+		from c_t_app_membercard
+		where status = 1
+		and maxprice &gt;= #{cardprice}
+		and minprice &lt;= #{cardprice}
+		order by commentstartdays asc
+		limit 1
+	</select>
+	
+	<insert id="insertOrder" parameterType="map">
+		insert into c_t_app_order
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="ordernum != null and ordernum != ''">ordernum,</if>
+	        <if test="cardid != null and cardid != ''">cardid,</if>
+	        <if test="cardprice != null and cardprice != ''">cardprice,</if>
+	        <if test="selluserid != null and selluserid != ''">selluserid,</if>
+	        <if test="ordertype != null and ordertype != ''">ordertype,</if>
+	        <if test="selltime != null and selltime != ''">selltime,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="ordernum != null and ordernum != ''">#{ordernum},</if>
+	        <if test="cardid != null and cardid != ''">#{cardid},</if>
+	        <if test="cardprice != null and cardprice != ''">#{cardprice},</if>
+	        <if test="selluserid != null and selluserid != ''">#{selluserid},</if>
+	        <if test="ordertype != null and ordertype != ''">#{ordertype},</if>
+	        <if test="selltime != null and selltime != ''">#{selltime},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	
+	<update id="addUserInfoOverProfit" parameterType="map">
+		update c_t_app_userinfo 
+		set sumprofit = sumprofit + #{overprofit}
+		where userid = #{userid}
 	</update>
 </mapper>

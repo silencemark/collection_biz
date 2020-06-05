@@ -79,4 +79,90 @@ public interface IAppVipCardMapper {
 	 * @param data
 	 */
 	void updateLevel(Map<String, Object> data);
+
+	/**
+	 * 获取父id 和爷id
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getElderid(Map<String, Object> data);
+	
+	/**
+	 * 邀请者加成长值
+	 * @param data
+	 */
+	void addParentGrowthValue(Map<String, Object> data);
+	
+	/**
+	 * 父级加收益5%
+	 * 父级的父级加2%
+	 * @param data
+	 */
+	void addParentsAndGrandPa(Map<String, Object> data);
+	
+	/**
+	 * 增加团队收益表记录
+	 * @param data
+	 */
+	void insertTeamProfit(Map<String, Object> data);
+	
+
+	/**
+	 * 增加个人总资产收益总和
+	 * @param data
+	 */
+	void addMySumassets(Map<String, Object> data);
+	
+	/**
+	 * 获取我的会员卡列表（审核通过）
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMyCardList(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getMemberCardInfo(Map<String, Object> data);
+	
+	/**
+	 * 获取会员VIP卡对应的视频包
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMovieByCardId(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡信息（初始化出售页面）
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getSellCardInfo(Map<String, Object> data);
+	
+	/**
+	 * 修改会员卡类型为过期
+	 * @param data
+	 */
+	void updateCardOrderStatus(Map<String, Object> data);
+	
+	/**
+	 * 根据价格获取会员卡类型
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getMemberCardByPrice(Map<String, Object> data);
+	
+	/**
+	 * 新建卖出会员卡订单
+	 * @param data
+	 */
+	void insertOrder(Map<String, Object> data);
+	
+	/**
+	 * 增加溢出资产到卖家个人信息
+	 * @param data
+	 */
+	void addUserInfoOverProfit(Map<String, Object> data);
 }

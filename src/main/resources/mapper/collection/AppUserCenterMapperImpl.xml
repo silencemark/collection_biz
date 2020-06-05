@@ -1,0 +1,158 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IAppUserCenterMapper">
+
+	<select id="getMyCenter" parameterType="map" resultType="map">
+	    select userid,password,phone,nickname,status,delflag,headimage,DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+	    DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    xgocoin,
+	    sumprofit,
+	    sumassets,
+	    growthvalue,
+	    isrealname
+	    from  c_t_app_userinfo ctau
+	    <where>
+	        <if test="phone != null and phone != ''">and phone=#{phone}</if>
+	        <if test="nickname != null and nickname != ''">and nickname=#{nickname}</if>
+	        <if test="password != null and password != ''">and password=#{password}</if>
+	        <if test="userid != null and userid != ''"> and userid = #{userid}</if>
+	        and delflag=0
+	    </where>
+	    limit 1
+	</select>
+	
+	<update id="signIn" parameterType="map">
+		update c_t_app_userinfo 
+		set xgocoin = xgocoin + 1,
+			growthvalue = growthvalue + #{growthvalue}
+		hwhere userid = #{userid}
+	</update>
+	
+	<update id="updateUserInfoLevel" parameterType="map">
+		update c_t_app_userinfo 
+		set levelid = (select levelid from ( 
+		SELECT
+			ml.levelid
+		FROM
+		  c_t_app_userinfo us 
+		left JOIN c_t_app_memberlevel ml ON 
+		 ml.mingrowthvalue &lt;= us.growthvalue
+		AND ml.maxgrowthvalue &gt; us.growthvalue
+		where us.userid = #{userid}
+		LIMIT 1) A)
+		where userid = #{userid}
+	</update>
+	
+	<select id="myGrowthValue" parameterType="map" resultType="map">
+		select us.growthvalue,ml.levelname,ml.levelenum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes from c_t_app_userinfo us 
+		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
+		 where userid = #{userid}
+	</select>
+	<select id="getMemberGrowList" parameterType="map" resultType="map">
+		select ml.levelid,ml.levelname,ml.levelenum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,DATE_FORMAT(ml.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime from
+		c_t_app_memberlevel ml
+	</select>
+	
+	<update id="deleteCertification" parameterType="map">
+		update c_t_app_certification
+		set delflag = 1
+		where userid = #{userid}
+	</update>
+	<insert id="certification" parameterType="map">
+		insert into c_t_app_certification
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="nationality != null and nationality != ''">nationality,</if>
+	        <if test="realname != null and realname != ''">realname,</if>
+	        <if test="idcard != null and idcard != ''">idcard,</if>
+	        <if test="status != null and status != ''">status,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	    	<if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="nationality != null and nationality != ''">#{nationality},</if>
+	        <if test="realname != null and realname != ''">#{realname},</if>
+	        <if test="idcard != null and idcard != ''">#{idcard},</if>
+	        <if test="status != null and status != ''">#{status},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	
+	<insert id="insertSign" parameterType="map">
+		insert into c_t_app_sign
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="growthvalue != null and growthvalue != ''">growthvalue,</if>
+	        <if test="xgocoin != null and xgocoin != ''">xgocoin,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	    	<if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="growthvalue != null and growthvalue != ''">#{growthvalue},</if>
+	        <if test="xgocoin != null and xgocoin != ''">#{xgocoin},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	
+	<select id="getCertification" parameterType="map" resultType="map">
+		select certificationid,nationality,realname,idcard,status,message,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime
+		from c_t_app_certification 
+		where userid = #{userid}
+		and delflag = 0
+		limit 1
+	</select>
+	
+	<select id="getSonProfit" parameterType="map" resultType="map">
+		select userid,nickname,headimage,sum(parentprofit) as sumprofit from (
+		select us.userid,us.nickname,us.headimage,te.parentprofit 
+		from c_t_app_teamprofit te 
+		left join c_t_app_userinfo us  on te.userid = us.userid
+		where te.parentid = #{userid}
+		) A group by userid,nickname,headimage
+	</select>
+	
+	<select id="getGrandSonProfit" parameterType="map" resultType="map">
+		select userid,nickname,headimage,sum(grandfatherprofit) as sumprofit from (
+		select us.userid,us.nickname,us.headimage,te.grandfatherprofit 
+		from c_t_app_teamprofit te 
+		left join c_t_app_userinfo us on te.userid = us.userid
+		where te.grandfatherid = #{userid}
+		) A group by userid,nickname,headimage
+	</select>
+	
+	<select id="myAssets" parameterType="map" resultType="map">
+		select (select sum(cardprice) from c_t_app_order where buyuserid = #{userid} and status > 1) as allorder,
+		(select sum(cardprice) from c_t_app_order where buyuserid = #{userid}  and status in (2, 3)) as buyorder,
+		(select sum(cardprice) from c_t_app_order where selluserid = #{userid}  and status in (0, 1)) as sellorder,
+		sumassets,sumprofit from c_t_app_userinfo us where userid = #{userid} 
+	</select>
+	
+	<select id="getExchangeList" parameterType="map" resultType="map">
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+			mc.typename,
+			mc.yield 
+			from c_t_app_exchange ex
+			left join c_t_app_order ao on ex.orderid = ao.orderid
+			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.selluserid = #{userid}
+			and ex.userid = #{userid}
+			and ordertype = 2
+	</select>
+	
+	<select id="myInviteCode" parameterType="map" resultType="map">
+		select userid,invitecode,invitecodehttpurl,invitecodeqrcode from c_t_app_userinfo where userid = #{userid}
+	</select>
+	
+	<update id="updateQrcode" parameterType="map">
+		update c_t_app_userinfo 
+		set invitecodeqrcode = #{invitecodeqrcode}
+		where userid = #{userid}
+	</update>
+	
+	<select id="getMyUserInfo" parameterType="map" resultType="map">
+		select userid,password,phone,nickname,status,delflag,headimage,isrealname,
+			case when ISNULL(paypassword) = 1 then 0 else 1 end as ispaypass,
+	    (select count(0) from c_t_app_paymentmethod where userid = 1) ispaymentmethod
+	    from  c_t_app_userinfo 
+	    where userid = 1
+	</select>
+</mapper>
