@@ -12,6 +12,10 @@
 	    </where>
 	</select>
 	
+	<select id="getMaxUserid" resultType="int">
+		select IFNULL(max(userid), 0) + 1 from c_t_app_userinfo
+	</select>
+	
 	<select id="checkPhone" parameterType="map" resultType="map">
 	    select * from  c_t_app_userinfo 
 	    <where>
@@ -26,6 +30,7 @@
             <if test="password != null and password != ''">password,</if>
             <if test="phone != null and phone != ''">phone,</if>
             <if test="nickname != null and nickname != ''">nickname,</if>
+            <if test="invitecode != null and invitecode != ''">invitecode,</if>
             <if test="createtime != null and createtime != ''">createtime,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -33,6 +38,7 @@
             <if test="password != null and password != ''">#{password},</if>
             <if test="phone != null and phone != ''">#{phone},</if>
             <if test="nickname != null and nickname != ''">#{nickname},</if>
+            <if test="invitecode != null and invitecode != ''">#{invitecode},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
         </trim>
 	

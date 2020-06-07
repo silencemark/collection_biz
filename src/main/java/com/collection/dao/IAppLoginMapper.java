@@ -23,6 +23,12 @@ public interface IAppLoginMapper {
 	Map<String, Object> checkPhone(Map<String, Object> data);
 	
 	/**
+	 * 获取用户表中userid最大的
+	 * @return
+	 */
+	int getMaxUserid();
+	
+	/**
 	 * @param data
 	 * @return
 	 * @author silence

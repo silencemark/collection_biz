@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.service.IAppUserCenterService;
-import com.collection.util.Constants;
 /**
  * 个人中心相关
  * @author silence
@@ -119,4 +118,53 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	public Map<String, Object> getMyUserInfo(Map<String, Object> data) {
 		return this.mapper.getMyUserInfo(data);
 	}
+
+	@Override
+	public void updateHeadImg(Map<String, Object> data) {
+		this.mapper.updateUserInfo(data);
+	}
+
+	@Override
+	public void updateNickName(Map<String, Object> data) {
+		this.mapper.updateUserInfo(data);
+	}
+
+	@Override
+	public Map<String, Object> updatePassWord(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//1、判断旧密码是否正确
+		result = this.mapper.getMyUserInfo(data);
+		if (result != null && result.size() > 0 ){
+			this.mapper.updateUserInfo(data);
+			result = new HashMap<String, Object>();
+			result.put("status", 0);
+			result.put("message", "登录密码修改成功");
+		} else {
+			result = new HashMap<String, Object>();
+			result.put("status", 1);
+			result.put("message", "旧密码输入错误");
+		}
+		return result;
+	}
+
+	@Override
+	public void setPayPassWord(Map<String, Object> data) {
+		this.mapper.updateUserInfo(data);
+	}
+
+	@Override
+	public Map<String, Object> getPaymentMethod(Map<String, Object> data) {
+		Map<String, Object> result = this.mapper.getPaymentMethod(data);
+		if (result != null && result.size() > 0) {
+			this.mapper.addPaymentMethod(data);
+		}
+		return result;
+	}
+
+	@Override
+	public void updatePaymentMethod(Map<String, Object> data) {
+		this.mapper.updatePaymentMethod(data);
+	}
+	
+	
 }

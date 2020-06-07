@@ -151,8 +151,86 @@
 	<select id="getMyUserInfo" parameterType="map" resultType="map">
 		select userid,password,phone,nickname,status,delflag,headimage,isrealname,
 			case when ISNULL(paypassword) = 1 then 0 else 1 end as ispaypass,
-	    (select count(0) from c_t_app_paymentmethod where userid = 1) ispaymentmethod
+	    (select count(0) from c_t_app_paymentmethod where userid = #{userid}) ispaymentmethod
 	    from  c_t_app_userinfo 
-	    where userid = 1
+	    <where>
+	    	<if test="userid != null and userid != ''">and userid=#{userid}</if>
+	    	<if test="oldpassword != null and oldpassword != ''">and password=#{oldpassword}</if>
+	    </where>
 	</select>
+	
+	<update id="updateUserInfo" parameterType="map">
+		update c_t_app_userinfo
+		<set>
+	      <if test="phone != null">phone = #{phone},</if>
+	      <if test="paypassword != null">paypassword = #{paypassword},</if>
+	      <if test="newpassword != null and newpassword != ''">password = #{newpassword},</if>
+	      <if test="nickname != null">nickname = #{nickname},</if>
+	      <if test="headimage != null">headimage = #{headimage},</if>
+	      <if test="status != null and status != ''">status = #{status},</if>
+	      <if test="delflag != null and delflag != ''">delflag = #{delflag},</if>
+	      <if test="levelid != null and levelid != ''">levelid = #{levelid},</if>
+	      <if test="isrealname != null">isrealname = #{isrealname},</if>
+	   </set>
+	   <where>
+	       <if test="userid != null and userid != ''">and userid=#{userid}</if>
+	   </where>
+	</update>
+	
+	<select id="getPaymentMethod" parameterType="map" resultType="map">
+		select paymentmethodid,userid,weixinnum,weixinqrcode,weixinrealname,alipaynum,alipayqrcode,alipayrealname,bank,banknum,bankrealname
+		c_t_app_paymentmethod 
+		where userid = #{userid}
+	</select>
+	
+	<insert id="addPaymentMethod" parameterType="map">
+		insert into c_t_app_paymentmethod
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="weixinnum != null and weixinnum != ''">weixinnum,</if>
+	        <if test="weixinqrcode != null and weixinqrcode != ''">weixinqrcode,</if>
+	        <if test="weixinrealname != null">weixinrealname,</if>
+	        <if test="alipaynum != null">alipaynum,</if>
+	        <if test="alipayqrcode != null and alipayqrcode != ''">alipayqrcode,</if>
+	        <if test="alipayrealname != null">alipayrealname,</if>
+	        <if test="bank != null and bank !=''">bank,</if>
+	        <if test="banknum != null and banknum !=''">banknum,</if>
+	        <if test="bankrealname != null and bankrealname !=''">bankrealname,</if>
+	        createtime
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="weixinnum != null and weixinnum != ''">#{weixinnum},</if>
+	        <if test="weixinqrcode != null and weixinqrcode != ''">#{weixinqrcode},</if>
+	        <if test="weixinrealname != null">#{weixinrealname},</if>
+	        <if test="alipaynum != null">#{alipaynum},</if>
+	        <if test="alipayqrcode != null and alipayqrcode != ''">#{alipayqrcode},</if>
+	        <if test="alipayrealname != null">#{alipayrealname},</if>
+	        <if test="bank != null and bank !=''">#{bank},</if>
+	        <if test="banknum != null and banknum !=''">#{banknum},</if>
+	        <if test="bankrealname != null and bankrealname !=''">#{bankrealname},</if>
+	        now()
+	    </trim>
+	</insert>
+	
+	<update id="updatePaymentMethod" parameterType="map">
+		update c_t_app_paymentmethod
+		<set>
+	      	<if test="phone != null and phone != ''">weixinnum = #{weixinnum},</if>
+	      	<if test="weixinqrcode != null and weixinqrcode != ''">weixinqrcode = #{weixinqrcode},</if>
+	      	<if test="weixinrealname != null and weixinrealname != ''">weixinrealname = #{weixinrealname},</if>
+	      	<if test="alipaynum != null and alipaynum != ''">alipaynum = #{alipaynum},</if>
+	      	<if test="alipayqrcode != null and alipayqrcode != ''">alipayqrcode = #{alipayqrcode},</if>
+	      	<if test="alipayrealname != null and alipayrealname != ''">alipayrealname = #{alipayrealname},</if>
+	      	<if test="bank != null and bank != ''">bank = #{bank},</if>
+	      	<if test="banknum != null and banknum != ''">banknum = #{banknum},</if>
+	      	<if test="bankrealname != null and bankrealname != ''">bankrealname = #{bankrealname},</if>
+		</set>
+		<where>
+			<if test="userid != null and userid != ''">and userid=#{userid}</if>
+			<if test="paymentmethodid != null and paymentmethodid != ''">and paymentmethodid=#{paymentmethodid}</if>
+		</where> 
+	</update>
+	
+	
 </mapper>

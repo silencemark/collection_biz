@@ -107,4 +107,29 @@ public interface IAppUserCenterMapper {
 	 * @return
 	 */
 	Map<String, Object> getMyUserInfo(Map<String, Object> data);
+	
+	/**
+	 * 修改用户信息
+	 * @param data
+	 */
+	void updateUserInfo(Map<String, Object> data);
+	
+	/**
+	 * 获取收款方式
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getPaymentMethod(Map<String, Object> data);
+	
+	/**
+	 * 新增收款方式
+	 * @param data
+	 */
+	void addPaymentMethod(Map<String, Object> data );
+	
+	/**
+	 * 修改付息收款方式
+	 * @param data
+	 */
+	void updatePaymentMethod(Map<String, Object> data);
 }

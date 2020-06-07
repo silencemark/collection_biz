@@ -25,14 +25,13 @@
     <bean id="appLoginService" class="com.collection.service.impl.AppLoginServiceImpl"/>
     <bean id="appIndexService" class="com.collection.service.impl.AppIndexServiceImpl"/>
     <bean id="appVipCardService" class="com.collection.service.impl.AppVipCardServiceImpl"/>
-    
+    <bean id="appUserCenterService" class="com.collection.service.impl.AppUserCenterServiceImpl"/>
     
     <!-- 声明需要暴露的服务接口     -->
     <dubbo:service interface="com.collection.service.IAppLoginService" ref="appLoginService" />
     <dubbo:service interface="com.collection.service.IAppIndexService" ref="appIndexService" />
     <dubbo:service interface="com.collection.service.IAppVipCardService" ref="appVipCardService" />
-    
-    
+    <dubbo:service interface="com.collection.service.IAppUserCenterService" ref="appUserCenterService" />
     
    	<bean id="indexService" class="com.collection.service.impl.IndexServiceImpl"/>
    	<bean id="companyService" class="com.collection.service.impl.CompanyServiceImpl"/>
@@ -94,10 +93,6 @@
     <!-- 组织检查模板 -->
     <dubbo:service interface="com.collection.service.worksheet.OrganizeTemplateService" ref="organizeTemplateService" />
     
-    <!--  OA日志管理 -->
-    <dubbo:service interface="com.collection.service.oa.JournalService" ref="journalService" />
-    <!--  OA通用审批-->
-    <dubbo:service interface="com.collection.service.oa.ApprovalService" ref="approvalService" />
      <!--  消息讨论组-->
     <dubbo:service interface="com.collection.service.chat.ChatService" ref="chatService" />
     <!-- 个人中心 -->
