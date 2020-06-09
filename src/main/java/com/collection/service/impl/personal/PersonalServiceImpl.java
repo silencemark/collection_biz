@@ -21,7 +21,6 @@ import com.collection.dao.worksheet.WorkSheetInspectMapper;
 import com.collection.service.managebackstage.CustomerFileService;
 import com.collection.service.personal.PersonalService;
 import com.collection.service.worksheet.WorkSheetInspectService;
-import com.collection.util.ImageUtil;
 
 /**
  * 用户管理
@@ -467,27 +466,23 @@ public class PersonalServiceImpl implements PersonalService{
 					String headimage = String.valueOf(usermap.get("headimage"));
 					if(usermap.containsKey("headimage") && !"".equals(headimage)){
 						if(headimage.indexOf("/systemDefaultUserHeadimg") > 0){
-							try {
-								String headimg = ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(map.get("realname")), String.valueOf(map.get("userid")),
-										String.valueOf(map.get("getRealPath")), String.valueOf(map.get("fileDirectory"))+String.valueOf(usermap.get("comapnyid")));
-								//记录头像信息修改公司的磁盘空间大小
-								 try {
-								    	Map<String,Object> param = new HashMap<String,Object>();
-								    	param.put("companyid", usermap.get("companyid"));
-								    	param.put("userid", map.get("userid"));
-								    	param.put("size", 8);
-								    	param.put("type", map.get("headimgtype"));
-								    	param.put("url", headimg);
-										this.customerFileService.insertCustomerFileInfo(param);
-									} catch (Exception e) {
-										// TODO: handle exception
-										e.printStackTrace();
-									}
-								map.put("headimage", headimg);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							String headimg = "";
+							//= ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(map.get("realname")), String.valueOf(map.get("userid")),
+									//String.valueOf(map.get("getRealPath")), String.valueOf(map.get("fileDirectory"))+String.valueOf(usermap.get("comapnyid")));
+							//记录头像信息修改公司的磁盘空间大小
+							 try {
+							    	Map<String,Object> param = new HashMap<String,Object>();
+							    	param.put("companyid", usermap.get("companyid"));
+							    	param.put("userid", map.get("userid"));
+							    	param.put("size", 8);
+							    	param.put("type", map.get("headimgtype"));
+							    	param.put("url", headimg);
+									this.customerFileService.insertCustomerFileInfo(param);
+								} catch (Exception e) {
+									// TODO: handle exception
+									e.printStackTrace();
+								}
+							map.put("headimage", headimg);
 						}
 					}
 				}
@@ -548,26 +543,22 @@ public class PersonalServiceImpl implements PersonalService{
 		map.put("createtime", new Date());
 		if(!map.containsKey("headimage") || "".equals(map.get("headimage"))){
 			String imgurl = "";
-			try {
-				imgurl = ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(map.get("realname")), String.valueOf(map.get("userid")),
-						String.valueOf(map.get("getRealPath")), String.valueOf(map.get("fileDirectory"))+String.valueOf(map.get("companyid")));
-				//记录头像信息修改公司的磁盘空间大小
-				 try {
-				    	Map<String,Object> param = new HashMap<String,Object>();
-				    	param.put("companyid", map.get("companyid"));
-				    	param.put("userid", map.get("userid"));
-				    	param.put("size", 8);
-				    	param.put("type", 13);
-				    	param.put("url", imgurl);
-						this.customerFileService.insertCustomerFileInfo(param);
-					} catch (Exception e) {
-						// TODO: handle exception
-						e.printStackTrace();
-					}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			imgurl = "";
+					//ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(map.get("realname")), String.valueOf(map.get("userid")),
+					//String.valueOf(map.get("getRealPath")), String.valueOf(map.get("fileDirectory"))+String.valueOf(map.get("companyid")));
+			//记录头像信息修改公司的磁盘空间大小
+			 try {
+			    	Map<String,Object> param = new HashMap<String,Object>();
+			    	param.put("companyid", map.get("companyid"));
+			    	param.put("userid", map.get("userid"));
+			    	param.put("size", 8);
+			    	param.put("type", 13);
+			    	param.put("url", imgurl);
+					this.customerFileService.insertCustomerFileInfo(param);
+				} catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
 			map.put("headimage", imgurl);
 		}
 		this.personalMapper.insertUserInfo(map);

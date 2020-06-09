@@ -7,7 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <name>collection.biz</name>
-  <url>http://maven.apache.org</url>
+  <url>http://repo1.maven.org/maven2</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -197,5 +197,34 @@
 	    </plugin>  
 	</plugins>
     <finalName>collection.biz</finalName> 
-  </build>
+  </build> 
+  
+  <!-- <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.collection.main.StartProvider</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build> -->
+  
 </project>

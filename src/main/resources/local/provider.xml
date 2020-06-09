@@ -51,8 +51,6 @@
     <bean id="rewardInfoService" class="com.collection.service.impl.worksheet.RewardInfoServiceImpl"/>
     <!-- 组织检查模板 -->
     <bean id="organizeTemplateService" class="com.collection.service.impl.worksheet.OrganizeTemplateServiceImpl"/>
-    <!--  消息讨论组-->
-    <bean id="chatService" class="com.collection.service.impl.chat.ChatServiceImpl"/> 
     <!-- 个人中心 -->
     <bean id="personalService" class="com.collection.service.impl.personal.PersonalServiceImpl"/>
     <!-- 每日报表 -->
@@ -93,8 +91,6 @@
     <!-- 组织检查模板 -->
     <dubbo:service interface="com.collection.service.worksheet.OrganizeTemplateService" ref="organizeTemplateService" />
     
-     <!--  消息讨论组-->
-    <dubbo:service interface="com.collection.service.chat.ChatService" ref="chatService" />
     <!-- 个人中心 -->
     <dubbo:service interface="com.collection.service.personal.PersonalService" ref="personalService" />
     <!-- 每日报表 -->

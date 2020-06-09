@@ -17,7 +17,6 @@ import com.collection.dao.CompanyMapper;
 import com.collection.dao.UserInfoMapper;
 import com.collection.service.UserInfoService;
 import com.collection.service.managebackstage.CustomerFileService;
-import com.collection.util.ImageUtil;
 /**
  * 采购管理
  * @author silence
@@ -39,26 +38,22 @@ public class UserInfoServiceImpl implements UserInfoService{
 		data.put("delflag", 0);
 		data.put("createtime", new Date());
 		String imgurl = "/app/appcssjs/images/defaultheadimage.png";
-		try {
-			imgurl = ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(data.get("realname")),String.valueOf(data.get("userid")),
-					String.valueOf(data.get("gerRealPath")), String.valueOf(data.get("fileDirectory"))+String.valueOf(data.get("companyid")));
-			//记录头像信息修改公司的磁盘空间大小
-			 try {
-			    	Map<String,Object> param = new HashMap<String,Object>();
-			    	param.put("companyid", data.get("companyid"));
-			    	param.put("userid", data.get("userid"));
-			    	param.put("size", 8);
-			    	param.put("type", 1);
-			    	param.put("url", imgurl);
-					this.customerFileService.insertCustomerFileInfo(param);
-				} catch (Exception e) {
-					// TODO: handle exception
-					e.printStackTrace();
-				}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		imgurl = "";
+				//ImageUtil.randomlyGeneratedDefaultAvatar(String.valueOf(data.get("realname")),String.valueOf(data.get("userid")),
+				//String.valueOf(data.get("gerRealPath")), String.valueOf(data.get("fileDirectory"))+String.valueOf(data.get("companyid")));
+		//记录头像信息修改公司的磁盘空间大小
+		 try {
+		    	Map<String,Object> param = new HashMap<String,Object>();
+		    	param.put("companyid", data.get("companyid"));
+		    	param.put("userid", data.get("userid"));
+		    	param.put("size", 8);
+		    	param.put("type", 1);
+		    	param.put("url", imgurl);
+				this.customerFileService.insertCustomerFileInfo(param);
+			} catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
 		data.put("headimage", imgurl);
 		this.userInfoMapper.insertUserInfo(data);
 	}
