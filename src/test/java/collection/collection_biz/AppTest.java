@@ -1,4 +1,4 @@
-package labor.labor_biz;
+package collection.collection_biz;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

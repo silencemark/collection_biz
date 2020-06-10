@@ -79,7 +79,6 @@
 		<groupId>javax.servlet</groupId>
 		<artifactId>servlet-api</artifactId>
 		<version>2.5</version>
-		<scope>provided</scope>
 	</dependency>
 	<!-- servlet 配置 end -->
 	<!-- dubbo包引用 配置 begin -->
@@ -184,47 +183,55 @@
 			<version>3.1</version>
 		</dependency>
   </dependencies>
-  <build> 
-  	<plugins>  
-	    <plugin>  
-	        <groupId>org.apache.maven.plugins</groupId>  
-	        <artifactId>maven-compiler-plugin</artifactId>  
-	        <version>2.3.2</version>  
-	        <configuration>  
-	            <source>1.7</source>  
-	            <target>1.7</target>  
-	        </configuration>  
-	    </plugin>  
-	</plugins>
-    <finalName>collection.biz</finalName> 
-  </build> 
-  
-  <!-- <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.collection.main.StartProvider</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>assembly</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build> -->
-  
+  <build>
+  		<finalName>collection.biz</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>com.collection.main.StartProvider</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			 <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/package.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>  
+		        <groupId>org.apache.maven.plugins</groupId>  
+		        <artifactId>maven-compiler-plugin</artifactId>  
+		        <version>2.3.2</version>  
+		        <configuration>  
+		            <source>1.7</source>  
+		            <target>1.7</target>  
+		        </configuration>  
+		    </plugin> 
+		</plugins>
+  </build>
+  	
 </project>
