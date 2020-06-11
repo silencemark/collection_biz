@@ -11,30 +11,25 @@
 	
 	<select id="getAdvertisement" parameterType="map" resultType="map">
 	    select advertid, advertcontent, imgurl, httpurl, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid from  c_t_app_advert
-	    <where>
-	        <if test="type != null and type != ''">and type=#{type}</if>
-	        and status = 1
-	    </where>
 	</select>
 	
 	<select id="getHomePageMovie" parameterType="map" resultType="map">
-	    select movieid, coverimg, title, httputl, description, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid, DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
+	    select type,movieid, coverimg, title, httpurl, description, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid, DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
 	    from  c_t_app_movie
 	    <where>
 	        <if test="type != null and type != '' and type != 0">and type=#{type}</if>
-	        <if test="type != null and type = 0">and 1=1 </if>
+	        <if test="type == 0">and 1=1 </if>
 	        and status = 1
 	    </where>
 	</select>
 	
 	<select id="getMemberMovieList" parameterType="map" resultType="map">
-	    select mo.movieid, mo.coverimg, mo.title, mo.httputl, mo.description, DATE_FORMAT(mo.createtime,'%Y-%m-%d %H:%i:%S') as createtime, mo.createid, DATE_FORMAT(mo.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
-	    from c_t_app_order or
-	    left join c_t_app_membermovie mo on or.cardid = mo.cardid and mo.status = 1
-	    
+	    select 1 as type,mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, DATE_FORMAT(mo.createtime,'%Y-%m-%d %H:%i:%S') as createtime, mo.createid, DATE_FORMAT(mo.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
+	    from c_t_app_order ao
+	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
 	    <where>
-	        <if test="userid != null and userid != '' ">and or.buyuserid=#{userid}</if>
-	         and or.status = 3
+	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
+	         and ao.status = 3
 	    </where>
 	</select>
 	

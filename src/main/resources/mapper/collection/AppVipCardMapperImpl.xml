@@ -32,8 +32,8 @@
 	</select>
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
-			timestampdiff(SECOND,now(),date_add(createtime, interval 1 hour)) as remaintime,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
+			timestampdiff(SECOND,now(),date_add(ao.createtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
@@ -45,7 +45,7 @@
 			and ao.status = 1
 			and ao.buyuserid = #{userid}
 		union 
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(buytime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
@@ -58,7 +58,7 @@
 			and ao.status = 2
 			and ao.buyuserid = #{userid}
 		union 
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			0,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
@@ -73,9 +73,9 @@
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
 		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,
-		DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime, mc.price,us.xgocoin,
+		DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,us.xgocoin,
 		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname
-		from c_t_app_order  or
+		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
@@ -92,15 +92,22 @@
 	</update>
 	
 	<select id="getContactPhone" parameterType="map" resultType="map">
-		select ce.realname,us.phone, pm.weixinnum c_t_app_certification ce
-		left join c_t_app_userinfo us on ce.userid = us.userid
-		left join c_t_app_paymentmethod pm on ce.userid = pm.userid
-		where ce.userid = #{userid} and ce.status = 1 
-		limit 1
+		SELECT
+			ce.realname,
+			us.phone,
+			pm.weixinnum
+		FROM
+			c_t_app_userinfo us
+		LEFT JOIN c_t_app_certification ce ON ce.userid = us.userid
+		AND ce. STATUS = 1
+		LEFT JOIN c_t_app_paymentmethod pm ON ce.userid = pm.userid
+		WHERE
+			us.userid = #{userid}
+		LIMIT 1
 	</select>
 	
 	<select id="getSaleCardList" parameterType="map" resultType="map">
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.createtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
@@ -113,7 +120,7 @@
 			and ao.status = 1
 			and ao.selluserid = #{userid}
 		union 
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
@@ -126,7 +133,7 @@
 			and ao.status = 2
 			and ao.selluserid = #{userid}
 		union 
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			0,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
@@ -140,7 +147,7 @@
 	</select>
 	
 	<select id="getExamineInfo" parameterType="map" resultType="map">
-		select ao.orderid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,mc.price,
+		select ao.orderid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,ao.cardprice,
 		timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
 		ao.payorder,ce.realname,us.phone, pm.weixinnum
 		 from c_t_app_order ao
@@ -214,7 +221,7 @@
 	</update>
 	
 	<select id="getMyCardList" parameterType="map" resultType="map">
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
@@ -234,7 +241,7 @@
 			ao.commentcount as alreadycount,
 			mc.commentstartdays，
 			mc.commentcount,
-			mc.price
+			ao.cardprice
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
@@ -257,7 +264,7 @@
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
 			mc.commentcount,
-			(mc.price + ao.profitprice) as maxprice
+			(ao.cardprice + ao.profitprice) as maxprice
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
