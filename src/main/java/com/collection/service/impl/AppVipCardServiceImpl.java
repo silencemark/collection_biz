@@ -122,6 +122,21 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Override
 	public List<Map<String, Object>> getMyCardList(Map<String, Object> data) {
+		//点击查询前可根据好评数和剩余观看天数到时间了 可置为到期可出售状态
+		//查询买家为当前用户 且时间大于 可出售最低时限 且 好评数大于需要的好评次数的订单
+		List<Map<String, Object>> orderlist = this.appVipCardMapper.getSellOrderListByid(data);
+		//更改订单为 到期可出售的债券status = 4
+		for (Map<String, Object> orderMap : orderlist) {
+			orderMap.put("status", 4);
+			this.appVipCardMapper.updateCardOrderStatus(orderMap);
+		}
+		//查询买家为当前用户 且时间大于剩余时限的订单
+		orderlist = this.appVipCardMapper.getDueOrderListByid(data);
+		//更改订单为过期不可出售的债券status = 5
+		for (Map<String, Object> orderMap : orderlist) {
+			orderMap.put("status", 5);
+			this.appVipCardMapper.updateCardOrderStatus(orderMap);
+		}
 		return this.appVipCardMapper.getMyCardList(data);
 	}
 

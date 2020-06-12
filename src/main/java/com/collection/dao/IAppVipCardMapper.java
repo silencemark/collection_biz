@@ -128,6 +128,20 @@ public interface IAppVipCardMapper {
 	Map<String, Object> getMemberCardInfo(Map<String, Object> data);
 	
 	/**
+	 * 获取可出售订单id列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getSellOrderListByid(Map<String, Object> data);
+	
+	/**
+	 * 获取到期订单列表ID
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getDueOrderListByid(Map<String, Object> data);
+	
+	/**
 	 * 获取会员VIP卡对应的视频包
 	 * @param data
 	 * @return

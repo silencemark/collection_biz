@@ -147,7 +147,7 @@
 	</select>
 	
 	<select id="getExamineInfo" parameterType="map" resultType="map">
-		select ao.orderid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,ao.cardprice,
+		select ao.orderid, ao.buyuserid, ao.selluserid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,ao.cardprice,
 		timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
 		ao.payorder,ce.realname,us.phone, pm.weixinnum
 		 from c_t_app_order ao
@@ -166,7 +166,7 @@
 	</update>
 	
 	<select id="getUserVipCount" parameterType="map" resultType="int">
-		select count(0) from orderid
+		select count(0) from c_t_app_order
 		<where>
 			<if test="status != null and status != ''">and status >= #{status} </if>
 			<if test="buyuserid != null and buyuserid != ''">and buyuserid = #{buyuserid} </if>
@@ -230,7 +230,7 @@
 			mc.yield
 			from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
-			where ao.status in (3 , 4 )
+			where ao.status in (3,4,5)
 			and ao.buyuserid = #{userid}
 	</select>
 	
@@ -239,7 +239,7 @@
 			DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
 			ao.commentcount as alreadycount,
-			mc.commentstartdays，
+			mc.commentstartdays,
 			mc.commentcount,
 			ao.cardprice
 		from c_t_app_order  ao
@@ -250,8 +250,26 @@
 			and ao.orderid = #{orderid}
 	</select> 
 	
+	<select id="getSellOrderListByid" parameterType="map" resultType="map">
+		select ao.orderid from c_t_app_order ao
+		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
+		where ao.status = 3
+			and ao.buyuserid = #{userid}
+			and timestampdiff(day,now(),ao.createtime) > mc.commentstartdays
+			and ao.commentcount >= mc.commentcount
+	</select>
+	
+	<select id="getDueOrderListByid">
+		select ao.orderid from c_t_app_order ao
+		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
+		where ao.status in (3,4)
+			and ao.buyuserid = #{userid}
+			and timestampdiff(day,now(),ao.createtime) > mc.watchdays
+	</select>
+	
+	
 	<select id="getMovieByCardId" parameterType="map" resultType="map">
-		select movieid, cardid, coverimg, title, description,httputl,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%s') as createtime 
+		select movieid, cardid, coverimg, title, description,httpurl,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%s') as createtime 
 		from c_t_app_membermovie 
 		where cardid = #{cardid}
 		and status = 1

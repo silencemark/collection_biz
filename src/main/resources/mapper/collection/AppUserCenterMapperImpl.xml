@@ -24,7 +24,7 @@
 		update c_t_app_userinfo 
 		set xgocoin = xgocoin + 1,
 			growthvalue = growthvalue + #{growthvalue}
-		hwhere userid = #{userid}
+		where userid = #{userid}
 	</update>
 	
 	<update id="updateUserInfoLevel" parameterType="map">

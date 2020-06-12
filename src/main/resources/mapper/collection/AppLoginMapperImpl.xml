@@ -4,12 +4,9 @@
 	<select id="login" parameterType="map" resultType="map">
 	    select userid,password,phone,nickname,status,delflag,DATE_FORMAT(ctau.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,DATE_FORMAT(ctau.createtime,'%Y-%m-%d %H:%i:%S') as createtime
 	    from  c_t_app_userinfo ctau
-	    <where>
-	        <if test="phone != null and phone != ''">and ctau.phone=#{phone}</if>
-	        <if test="nickname != null and nickname != ''">and ctau.nickname=#{nickname}</if>
-	        <if test="password != null and password != ''">and ctau.password=#{password}</if>
-	        and ctau.delflag=0
-	    </where>
+	    where ctau.phone=#{phone}
+	    and ctau.password=#{password}
+	    and ctau.delflag=0
 	</select>
 	
 	<select id="getMaxUserid" resultType="int">
@@ -18,9 +15,7 @@
 	
 	<select id="checkPhone" parameterType="map" resultType="map">
 	    select * from  c_t_app_userinfo 
-	    <where>
-	        <if test="phone != null and phone != ''">and phone=#{phone}</if>
-	    </where>
+	    where phone=#{phone}
 	</select>
 
 	<insert id="insertUserInfo" parameterType="map">
@@ -31,6 +26,7 @@
             <if test="phone != null and phone != ''">phone,</if>
             <if test="nickname != null and nickname != ''">nickname,</if>
             <if test="invitecode != null and invitecode != ''">invitecode,</if>
+           <if test="parentid != null and parentid != ''">parentid,</if> 
             <if test="createtime != null and createtime != ''">createtime,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -39,6 +35,7 @@
             <if test="phone != null and phone != ''">#{phone},</if>
             <if test="nickname != null and nickname != ''">#{nickname},</if>
             <if test="invitecode != null and invitecode != ''">#{invitecode},</if>
+            <if test="parentid != null and parentid != ''">#{parentid},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
         </trim>
 	
