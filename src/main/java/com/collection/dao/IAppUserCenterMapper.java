@@ -88,6 +88,12 @@ public interface IAppUserCenterMapper {
 	List<Map<String, Object>> getExchangeList(Map<String, Object> data);
 	
 	/**
+	 * 新增兑换记录
+	 * @param data
+	 */
+	void insertExchange(Map<String, Object> data);
+	
+	/**
 	 * 获取我的邀请码 和 qr邀请二维码
 	 * @param data
 	 * @return

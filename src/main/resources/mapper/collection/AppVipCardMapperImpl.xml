@@ -33,7 +33,7 @@
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
-			timestampdiff(SECOND,now(),date_add(ao.createtime, interval 1 hour)) as remaintime,
+			timestampdiff(SECOND,now(),date_add(ao.rushtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
@@ -41,7 +41,7 @@
 			mc.yield
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
-			where ao.createtime  &gt; date_add(now(), interval -1 hour) 
+			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 1
 			and ao.buyuserid = #{userid}
 		union 
@@ -71,9 +71,32 @@
 			and ao.buyuserid = #{userid}
 	</select>
 	
+	<select id="getRushToBuyList" parameterType="map" resultType="map">
+		SELECT mc.cardid,
+				mc.typename,
+				mc.cardicon,
+				mc.minprice,
+				mc.maxprice,
+				mc.xgocoin,
+				mc.starttime,
+				mc.endtime,
+				mc.commentstartdays,
+				mc.watchdays,
+				mc.commentcount,
+				mc.yield,
+				DATE_FORMAT(bu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+				timestampdiff(SECOND,now(),bu.createtime) as secondbuy,
+				bu.status
+			FROM
+				c_t_app_rushtobuy  bu
+				left join	c_t_app_membercard mc on bu.cardid = mc.cardid
+				where bu.userid = #{userid}
+			order by bu.status,bu.createtime desc
+	</select>
+	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
 		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,
-		DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,us.xgocoin,
+		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,us.xgocoin,
 		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
@@ -108,7 +131,7 @@
 	
 	<select id="getSaleCardList" parameterType="map" resultType="map">
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
-			timestampdiff(SECOND,now(),date_add(ao.createtime, interval 1 hour)) as remaintime,
+			timestampdiff(SECOND,now(),date_add(ao.rushtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
@@ -116,7 +139,7 @@
 			mc.yield
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
-			where ao.createtime  &gt; date_add(now(), interval -1 hour) 
+			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 1
 			and ao.selluserid = #{userid}
 		union 
@@ -236,7 +259,7 @@
 	
 	<select id="getMemberCardInfo" parameterType="map" resultType="map">
 		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
-			DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime,
+			DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
@@ -255,7 +278,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status = 3
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,now(),ao.createtime) > mc.commentstartdays
+			and timestampdiff(day,now(),ao.rushtime) > mc.commentstartdays
 			and ao.commentcount >= mc.commentcount
 	</select>
 	
@@ -264,7 +287,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,now(),ao.createtime) > mc.watchdays
+			and timestampdiff(day,now(),ao.rushtime) > mc.watchdays
 	</select>
 	
 	
@@ -277,7 +300,7 @@
 	
 	<select id="getSellCardInfo" parameterType="map" resultType="map">
 		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
-			DATE_FORMAT(ao.createtime,'%Y-%m-%d %H:%i:%S') as buytime,
+			DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
@@ -297,7 +320,8 @@
 	
 	<select id="getMemberCardByPrice" parameterType="map" resultType="map">
 		select cardid,typename,type,cardicon,cardimg,xgocoin,minprice,maxprice,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,
-		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime
+		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime,
+		(#{cardprice}*yield/100) as profitprice
 		from c_t_app_membercard
 		where status = 1
 		and maxprice &gt;= #{cardprice}
@@ -313,8 +337,9 @@
 	        <if test="cardid != null and cardid != ''">cardid,</if>
 	        <if test="cardprice != null and cardprice != ''">cardprice,</if>
 	        <if test="selluserid != null and selluserid != ''">selluserid,</if>
-	        <if test="ordertype != null and ordertype != ''">ordertype,</if>
 	        <if test="selltime != null and selltime != ''">selltime,</if>
+	        <if test="profitprice != null and profitprice != ''">profitprice,</if>
+	        <if test="ordertype != null and ordertype != ''">ordertype,</if>
 	        <if test="createtime != null and createtime != ''">createtime,</if>
 	    </trim>
 	    <trim prefix="values(" suffix=")" suffixOverrides=",">
@@ -322,8 +347,9 @@
 	        <if test="cardid != null and cardid != ''">#{cardid},</if>
 	        <if test="cardprice != null and cardprice != ''">#{cardprice},</if>
 	        <if test="selluserid != null and selluserid != ''">#{selluserid},</if>
-	        <if test="ordertype != null and ordertype != ''">#{ordertype},</if>
 	        <if test="selltime != null and selltime != ''">#{selltime},</if>
+	        <if test="profitprice != null and profitprice != ''">#{profitprice},</if>
+	        <if test="ordertype != null and ordertype != ''">#{ordertype},</if>
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>
@@ -333,4 +359,15 @@
 		set sumprofit = sumprofit + #{overprofit}
 		where userid = #{userid}
 	</update>
+	
+	<insert id="insertOverFlow" parameterType="map">
+		insert into c_t_app_overflow(cardid, userid, createtime)
+		values(#{cardid}, #{userid}, #{createtime})
+	</insert>
+	
+	
+	<insert id="insertRushToBuy" parameterType="map">
+		insert into c_t_app_rushtobuy(userid, overprofit, orderid, createtime)
+		values(#{userid}, #{overprofit}, #{orderid}, #{createtime})
+	</insert>
 </mapper>

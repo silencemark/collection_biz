@@ -179,4 +179,24 @@ public interface IAppVipCardMapper {
 	 * @param data
 	 */
 	void addUserInfoOverProfit(Map<String, Object> data);
+	
+	/**
+	 * 增加溢出记录
+	 * @param data
+	 */
+	void insertOverFlow(Map<String, Object> data);
+	
+	/**
+	 * 参与抢购中
+	 * @param data
+	 */
+	void insertRushToBuy(Map<String, Object> data);
+	
+
+	/**
+	 * 获取我的会员卡列表（抢购中）
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getRushToBuyList(Map<String, Object> data);
 }

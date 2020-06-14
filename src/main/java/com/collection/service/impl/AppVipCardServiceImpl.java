@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -163,21 +163,54 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			double overprofit = 20000d - cardprice;
 			cardprice = 20000d;
 			data.put("overprofit", overprofit);
+			//添加到个人可兑换资产
 			this.appVipCardMapper.addUserInfoOverProfit(data);
+			//添加到溢出 
+			data.put("createtime", new Date());
+			this.appVipCardMapper.insertOverFlow(data);
 		}
 		data.put("cardprice", cardprice);
 		//2、把原来的会员卡订单置为过期
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("orderid", data.get("orderid"));
-		map.put("status", 5);
-		this.appVipCardMapper.updateCardOrderStatus(data);
-		//3、根据价格生成一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
+		map.put("status", 5); 
+		this.appVipCardMapper.updateCardOrderStatus(map);
+		//3、根据价格匹配一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
 		Map<String, Object> cardMap = this.appVipCardMapper.getMemberCardByPrice(data);
 		cardMap.put("cardprice", cardprice);
 		cardMap.put("selluserid", data.get("userid"));
-		cardMap.put("ordernum", UUID.randomUUID().toString().replaceAll("-", ""));
+		cardMap.put("ordernum", generateUniqueKey());
 		cardMap.put("ordertype", 1);
+		cardMap.put("createtime", new Date());
 		//4、生成待出售的订单
 		this.appVipCardMapper.insertOrder(cardMap);
 	}
+
+	@Override
+	public void insertRushToBuy(Map<String, Object> data) {
+		data.put("createtime", new Date());
+		this.appVipCardMapper.insertRushToBuy(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getRushToBuyList(Map<String, Object> data) {
+		return this.appVipCardMapper.getRushToBuyList(data);
+	}
+	
+	
+	/**
+     * 生成主键id
+     * 时间+随机数
+     * silence
+     * @return
+     */
+    public static synchronized String generateUniqueKey(){
+        Random random = new Random();
+        // 随机数的9位随机数
+        Integer r = random.nextInt(900000000) + 100000000;
+        // 返回  13位时间
+        Long timeMillis = System.currentTimeMillis();
+        // 13位毫秒+9位随机数
+        return  timeMillis + String.valueOf(r);
+    }
 }

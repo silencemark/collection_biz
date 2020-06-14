@@ -2,20 +2,22 @@
 <mapper namespace="com.collection.dao.IAppUserCenterMapper">
 
 	<select id="getMyCenter" parameterType="map" resultType="map">
-	    select userid,password,phone,nickname,status,delflag,headimage,DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
-	    DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,
-	    xgocoin,
-	    sumprofit,
-	    sumassets,
-	    growthvalue,
-	    isrealname
-	    from  c_t_app_userinfo ctau
+	    select us.userid,us.password,us.phone,us.nickname,us.status,us.delflag,us.headimage,DATE_FORMAT(us.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+	    DATE_FORMAT(us.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    us.xgocoin,
+	    us.sumprofit,
+	    us.sumassets,
+	    us.growthvalue,
+	    us.isrealname,
+		us.growthvalue,ml.levelname,CONCAT('V',ml.levelenum) as levelenum, CONCAT('V',ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+	    from  c_t_app_userinfo us
+		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 	    <where>
-	        <if test="phone != null and phone != ''">and phone=#{phone}</if>
-	        <if test="nickname != null and nickname != ''">and nickname=#{nickname}</if>
-	        <if test="password != null and password != ''">and password=#{password}</if>
-	        <if test="userid != null and userid != ''"> and userid = #{userid}</if>
-	        and delflag=0
+	        <if test="phone != null and phone != ''">and us.phone=#{phone}</if>
+	        <if test="nickname != null and nickname != ''">and us.nickname=#{nickname}</if>
+	        <if test="password != null and password != ''">and us.password=#{password}</if>
+	        <if test="userid != null and userid != ''"> and us.userid = #{userid}</if>
+	        and us.delflag=0
 	    </where>
 	    limit 1
 	</select>
@@ -43,7 +45,8 @@
 	</update>
 	
 	<select id="myGrowthValue" parameterType="map" resultType="map">
-		select us.growthvalue,ml.levelname,ml.levelenum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes from c_t_app_userinfo us 
+		select us.growthvalue,ml.levelname,CONCAT('V',ml.levelenum) as levelenum, CONCAT('V',ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+		from c_t_app_userinfo us 
 		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 		 where userid = #{userid}
 	</select>
@@ -55,7 +58,11 @@
 	<update id="deleteCertification" parameterType="map">
 		update c_t_app_certification
 		set delflag = 1
-		where userid = #{userid}
+		<where>
+	        <if test="certificationid != null and certificationid != ''">and certificationid=#{certificationid}</if>
+	        <if test="userid != null and userid != ''"> and userid = #{userid}</if>
+	        and delflag=0
+	    </where>
 	</update>
 	<insert id="certification" parameterType="map">
 		insert into c_t_app_certification
@@ -64,7 +71,6 @@
 	        <if test="nationality != null and nationality != ''">nationality,</if>
 	        <if test="realname != null and realname != ''">realname,</if>
 	        <if test="idcard != null and idcard != ''">idcard,</if>
-	        <if test="status != null and status != ''">status,</if>
 	        <if test="createtime != null and createtime != ''">createtime,</if>
 	    </trim>
 	    <trim prefix="values(" suffix=")" suffixOverrides=",">
@@ -72,7 +78,6 @@
 	        <if test="nationality != null and nationality != ''">#{nationality},</if>
 	        <if test="realname != null and realname != ''">#{realname},</if>
 	        <if test="idcard != null and idcard != ''">#{idcard},</if>
-	        <if test="status != null and status != ''">#{status},</if>
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>
@@ -103,33 +108,36 @@
 	
 	<select id="getSonProfit" parameterType="map" resultType="map">
 		select userid,nickname,headimage,sum(parentprofit) as sumprofit from (
-		select us.userid,us.nickname,us.headimage,te.parentprofit 
-		from c_t_app_teamprofit te 
-		left join c_t_app_userinfo us  on te.userid = us.userid
-		where te.parentid = #{userid}
+		select us.userid,us.nickname,us.headimage,IFNULL(te.parentprofit,0) as parentprofit
+		from c_t_app_userinfo us
+		left join c_t_app_teamprofit te on te.userid = us.userid
+		where us.parentid = #{userid}
 		) A group by userid,nickname,headimage
+		order by A.parentprofit desc
 	</select>
 	
 	<select id="getGrandSonProfit" parameterType="map" resultType="map">
 		select userid,nickname,headimage,sum(grandfatherprofit) as sumprofit from (
-		select us.userid,us.nickname,us.headimage,te.grandfatherprofit 
-		from c_t_app_teamprofit te 
-		left join c_t_app_userinfo us on te.userid = us.userid
-		where te.grandfatherid = #{userid}
-		) A group by userid,nickname,headimage
+			select us.userid,us.nickname,us.headimage,IFNULL(te.grandfatherprofit ,0) as grandfatherprofit
+				from c_t_app_userinfo us
+				inner join c_t_app_userinfo usp on us.parentid = usp.userid and usp.parentid = #{grandid}
+				left join c_t_app_teamprofit te on te.userid = us.userid 
+				where us.parentid  = #{userid}
+			) A group by userid,nickname,headimage
+			order by A.grandfatherprofit desc
 	</select>
 	
 	<select id="myAssets" parameterType="map" resultType="map">
-		select (select sum(cardprice) from c_t_app_order where buyuserid = #{userid} and status > 1) as allorder,
-		(select sum(cardprice) from c_t_app_order where buyuserid = #{userid}  and status in (2, 3)) as buyorder,
-		(select sum(cardprice) from c_t_app_order where selluserid = #{userid}  and status in (0, 1)) as sellorder,
-		sumassets,sumprofit from c_t_app_userinfo us where userid = #{userid} 
+		select (select IFNULL(sum(cardprice),0) from c_t_app_order where buyuserid =#{userid} and status > 1) as allorder,
+		(select IFNULL(sum(cardprice), 0) from c_t_app_order where buyuserid = #{userid} and status in (2, 3)) as buyorder,
+		(select IFNULL(sum(cardprice), 0) from c_t_app_order where selluserid = #{userid} and status in (0, 1)) as sellorder,
+		sumassets,sumprofit from c_t_app_userinfo us where userid = #{userid}
 	</select>
 	
 	<select id="getExchangeList" parameterType="map" resultType="map">
-		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,mc.price,
+		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			mc.typename,
-			mc.yield 
+			mc.yield
 			from c_t_app_exchange ex
 			left join c_t_app_order ao on ex.orderid = ao.orderid
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
@@ -137,6 +145,11 @@
 			and ex.userid = #{userid}
 			and ordertype = 2
 	</select>
+	
+	<insert id="insertExchange" parameterType="map">
+		insert into c_t_app_exchange(userid,amount,ordernum,createtime)
+		values (#{userid}, #{amount}, #{ordernum}, now())
+	</insert>
 	
 	<select id="myInviteCode" parameterType="map" resultType="map">
 		select userid,invitecode,invitecodehttpurl,invitecodeqrcode from c_t_app_userinfo where userid = #{userid}
@@ -179,7 +192,7 @@
 	
 	<select id="getPaymentMethod" parameterType="map" resultType="map">
 		select paymentmethodid,userid,weixinnum,weixinqrcode,weixinrealname,alipaynum,alipayqrcode,alipayrealname,bank,banknum,bankrealname
-		c_t_app_paymentmethod 
+		from c_t_app_paymentmethod 
 		where userid = #{userid}
 	</select>
 	
@@ -216,7 +229,7 @@
 	<update id="updatePaymentMethod" parameterType="map">
 		update c_t_app_paymentmethod
 		<set>
-	      	<if test="phone != null and phone != ''">weixinnum = #{weixinnum},</if>
+	      	<if test="weixinnum != null and weixinnum != ''">weixinnum = #{weixinnum},</if>
 	      	<if test="weixinqrcode != null and weixinqrcode != ''">weixinqrcode = #{weixinqrcode},</if>
 	      	<if test="weixinrealname != null and weixinrealname != ''">weixinrealname = #{weixinrealname},</if>
 	      	<if test="alipaynum != null and alipaynum != ''">alipaynum = #{alipaynum},</if>
