@@ -23,7 +23,6 @@ public class SystemServiceImpl implements SystemService{
 	@Override
 	public Map<String, Object> getUserInfo(Map<String, Object> data) {
 		// TODO Auto-generated method stub
-		Map<String, Object> da = this.systemMapper.getUserInfo(data);
 		return this.systemMapper.getUserInfo(data);
 	}
 

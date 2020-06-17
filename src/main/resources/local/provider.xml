@@ -18,7 +18,7 @@
     <!-- 用dubbo协议在20881端口暴露服务
      -->
     <dubbo:protocol name="dubbo" port="20882" /> 
-    <dubbo:registry check="false" address="zookeeper://117.18.12.193:2181" file="/home/silence/zookeeper/cache/dubbo.cache"/>  
+    <dubbo:registry check="false" address="zookeeper://117.18.12.193:2181" file="/home/silence/zookeeper/cache/dubbo.cache"/>
     <!-- <dubbo:registry check="false" address="zookeeper://localhost:2181" file="/home/silence/zookeeper/cache/dubbo.cache"/> -->
     
     
@@ -28,12 +28,14 @@
     <bean id="appIndexService" class="com.collection.service.impl.AppIndexServiceImpl"/>
     <bean id="appVipCardService" class="com.collection.service.impl.AppVipCardServiceImpl"/>
     <bean id="appUserCenterService" class="com.collection.service.impl.AppUserCenterServiceImpl"/>
+    <bean id="manageBackStageService" class="com.collection.service.impl.ManageBackStageServiceImpl"/>
     
     <!-- 声明需要暴露的服务接口     -->
     <dubbo:service interface="com.collection.service.IAppLoginService" ref="appLoginService" />
     <dubbo:service interface="com.collection.service.IAppIndexService" ref="appIndexService" />
     <dubbo:service interface="com.collection.service.IAppVipCardService" ref="appVipCardService" />
     <dubbo:service interface="com.collection.service.IAppUserCenterService" ref="appUserCenterService" />
+    <dubbo:service interface="com.collection.service.IManageBackStageService" ref="manageBackStageService" />
     
    	<bean id="indexService" class="com.collection.service.impl.IndexServiceImpl"/>
    	<bean id="companyService" class="com.collection.service.impl.CompanyServiceImpl"/>

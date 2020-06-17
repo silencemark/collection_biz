@@ -138,4 +138,16 @@ public interface IAppUserCenterMapper {
 	 * @param data
 	 */
 	void updatePaymentMethod(Map<String, Object> data);
+	
+	/**
+	 * 获取我提过的问题及回复
+	 * @return
+	 */
+	List<Map<String, Object>> getMyQuestion(Map<String, Object> data);
+	
+	/**
+	 * 提交我的提问及投诉建议
+	 * @param data
+	 */
+	void addMyQuestion(Map<String, Object> data);
 }

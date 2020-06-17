@@ -1,0 +1,107 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IManageBackStageMapper">
+    <select id="getUserInfo" parameterType="map" resultType="map">
+        select userid,username,phone,email,realname,sex,birthday,headimage,status,createtime,updatetime,deletetime,delflag,address from c_t_manage_user
+        <where>
+            <if test="username != null and username != ''">and username=#{username}</if>
+            <if test="password != null and password != ''">and password=#{password}</if>
+            <if test="phone != null and phone != ''">and phone=#{phone}</if>
+            <if test="userid != null and userid != ''">and userid=#{userid}</if>
+        </where>
+        limit 1
+    </select>
+    
+   <select id="getUserList" parameterType="map" resultType="map">
+		select u.userid, u.phone, u.nickname, u.headimage, u.status,u.delflag,u.invitecode,u.invitecodehttpurl,u.invitecodeqrcode,u.parentid,u.levelid,
+		u.xgocoin,u.sumprofit,u.sumassets,u.growthvalue,u.isrealname, u.createtime, u.updatetime
+		 from  c_t_app_userinfo u
+		 left join c_t_app_certification c on u.userid = c.userid and c.status=1
+		<where>
+			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},u.nickname) > 0</if>
+			<if test="realname != null and realname != ''">and locate(#{realname},c.realname) > 0</if>
+			<if test="status != null and status != '全部'">and status = #{status}</if>
+			and u.delflag=0
+		</where>
+		order by u.createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<update id="updateUserInfo" parameterType="map">
+		update c_t_app_userinfo
+		<set>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="delflag != null and delflag != ''">delflag=#{delflag},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+        </set>
+        where userid=#{userid}
+	</update>
+	
+	<select id="getUserListCount" parameterType="map" resultType="int">
+		select count(0) from  c_t_app_userinfo u
+		 left join c_t_app_certification c on u.userid = c.userid and c.status=1
+		<where>
+			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
+			<if test="nickname != null and nickname != ''">and locate(#{phone},u.nickname) > 0</if>
+			<if test="realname != null and realname != ''">and locate(#{realname},c.realname) > 0</if>
+			<if test="status != null and status != '全部'">and locate(#{status},u.status) > 0</if>
+			and u.delflag=0
+		</where>
+	</select>
+	
+	<select id="getBannerList" resultType="map" parameterType="map">
+		select bannerid, imgurl, httpurl, type, status, updatetime, createtime 
+		from c_t_app_banner
+		<where>
+			<if test="type != null and type != '全部'">and type = #{type}</if>
+			<if test="status != null and status != '全部'">and status = #{status}</if>
+		</where>
+	</select>
+	
+	<select id="getBannerListCount" resultType="int" parameterType="map">
+		select  count(0) from c_t_app_banner
+		<where>
+			<if test="type != null and type != '全部'">and type = #{type}</if>
+			<if test="status != null and status != '全部'">and status = #{status}</if>
+		</where>
+	</select>
+	
+	<select id="getBannerInfo" resultType="map" parameterType="map">
+		select bannerid, imgurl, httpurl, type, status, updatetime, createtime 
+		from c_t_app_banner
+		<where>
+			<if test="bannerid != null and bannerid != ''">and bannerid = #{bannerid}</if>
+		</where>
+		limit 1 
+	</select>
+	
+	<update id="updateBanner" parameterType="map">
+        update c_t_app_banner
+        <set>
+            <if test="imgurl != null and imgurl != ''">imgurl=#{imgurl},</if>
+            <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+            <if test="type != null and type != ''">type=#{type},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+            <if test="status != null and status != ''">status=#{status},</if>
+        </set>
+        where bannerid=#{bannerid}
+    </update>
+    <insert id="insertBanner" parameterType="map">
+        insert into c_t_app_banner
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="imgurl != null and imgurl != ''">imgurl,</if>
+            <if test="httpurl != null and httpurl != ''">httpurl,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="createid != null and createid != ''">createid,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="imgurl != null and imgurl != ''">#{imgurl},</if>
+            <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="createid != null and createid != ''">#{createid},</if>
+        </trim>
+    </insert>
+</mapper>

@@ -186,6 +186,17 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	public void updatePaymentMethod(Map<String, Object> data) {
 		this.appUserCenterMapper.updatePaymentMethod(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getMyQuestion(Map<String, Object> data) {
+		return this.appUserCenterMapper.getMyQuestion(data);
+	}
+
+	@Override
+	public void addMyQuestion(Map<String, Object> data) {
+		data.put("createtime", new Date());
+		this.appUserCenterMapper.addMyQuestion(data);
+	}
 	
 	
 }

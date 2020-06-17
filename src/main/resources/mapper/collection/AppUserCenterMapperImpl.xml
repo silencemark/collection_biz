@@ -245,5 +245,24 @@
 		</where> 
 	</update>
 	
+	<select id="getMyQuestion" parameterType="map" resultType="map">
+		select questioncontent,replycontent,DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime 
+		from c_t_app_question
+		where userid = #{userid}
+		order by createtime desc
+	</select>
 	
+	<insert id="addMyQuestion" parameterType="map">
+		insert into c_t_app_question
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="questioncontent != null and questioncontent != ''">questioncontent,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="questioncontent != null and questioncontent != ''">#{questioncontent},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
 </mapper>
