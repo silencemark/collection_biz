@@ -56,6 +56,8 @@
 			<if test="type != null and type != '全部'">and type = #{type}</if>
 			<if test="status != null and status != '全部'">and status = #{status}</if>
 		</where>
+		order by createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
 	</select>
 	
 	<select id="getBannerListCount" resultType="int" parameterType="map">
@@ -104,4 +106,48 @@
             <if test="createid != null and createid != ''">#{createid},</if>
         </trim>
     </insert>
+    
+    <select id="getOrderList" parameterType="map" resultType="map">
+    	select ao.orderid, ao.buyuserid, us1.nickname as buynickname, ao.selluserid, us2.nickname as sellnickname, mc.typename, ao.ordernum, ao.cardid,
+			ao.type, ao.cardprice, ao.surpluswatchdays, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime
+		from c_t_app_order ao
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid
+		LEFT JOIN c_t_app_userinfo us2 on ao.selluserid = us2.userid
+		<where>
+			<if test="ordernum != null and ordernum != ''">and ao.ordernum = #{ordernum}</if>
+			<if test="buynickname != null and buynickname != ''">and us1.nickname = #{buynickname}</if>
+			<if test="sellnickname != null and sellnickname != ''">and us2.nickname = #{sellnickname}</if>
+			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
+			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
+			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
+		</where>
+		order by ao.createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getOrderListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_order ao
+		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid
+		LEFT JOIN c_t_app_userinfo us2 on ao.selluserid = us2.userid
+		<where>
+			<if test="ordernum != null and ordernum != ''">and ao.ordernum = #{ordernum}</if>
+			<if test="buynickname != null and buynickname != ''">and us1.nickname = #{buynickname}</if>
+			<if test="sellnickname != null and sellnickname != ''">and us2.nickname = #{sellnickname}</if>
+			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
+			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
+			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
+		</where>
+    </select>
+    
+    <update id="frozenOrder" parameterType="map">
+    	update c_t_app_userinfo set status = 2
+    	where userid in (select selluserid, buyuserid from c_t_app_order where orderid = #{orderid})
+    </update>
+    
+    <update id="updateOrderStatus" parameterType="map">
+    	update c_t_app_order set status = #{status} where orderid = #{orderid}
+    </update>
+    
 </mapper>

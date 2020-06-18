@@ -60,5 +60,25 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	public void updateUserInfo(Map<String, Object> data) {
 		this.manageBackStageMapper.updateUserInfo(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getOrderList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getOrderList(data);
+	}
+
+	@Override
+	public int getOrderListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getOrderListCount(data);
+	}
+
+	@Override
+	public void frozenOrder(Map<String, Object> data) {
+		this.manageBackStageMapper.frozenOrder(data);
+	}
+
+	@Override
+	public void updateOrderStatus(Map<String, Object> data) {
+		this.manageBackStageMapper.updateOrderStatus(data);
+	}
 	
 }
