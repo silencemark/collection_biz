@@ -121,6 +121,7 @@
 			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
+			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY) </if>
 		</where>
 		order by ao.createtime desc
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
@@ -138,16 +139,96 @@
 			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
+			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY)  </if>
 		</where>
     </select>
     
     <update id="frozenOrder" parameterType="map">
-    	update c_t_app_userinfo set status = 2
-    	where userid in (select selluserid, buyuserid from c_t_app_order where orderid = #{orderid})
+    	update c_t_app_userinfo set status = #{status}
+    	where userid in 
+    	(select selluserid from c_t_app_order where orderid = #{orderid}
+    	union select buyuserid from c_t_app_order where orderid = #{orderid})
     </update>
     
     <update id="updateOrderStatus" parameterType="map">
     	update c_t_app_order set status = #{status} where orderid = #{orderid}
     </update>
     
+    <select id="getIndexMovieList" parameterType="map" resultType="map">
+    	select am.movieid, am.coverimg , am.title, am.description, am.httpurl, am.type, am.status,
+		am.createtime, am.updatetime
+		from c_t_app_movie am
+		<where>
+			<if test="title != null and title != ''">and am.title = #{title}</if>
+			<if test="description != null and description != ''">and am.description = #{description}</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+		</where>
+		order by am.createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getIndexMovieListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_movie am
+		<where>
+			<if test="title != null and title != ''">and am.title = #{title}</if>
+			<if test="description != null and description != ''">and am.description = #{description}</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+		</where>
+    </select>
+    
+    <update id="updateIndexMovie" parameterType="map">
+    	update c_t_app_movie
+    	<set>
+            <if test="coverimg != null and coverimg != ''">coverimg=#{coverimg},</if>
+            <if test="title != null and title != ''">title=#{title},</if>
+            <if test="description != null and description != ''">description=#{description},</if>
+            <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+            <if test="type != null and type != ''">type=#{type},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+            <if test="status != null and status != ''">status=#{status},</if>
+        </set>
+        where movieid=#{movieid}
+    </update>
+    
+    <insert id="insertIndexMovie" parameterType="map">
+    	insert into c_t_app_movie
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="coverimg != null and coverimg != ''">coverimg,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="description != null and title != ''">description,</if>
+            <if test="httpurl != null and httpurl != ''">httpurl,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="createid != null and createid != ''">createid,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="coverimg != null and coverimg != ''">#{coverimg},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="description != null and description != ''">#{description},</if>
+            <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="createid != null and createid != ''">#{createid},</if>
+        </trim>
+    </insert>
+    
+    <select id="getMemberCardList" parameterType="map" resultType="map">
+    	select cardid,typename,forder,cardicon,cardimg,minprice,maxprice,xgocoin,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,createtime,updatetime,status
+    	from c_t_app_membercard
+    	<where>
+			<if test="typename != null and typename != ''">and am.typename = #{typename}</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+		</where>
+		order by forder
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getMemberCardListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_membercard
+    	<where>
+			<if test="typename != null and typename != ''">and am.typename = #{typename}</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+		</where>
+    </select>
 </mapper>

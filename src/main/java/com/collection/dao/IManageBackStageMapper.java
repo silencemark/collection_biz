@@ -92,4 +92,43 @@ public interface IManageBackStageMapper {
 	 * @param data
 	 */
 	void updateOrderStatus(Map<String, Object> data);
+	
+	/**
+	 * 获取首页免费电影管理列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getIndexMovieList(Map<String, Object> data);
+	
+	/**
+	 * 获取首页免费电影管理列表次数
+	 * @param data
+	 * @return
+	 */
+	int getIndexMovieListCount(Map<String, Object> data);
+	
+	/**
+	 * 修改首页免费电影信息
+	 * @param data
+	 */
+	void updateIndexMovie(Map<String, Object> data);
+	
+	/**
+	 * 新增首页免费电影信息
+	 * @param data
+	 */
+	void insertIndexMovie(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡信息列表
+	 * @return
+	 */
+	List<Map<String, Object>> getMemberCardList(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡信息总数
+	 * @param data
+	 * @return
+	 */
+	int getMemberCardListCount(Map<String, Object> data);
 }

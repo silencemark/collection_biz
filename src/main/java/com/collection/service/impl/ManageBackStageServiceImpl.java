@@ -73,12 +73,52 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 
 	@Override
 	public void frozenOrder(Map<String, Object> data) {
-		this.manageBackStageMapper.frozenOrder(data);
+		//订单状态为冻结/解冻
+		this.manageBackStageMapper.updateOrderStatus(data);
+		if("-2".equals(data.get("status").toString())){
+			//冻结双方用户
+			data.put("status", 2);
+			this.manageBackStageMapper.frozenOrder(data);
+		} else {
+			//解冻结双方用户
+			data.put("status", 0);
+			this.manageBackStageMapper.frozenOrder(data);
+		}
 	}
 
 	@Override
 	public void updateOrderStatus(Map<String, Object> data) {
 		this.manageBackStageMapper.updateOrderStatus(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getIndexMovieList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getIndexMovieList(data);
+	}
+
+	@Override
+	public int getIndexMovieListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getIndexMovieListCount(data);
+	}
+
+	@Override
+	public void updateIndexMovie(Map<String, Object> data) {
+		this.manageBackStageMapper.updateIndexMovie(data);
+	}
+
+	@Override
+	public void insertIndexMovie(Map<String, Object> data) {
+		this.manageBackStageMapper.insertIndexMovie(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getMemberCardList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getMemberCardList(data);
+	}
+
+	@Override
+	public int getMemberCardListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getMemberCardListCount(data);
 	}
 	
 }
