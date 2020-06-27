@@ -6,7 +6,7 @@ import java.util.Map;
  * @author silence
  *
  */
-public interface SystemMapper {
+public interface ISystemMapper {
 	/**
 	 * 查询用户信息
 	 * @author silence

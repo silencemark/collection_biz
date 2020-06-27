@@ -3,7 +3,7 @@
 
 	<select id="getVipCardList" resultType="map" parameterType="map">
 		select * from (SELECT
-				cardid,
+				am.cardid,
 				typename,
 				cardicon,
 				minprice,
@@ -16,19 +16,23 @@
 				commentcount,
 				yield,
 				forder,
-				DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,
-				createid,
-				DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
-				updateid,
+				DATE_FORMAT(am.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+				am.createid,
+				DATE_FORMAT(am.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+				am.updateid,
 				case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') &lt;= now() AND
 									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') &gt; now()
 						THEN  1
 						ELSE  0
 				END as isbuy,
-				timestampdiff(SECOND,now(),STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i')) as secondbuy
+				timestampdiff(SECOND,now(),STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i')) as secondbuy,
+				ar.status as havebuy
 			FROM
-				c_t_app_membercard) A
-			order by isbuy, forder
+				c_t_app_membercard am
+				left join c_t_app_rushtobuy ar on am.cardid = ar.cardid and ar.userid = #{userid}
+				and ar.createtime > CURDATE() and ar.status != 3
+				) A
+			order by isbuy, havebuy, forder
 	</select>
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
@@ -38,7 +42,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield, mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
@@ -51,7 +55,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 
@@ -64,7 +68,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status = 4
@@ -85,8 +89,9 @@
 				mc.commentcount,
 				mc.yield,
 				DATE_FORMAT(bu.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
-				timestampdiff(SECOND,now(),bu.createtime) as secondbuy,
-				bu.status
+				timestampdiff(SECOND,bu.createtime,now()) as secondbuy,
+				bu.status,
+				mc.forder
 			FROM
 				c_t_app_rushtobuy  bu
 				left join	c_t_app_membercard mc on bu.cardid = mc.cardid
@@ -136,7 +141,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
@@ -149,7 +154,7 @@
 			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 	
@@ -162,7 +167,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status = 0
@@ -250,7 +255,7 @@
 			mc.typename,
 			timestampdiff(day,now(),ao.duetime) as remaindays,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield
+			mc.yield,mc.forder
 			from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status in (3,4,5)
@@ -278,7 +283,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status = 3
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,now(),ao.rushtime) > mc.commentstartdays
+			and timestampdiff(day,ao.rushtime,now()) > mc.commentstartdays
 			and ao.commentcount >= mc.commentcount
 	</select>
 	
@@ -287,7 +292,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,now(),ao.rushtime) > mc.watchdays
+			and timestampdiff(day,ao.rushtime,now()) > mc.watchdays
 	</select>
 	
 	
@@ -321,7 +326,7 @@
 	<select id="getMemberCardByPrice" parameterType="map" resultType="map">
 		select cardid,typename,type,cardicon,cardimg,xgocoin,minprice,maxprice,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,
 		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime,
-		(#{cardprice}*yield/100) as profitprice
+		(#{cardprice}*yield/100) as profitprice, forder
 		from c_t_app_membercard
 		where status = 1
 		and maxprice &gt;= #{cardprice}
@@ -367,7 +372,7 @@
 	
 	
 	<insert id="insertRushToBuy" parameterType="map">
-		insert into c_t_app_rushtobuy(userid, overprofit, orderid, createtime)
-		values(#{userid}, #{overprofit}, #{orderid}, #{createtime})
+		insert into c_t_app_rushtobuy(userid, cardid, createtime)
+		values(#{userid}, #{cardid}, #{createtime})
 	</insert>
 </mapper>

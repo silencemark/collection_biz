@@ -8,8 +8,7 @@
 	    us.sumprofit,
 	    us.sumassets,
 	    us.growthvalue,
-	    us.isrealname,
-		us.growthvalue,ml.levelname,CONCAT('V',ml.levelenum) as levelenum, CONCAT('V',ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+	    us.isrealname,ml.levelname, ml.levelenum,(ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
 	    from  c_t_app_userinfo us
 		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 	    <where>

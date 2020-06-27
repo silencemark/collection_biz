@@ -231,4 +231,29 @@
 			<if test="status != null and status != ''">and am.status = #{status}</if>
 		</where>
     </select>
+    
+    <update id="updateMemberCard" parameterType="map">
+    	update c_t_app_membercard
+    	<set>
+            <if test="typename != null and typename != ''">typename=#{typename},</if>
+            <if test="cardicon != null and cardicon != ''">cardicon=#{cardicon},</if>
+            <if test="cardimg != null and cardimg != ''">cardimg=#{cardimg},</if>
+            <if test="minprice != null and minprice != ''">minprice=#{minprice},</if>
+            <if test="maxprice != null and maxprice != ''">maxprice=#{maxprice},</if>
+            <if test="xgocoin != null and xgocoin != ''">xgocoin=#{xgocoin},</if>
+            <if test="starttime != null and starttime != ''">starttime=#{starttime},</if>
+            <if test="endtime != null and endtime != ''">endtime=#{endtime},</if>
+            
+            <if test="commentstartdays != null and commentstartdays != ''">commentstartdays=#{commentstartdays},</if>
+            <if test="watchdays != null and watchdays != ''">watchdays=#{watchdays},</if>
+            <if test="commentcount != null and commentcount != ''">commentcount=#{commentcount},</if>
+            <if test="yield != null and yield != ''">yield=#{yield},</if>
+            <if test="introduction != null and endtime != ''">introduction=#{introduction},</if>
+            <if test="description != null and description != ''">description=#{description},</if>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+        </set>
+        where cardid=#{cardid}
+    </update>
 </mapper>
