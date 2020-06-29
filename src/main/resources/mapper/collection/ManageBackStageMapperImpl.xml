@@ -287,4 +287,107 @@
         where levelid=#{levelid}
     </update>
     
+    
+    <select id="getPaymentMethodList" parameterType="map" resultType="map">
+    	select ap.paymentmethodid, au.nickname,ap.userid, ap.weixinnum, ap.weixinqrcode, ap.weixinrealname, ap.alipaynum, ap.alipayqrcode,ap.alipayrealname,ap.bank,ap.banknum,ap.bankrealname, ap.updatetime
+    	from c_t_app_paymentmethod ap
+    	left join c_t_app_userinfo au on ap.userid = au.userid
+    	<where>
+			<if test="realname != null and realname != ''">and (locate(#{realname},ap.weixinrealname) > 0  or locate(#{realname},ap.alipayrealname) > 0 or locate(#{realname},ap.bankrealname) > 0)</if>
+		</where>
+		order by ap.updatetime desc 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getPaymentMethodListCount" parameterType="map" resultType="int">
+    	select  count(0) from c_t_app_paymentmethod ap
+    	left join c_t_app_userinfo au on ap.userid = au.userid
+    	<where>
+			<if test="realname != null and realname != ''">and (locate(#{realname},ap.weixinrealname) > 0  or locate(#{realname},ap.alipayrealname) > 0 or locate(#{realname},ap.bankrealname) > 0)</if>
+		</where>
+    </select>
+    
+    <select id="getCertificationList" parameterType="map" resultType="map">
+    	select ac.certificationid, ac.userid, ac.nationality, au.nickname, ac.realname, ac.idcard,ac.status,ac.message,ac.delflag, ac.updatetime
+    	from c_t_app_certification ac
+    	left join c_t_app_userinfo au on ac.userid = au.userid
+    	<where>
+			<if test="realname != null and realname != ''">and locate(#{realname},ac.realname) > 0</if>
+			<if test="idcard != null and idcard != ''">and locate(#{idcard},ac.idcard) > 0</if>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+			and ac.delflag = 0 
+		</where>
+		order by ac.updatetime desc 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getCertificationListCount" parameterType="map" resultType="int">
+    	select  count(0) from c_t_app_certification ac
+    	left join c_t_app_userinfo au on ac.userid = au.userid
+    	<where>
+			<if test="realname != null and realname != ''">and locate(#{realname},ac.realname) > 0</if>
+			<if test="idcard != null and idcard != ''">and locate(#{idcard},ac.idcard) > 0</if>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+			and ac.delflag = 0 
+		</where>
+    </select>
+    
+    <update id="updateCertification" parameterType="map">
+    	update c_t_app_certification
+    	<set>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="message != null and message != ''">message=#{message},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+        </set>
+        where certificationid=#{certificationid}
+    </update>
+    
+    <select id="getQuestionList" parameterType="map" resultType="map">
+    	select aq.questionid, aq.userid, aq.questioncontent, au.nickname, aq.systemuserid, aq.replycontent, aq.updatetime,aq.createtime
+    	from c_t_app_question aq
+    	left join c_t_app_userinfo au on aq.userid = au.userid
+    	<where>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+		</where>
+		order by aq.updatetime desc 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getQuestionListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_question aq
+    	left join c_t_app_userinfo au on aq.userid = au.userid
+    	<where>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+		</where>
+    </select>
+    
+    <update id="replyQuestion" parameterType="map">
+    	update c_t_app_question
+    	<set>
+            <if test="systemuserid != null and systemuserid != ''">systemuserid=#{systemuserid},</if>
+            <if test="replycontent != null and replycontent != ''">replycontent=#{replycontent},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+        </set>
+        where questionid=#{questionid}
+    </update>
+    
+    <select id="getExchangeList" parameterType="map" resultType="map">
+    	select ae.exchangeid, ae.userid, ae.amount, au.nickname, ae.ordernum, ae.createtime
+    	from c_t_app_exchange ae
+    	left join c_t_app_userinfo au on ae.userid = au.userid
+    	<where>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+		</where>
+		order by ae.createtime desc 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getExchangeListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_exchange ae
+    	left join c_t_app_userinfo au on ae.userid = au.userid
+    	<where>
+			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+		</where>
+    </select>
+    
 </mapper>

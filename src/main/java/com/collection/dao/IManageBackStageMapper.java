@@ -156,4 +156,68 @@ public interface IManageBackStageMapper {
 	 * @param data
 	 */
 	void updateLevel(Map<String, Object> data);
+	
+	/**
+	 *  获取审核信息列表
+	 * @return
+	 */
+	List<Map<String, Object>> getCertificationList(Map<String, Object> data);
+	
+	/**
+	 * 获取审核信息列表总数
+	 * @param data
+	 * @return
+	 */
+	int getCertificationListCount(Map<String, Object> data);
+	
+	/**
+	 * 审核实名认证
+	 * @param data
+	 */
+	void updateCertification(Map<String, Object> data);
+	
+	/**
+	 *  获取收款方式信息列表
+	 * @return
+	 */
+	List<Map<String, Object>> getPaymentMethodList(Map<String, Object> data);
+	
+	/**
+	 * 获取收款方式信息列表总数
+	 * @param data
+	 * @return
+	 */
+	int getPaymentMethodListCount(Map<String, Object> data);
+	
+	/**
+	 *  获取投诉建议列表
+	 * @return
+	 */
+	List<Map<String, Object>> getQuestionList(Map<String, Object> data);
+	
+	/**
+	 * 获取投诉建议列表总数
+	 * @param data
+	 * @return
+	 */
+	int getQuestionListCount(Map<String, Object> data);
+	
+	/**
+	 * 回复投诉
+	 * @param data
+	 */
+	void replyQuestion(Map<String, Object> data);
+	
+	/**
+	 *  获取兑换记录列表
+	 * @return
+	 */
+	List<Map<String, Object>> getExchangeList(Map<String, Object> data);
+	
+	/**
+	 * 获取兑换记录列表总数
+	 * @param data
+	 * @return
+	 */
+	int getExchangeListCount(Map<String, Object> data);
 }

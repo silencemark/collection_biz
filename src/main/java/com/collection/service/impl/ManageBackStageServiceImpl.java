@@ -140,5 +140,57 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	public void updateLevel(Map<String, Object> data) {
 		this.manageBackStageMapper.updateLevel(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getCertificationList(
+			Map<String, Object> data) {
+		return this.manageBackStageMapper.getCertificationList(data);
+	}
+
+	@Override
+	public int getCertificationListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getCertificationListCount(data);
+	}
+
+	@Override
+	public void updateCertification(Map<String, Object> data) {
+		this.manageBackStageMapper.updateCertification(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getPaymentMethodList(
+			Map<String, Object> data) {
+		return this.manageBackStageMapper.getPaymentMethodList(data);
+	}
+
+	@Override
+	public int getPaymentMethodListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getPaymentMethodListCount(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getQuestionList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getQuestionList(data);
+	}
+
+	@Override
+	public int getQuestionListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getQuestionListCount(data);
+	}
+
+	@Override
+	public void replyQuestion(Map<String, Object> data) {
+		this.manageBackStageMapper.replyQuestion(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getExchangeList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getExchangeList(data);
+	}
+
+	@Override
+	public int getExchangeListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getExchangeListCount(data);
+	}
 	
 }

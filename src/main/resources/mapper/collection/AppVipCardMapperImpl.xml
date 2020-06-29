@@ -30,7 +30,7 @@
 			FROM
 				c_t_app_membercard am
 				left join c_t_app_rushtobuy ar on am.cardid = ar.cardid and ar.userid = #{userid}
-				and ar.createtime > CURDATE() and ar.status != 3
+				and ar.createtime &gt; CURDATE() and ar.status != 3
 				) A
 			order by isbuy, havebuy, forder
 	</select>
@@ -290,7 +290,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status = 3
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,ao.rushtime,now()) > mc.commentstartdays
+			and timestampdiff(day,ao.rushtime,now()) &gt; mc.commentstartdays
 			and ao.commentcount >= mc.commentcount
 	</select>
 	
@@ -299,7 +299,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,ao.rushtime,now()) > mc.watchdays
+			and timestampdiff(day,ao.rushtime,now()) &gt; mc.watchdays
 	</select>
 	
 	
@@ -322,7 +322,7 @@
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
-		where (ao.status = 4 or duetime > now())
+		where (ao.status = 4 or duetime &gt; now())
 		and ao.orderid = #{orderid}
 	</select>
 	

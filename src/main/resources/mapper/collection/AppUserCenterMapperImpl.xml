@@ -127,7 +127,7 @@
 	</select>
 	
 	<select id="myAssets" parameterType="map" resultType="map">
-		select (select IFNULL(sum(cardprice),0) from c_t_app_order where buyuserid =#{userid} and status > 1) as allorder,
+		select (select IFNULL(sum(cardprice),0) from c_t_app_order where buyuserid =#{userid} and status &gt; 1) as allorder,
 		(select IFNULL(sum(cardprice), 0) from c_t_app_order where buyuserid = #{userid} and status in (2, 3)) as buyorder,
 		(select IFNULL(sum(cardprice), 0) from c_t_app_order where selluserid = #{userid} and status in (0, 1)) as sellorder,
 		sumassets,sumprofit from c_t_app_userinfo us where userid = #{userid}

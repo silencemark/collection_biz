@@ -1,0 +1,25 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IManageStatisticsMapper">
+    <select id="getNewOrderStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,ifnull(count(ao.orderid),0) as count
+ 		FROM calendar c
+		left join c_t_app_order ao on ao.createtime &gt; c.datelist and ao.createtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY)
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
+	<select id="getNewMoneyStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,ifnull(sum(ao.cardprice),0) as count
+ 		FROM calendar c
+		left join c_t_app_order ao on ao.createtime &gt; c.datelist and ao.createtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY)
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
+</mapper>

@@ -1,12 +1,16 @@
 package com.collection.service.impl;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 
 import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
@@ -21,6 +25,8 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	@Autowired IAppUserCenterMapper appUserCenterMapper;
 	@Autowired IAppVipCardMapper appVipCardMapper;
 
+	private Logger logger = Logger.getLogger(AppUserCenterServiceImpl.class);
+	
 	@Override
 	public Map<String, Object> getMyCenter(Map<String, Object> data) {
 		return appUserCenterMapper.getMyCenter(data);
@@ -183,8 +189,52 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public void updatePaymentMethod(Map<String, Object> data) {
+	public Map<String, Object> updatePaymentMethod(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> paymap = this.appUserCenterMapper.getPaymentMethod(data);
+		if (paymap == null) {
+			this.appUserCenterMapper.addPaymentMethod(data);
+		} 
+		String weixinqrcode = String.valueOf(data.get("weixinqrcode"));
+		String alipayqrcode = String.valueOf(data.get("alipayqrcode"));
+		//上传微信二维码
+        if(weixinqrcode != null && !"".equals(weixinqrcode)){
+        	String tempFileName = System.currentTimeMillis()/1000l+"_weixin" + ".jpg";
+            logger.debug("微信二维码生成文件名为："+tempFileName);
+            //因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
+            byte[] bs = Base64Utils.decodeFromString(weixinqrcode);
+            try{
+                //使用apache提供的工具类操作流
+                FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
+            }catch(Exception ee){
+            	logger.info("上传失败，写入微信二维码失败"+ee.getMessage());
+            	result.put("status", 0);
+        		result.put("message", "上传失败，写入文件失败");
+        		return result;
+            }
+            data.put("weixinqrcode", "/upload/images/"+tempFileName);
+        }
+        //上传支付宝二维码
+        if (alipayqrcode != null && !"".equals(alipayqrcode)){
+        	String tempFileName = System.currentTimeMillis()/1000l+"_alipay" + ".jpg";
+            logger.debug("支付宝二维码生成文件名为："+tempFileName);
+            //因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
+            byte[] bs = Base64Utils.decodeFromString(alipayqrcode);
+            try{
+                //使用apache提供的工具类操作流
+                FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
+            }catch(Exception ee){
+            	logger.info("上传失败，写入支付宝二维码失败"+ee.getMessage());
+            	result.put("status", 0);
+        		result.put("message", "上传失败，写入文件失败");
+        		return result;
+            }
+            data.put("alipayqrcode", "/upload/images/"+tempFileName);
+        }
 		this.appUserCenterMapper.updatePaymentMethod(data);
+		result.put("status", 0);
+		result.put("message", "修改成功");
+		return data;
 	}
 
 	@Override
