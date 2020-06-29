@@ -42,7 +42,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield, mc.forder
+			mc.yield, mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
@@ -55,7 +55,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 
@@ -68,7 +68,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status = 4
@@ -95,13 +95,15 @@
 			FROM
 				c_t_app_rushtobuy  bu
 				left join	c_t_app_membercard mc on bu.cardid = mc.cardid
-				where bu.userid = #{userid}
+				where bu.userid = #{userid} and bu.status = 1
 			order by bu.status,bu.createtime desc
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
 		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,
-		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,us.xgocoin,
+		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,IFNULL(us.xgocoin,0) xgocoin,
+		mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,mc.typename,
+		DATE_FORMAT(DATE_ADD(ao.createtime,INTERVAL mc.watchdays DAY),'%Y-%m-%d %H:%i:%S') duetime,
 		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
@@ -114,6 +116,7 @@
 		update c_t_app_order
 		<set>
 	      <if test="status != null">status = #{status},</if>
+	      <if test="buytime != null">buytime = #{buytime},</if>
 	      <if test="payorder != null">payorder = #{payorder},</if>
 	   </set>
 	   where orderid = #{orderid}
@@ -141,7 +144,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
@@ -154,7 +157,7 @@
 			DATE_FORMAT(duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 	
@@ -167,7 +170,7 @@
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status = 0
@@ -253,9 +256,10 @@
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%s') as duetime,
 			mc.typename,
+			timestampdiff(day,now(),ao.duetime) as remainwatchdays,
 			timestampdiff(day,now(),ao.duetime) as remaindays,
 			(mc.commentcount - ao.commentcount) remaincount,
-			mc.yield,mc.forder
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
 			from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status in (3,4,5)
@@ -269,7 +273,10 @@
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
 			mc.commentcount,
-			ao.cardprice
+			ao.cardprice,
+			(mc.commentcount - ao.commentcount) remaincount,
+			timestampdiff(day,now(),ao.duetime) as remaindays,
+			mc.yield, mc.forder,mc.watchdays
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
@@ -287,7 +294,7 @@
 			and ao.commentcount >= mc.commentcount
 	</select>
 	
-	<select id="getDueOrderListByid">
+	<select id="getDueOrderListByid" resultType="map" parameterType="map">
 		select ao.orderid from c_t_app_order ao
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status in (3,4)

@@ -20,7 +20,7 @@
 			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
 			<if test="nickname != null and nickname != ''">and locate(#{nickname},u.nickname) > 0</if>
 			<if test="realname != null and realname != ''">and locate(#{realname},c.realname) > 0</if>
-			<if test="status != null and status != '全部'">and status = #{status}</if>
+			<if test="status != null and status != '全部'">and u.status = #{status}</if>
 			and u.delflag=0
 		</where>
 		order by u.createtime desc
@@ -44,7 +44,7 @@
 			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
 			<if test="nickname != null and nickname != ''">and locate(#{phone},u.nickname) > 0</if>
 			<if test="realname != null and realname != ''">and locate(#{realname},c.realname) > 0</if>
-			<if test="status != null and status != '全部'">and locate(#{status},u.status) > 0</if>
+			<if test="status != null and status != '全部'">and u.status = #{status}</if>
 			and u.delflag=0
 		</where>
 	</select>
@@ -115,10 +115,10 @@
 		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid
 		LEFT JOIN c_t_app_userinfo us2 on ao.selluserid = us2.userid
 		<where>
-			<if test="ordernum != null and ordernum != ''">and ao.ordernum = #{ordernum}</if>
-			<if test="buynickname != null and buynickname != ''">and us1.nickname = #{buynickname}</if>
-			<if test="sellnickname != null and sellnickname != ''">and us2.nickname = #{sellnickname}</if>
-			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
+			<if test="ordernum != null and ordernum != ''">and locate(#{ordernum},ao.ordernum) > 0</if>
+			<if test="buynickname != null and buynickname != ''">and locate(#{buynickname},us1.nickname) > 0</if>
+			<if test="sellnickname != null and sellnickname != ''">and locate(#{sellnickname},us2.nickname) > 0</if>
+			<if test="typename != null and typename != ''">and locate(#{typename},mc.typename) > 0 </if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
 			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY) </if>
@@ -133,10 +133,10 @@
 		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid
 		LEFT JOIN c_t_app_userinfo us2 on ao.selluserid = us2.userid
 		<where>
-			<if test="ordernum != null and ordernum != ''">and ao.ordernum = #{ordernum}</if>
-			<if test="buynickname != null and buynickname != ''">and us1.nickname = #{buynickname}</if>
-			<if test="sellnickname != null and sellnickname != ''">and us2.nickname = #{sellnickname}</if>
-			<if test="typename != null and typename != ''">and mc.typename = #{typename}</if>
+			<if test="ordernum != null and ordernum != ''">and locate(#{ordernum},ao.ordernum) > 0</if>
+			<if test="buynickname != null and buynickname != ''">and locate(#{buynickname},us1.nickname) > 0</if>
+			<if test="sellnickname != null and sellnickname != ''">and locate(#{sellnickname},us2.nickname) > 0</if>
+			<if test="typename != null and typename != ''">and locate(#{typename},mc.typename) > 0 </if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
 			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY)  </if>
@@ -159,8 +159,8 @@
 		am.createtime, am.updatetime
 		from c_t_app_movie am
 		<where>
-			<if test="title != null and title != ''">and am.title = #{title}</if>
-			<if test="description != null and description != ''">and am.description = #{description}</if>
+			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
+			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
 		</where>
 		order by am.createtime desc
@@ -170,8 +170,8 @@
     <select id="getIndexMovieListCount" parameterType="map" resultType="int">
     	select count(0) from c_t_app_movie am
 		<where>
-			<if test="title != null and title != ''">and am.title = #{title}</if>
-			<if test="description != null and description != ''">and am.description = #{description}</if>
+			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
+			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
 		</where>
     </select>
@@ -217,7 +217,7 @@
     	select cardid,typename,forder,cardicon,cardimg,minprice,maxprice,xgocoin,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,createtime,updatetime,status
     	from c_t_app_membercard
     	<where>
-			<if test="typename != null and typename != ''">and am.typename = #{typename}</if>
+			<if test="typename != null and typename != ''">and locate(#{typename},am.typename) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
 		</where>
 		order by forder
@@ -227,7 +227,7 @@
     <select id="getMemberCardListCount" parameterType="map" resultType="int">
     	select count(0) from c_t_app_membercard
     	<where>
-			<if test="typename != null and typename != ''">and am.typename = #{typename}</if>
+			<if test="typename != null and typename != ''">and locate(#{typename},am.typename) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
 		</where>
     </select>
@@ -243,7 +243,6 @@
             <if test="xgocoin != null and xgocoin != ''">xgocoin=#{xgocoin},</if>
             <if test="starttime != null and starttime != ''">starttime=#{starttime},</if>
             <if test="endtime != null and endtime != ''">endtime=#{endtime},</if>
-            
             <if test="commentstartdays != null and commentstartdays != ''">commentstartdays=#{commentstartdays},</if>
             <if test="watchdays != null and watchdays != ''">watchdays=#{watchdays},</if>
             <if test="commentcount != null and commentcount != ''">commentcount=#{commentcount},</if>
@@ -256,4 +255,36 @@
         </set>
         where cardid=#{cardid}
     </update>
+    
+    <select id="getLevelList" parameterType="map" resultType="map">
+    	select levelid,levelname,levelenum,mingrowthvalue,maxgrowthvalue,interesttimes,
+    	updatetime,updateid
+    	from c_t_app_memberlevel
+    	<where>
+			<if test="levelname != null and levelname != ''">and locate(#{levelname},levelname) > 0</if>
+		</where>
+		order by levelenum
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getLevelListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_memberlevel
+    	<where>
+			<if test="levelname != null and levelname != ''">and levelname = #{levelname}</if>
+		</where>
+    </select>
+    
+     <update id="updateLevel" parameterType="map">
+    	update c_t_app_memberlevel
+    	<set>
+            <if test="levelname != null and levelname != ''">levelname=#{levelname},</if>
+            <if test="mingrowthvalue != null and mingrowthvalue != ''">mingrowthvalue=#{mingrowthvalue},</if>
+            <if test="maxgrowthvalue != null and maxgrowthvalue != ''">maxgrowthvalue=#{maxgrowthvalue},</if>
+            <if test="interesttimes != null and interesttimes != ''">interesttimes=#{interesttimes},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+        </set>
+        where levelid=#{levelid}
+    </update>
+    
 </mapper>

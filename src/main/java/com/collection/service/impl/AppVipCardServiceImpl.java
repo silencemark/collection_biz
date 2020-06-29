@@ -1,15 +1,20 @@
 package com.collection.service.impl;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.service.IAppVipCardService;
+import com.collection.util.Constants;
 /**
  * VIP会员卡相关功能
  * @author silence
@@ -19,6 +24,8 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Autowired IAppVipCardMapper appVipCardMapper;
 
+	private Logger logger = Logger.getLogger(AppVipCardServiceImpl.class);
+	
 	@Override
 	public List<Map<String, Object>> getVipCardList(Map<String, Object> data) {
 		return appVipCardMapper.getVipCardList(data);
@@ -35,8 +42,75 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	}
 
 	@Override
-	public void payVipCard(Map<String, Object> data) {
-		this.appVipCardMapper.payVipCard(data);
+	public Map<String, Object> payVipCard(Map<String, Object> datamap) {
+		//拿出payorder的base64文件流
+		String base64Data = String.valueOf(datamap.get("payorder"));
+		Map<String, Object> result = new HashMap<String, Object>();
+        try{  
+            logger.debug("上传文件的数据："+base64Data);
+            logger.debug("对数据进行判断");
+            if(base64Data == null || "".equals(base64Data)){
+                logger.info("上传失败，上传图片数据为空");
+                result.put("status", 1);
+        		result.put("message", "上传失败，上传图片数据为空");
+        		return result;
+            }
+            /*else{
+                String [] d = base64Data.split("base64,");
+                if(d != null && d.length == 2){
+                    dataPrix = d[0];
+                    data = d[1];
+                }else{
+                	logger.info("上传失败，数据不合法");
+                    result.put("status", 1);
+            		result.put("message", "上传图片格式不合法");
+            		return result;
+                }
+            }
+ 
+            logger.debug("对数据进行解析，获取文件名和流数据");
+            String suffix = "";
+            if("data:image/jpeg;".equalsIgnoreCase(dataPrix)){//data:image/jpeg;base64,base64编码的jpeg图片数据
+                suffix = ".jpg";
+            } else if("data:image/x-icon;".equalsIgnoreCase(dataPrix)){//data:image/x-icon;base64,base64编码的icon图片数据
+                suffix = ".ico";
+            } else if("data:image/gif;".equalsIgnoreCase(dataPrix)){//data:image/gif;base64,base64编码的gif图片数据
+                suffix = ".gif";
+            } else if("data:image/png;".equalsIgnoreCase(dataPrix)){//data:image/png;base64,base64编码的png图片数据
+                suffix = ".png";
+            }else{
+                logger.info("上传图片格式不合法"+dataPrix);
+                result.put("status", 1);
+        		result.put("message", "上传图片格式不合法");
+        		return result;
+            }*/
+            String tempFileName = System.currentTimeMillis()/1000l+"_app" + ".jpg";
+            logger.debug("生成文件名为："+tempFileName);
+ 
+            //因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
+            byte[] bs = Base64Utils.decodeFromString(base64Data);
+            try{
+                //使用apache提供的工具类操作流
+                FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
+            }catch(Exception ee){
+            	logger.info("上传失败，写入文件失败"+ee.getMessage());
+            	result.put("status", 0);
+        		result.put("message", "上传失败，写入文件失败");
+        		return result;
+            }
+            datamap.put("payorder", "/upload/images/"+tempFileName);
+            datamap.put("buytime", new Date());
+            this.appVipCardMapper.payVipCard(datamap);
+    		result.put("status", 0);
+    		result.put("message", "上传成功，等待审核");
+            logger.debug("上传成功");
+        }catch (Exception e) {  
+        	logger.info("上传失败"+ e.getMessage());
+        	result.put("status", 0);
+    		result.put("message", "上传失败");
+    		return result;
+        }
+		return result;
 	}
 
 	@Override

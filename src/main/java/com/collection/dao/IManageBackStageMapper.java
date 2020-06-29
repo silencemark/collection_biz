@@ -137,4 +137,23 @@ public interface IManageBackStageMapper {
 	 * @param data
 	 */
 	void updateMemberCard(Map<String, Object> data);
+	
+	/**
+	 * 获取会员等级信息列表
+	 * @return
+	 */
+	List<Map<String, Object>> getLevelList(Map<String, Object> data);
+	
+	/**
+	 * 获取会员等级信息总数
+	 * @param data
+	 * @return
+	 */
+	int getLevelListCount(Map<String, Object> data);
+	
+	/**
+	 * 修改会员等级信息
+	 * @param data
+	 */
+	void updateLevel(Map<String, Object> data);
 }

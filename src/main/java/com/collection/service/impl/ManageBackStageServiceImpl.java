@@ -125,5 +125,20 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	public void updateMemberCard(Map<String, Object> data) {
 		this.manageBackStageMapper.updateMemberCard(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getLevelList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getLevelList(data);
+	}
+
+	@Override
+	public int getLevelListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getLevelListCount(data);
+	}
+
+	@Override
+	public void updateLevel(Map<String, Object> data) {
+		this.manageBackStageMapper.updateLevel(data);
+	}
 	
 }
