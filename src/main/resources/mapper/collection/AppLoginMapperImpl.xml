@@ -61,7 +61,7 @@
 	</update>
 	
 	<select id="getUserInfo" resultType="map" parameterType="map">
-		select ctau.userid, ctau.phone, ctau.password, ctau.nickname, ctau.status, ctau.invitecode, ctau.delflag, ctau.parentid, ctau.levelid, ctau.xgocoin, ctau.sumprofit, ctau.sumassets, ctau.growthvalue, DATE_FORMAT(ctau.updatetime,'%Y-%m-%d %H:%i:%S')  as updatetime, DATE_FORMAT(ctau.createtime,'%Y-%m-%d %H:%i:%S') as createtime 
+		select ctau.userid, ctau.paypassword, ctau.phone, ctau.password, ctau.nickname, ctau.status, ctau.invitecode, ctau.delflag, ctau.parentid, ctau.levelid, ctau.xgocoin, ctau.sumprofit, ctau.sumassets, ctau.growthvalue, DATE_FORMAT(ctau.updatetime,'%Y-%m-%d %H:%i:%S')  as updatetime, DATE_FORMAT(ctau.createtime,'%Y-%m-%d %H:%i:%S') as createtime 
 		from c_t_app_userinfo ctau 
 		<where>
 			<if test="phone != null and phone != ''">and ctau.phone=#{phone}</if>

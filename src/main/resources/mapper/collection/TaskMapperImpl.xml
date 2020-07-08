@@ -1,0 +1,118 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.ITaskMapper">
+    <select id="initialize"  resultType="map">
+	    SELECT taskid , taskname , taskclass , status, exectime, nexttime FROM c_t_scheduler WHERE status != 0 ORDER BY taskid
+	</select>
+	
+	<select id="getTasks" parameterType="map" resultType="map">
+				SELECT B.taskid,
+		    B.taskclass,
+		    B.taskname,
+		    A.crontab,
+		    A.starttime,
+		    A.endtime,
+		    A.startdate,
+		    A.enddate,
+		    IFNULL(A.delaysecods, 0) delaysecods,
+		    CASE
+		    WHEN B.exectime IS NOT NULL AND STR_TO_DATE(B.exectime,'%Y-%m-%d %H:%i:%S') &gt;= A.validdate AND STR_TO_DATE(B.exectime,'%Y-%m-%d %H:%i:%S') &lt;= ifnull(A.invaliddate, STR_TO_DATE(B.exectime,'%Y-%m-%d %H:%i:%S')) THEN
+		    B.exectime
+		    ELSE
+		    NULL
+		    END exectime,
+		    CASE
+		    WHEN B.nexttime IS NOT NULL AND STR_TO_DATE(B.nexttime,'%Y-%m-%d %H:%i:%S') &gt;= A.validdate AND STR_TO_DATE(B.nexttime,'%Y-%m-%d %H:%i:%S') &lt;= ifnull(A.invaliddate, STR_TO_DATE(B.nexttime,'%Y-%m-%d %H:%i:%S')) THEN
+		    B.nexttime
+		    ELSE
+		    NULL
+		    END nexttime,
+		    IF(A.status=#{effectstatus}, #{effectstatus}, B.status) status,
+		    DATE_FORMAT(A.validdate,'%Y-%m-%d %H:%i:%S') validdate,
+		    DATE_FORMAT(A.invaliddate,'%Y-%m-%d %H:%i:%S') invaliddate
+		    FROM c_t_scheduler B
+		    LEFT JOIN (SELECT *
+		    FROM (SELECT T.*, COUNT(*) OVER(PARTITION BY T.taskid) CN
+		    FROM c_t_crontab T) C
+		    WHERE (C.CN = 1 OR
+		    (C.CN != 1 AND IFNULL(C.invaliddate, now() + 1) &gt;= now()))) A
+		    ON A.taskid = B.taskid
+		    <where>
+		    	<if test="taskid != null and taskid > 0 ">AND B.taskid = #{taskid}</if>
+		    	<if test="taskclass != null and taskclass != ''"> AND B.taskclass = #{taskclass}</if>
+		    	and  B.status != 0
+		    </where>
+			 ORDER BY A.taskid, A.validdate
+	</select>
+	
+	<update id="update" parameterType="map">
+		UPDATE c_t_scheduler 
+		<set>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="exectime != null and exectime != ''">exectime=#{exectime},</if>
+            <if test="nexttime != null and nexttime != ''">nexttime=#{nexttime},</if>
+        </set>
+       	WHERE taskid  = #{taskid} AND status != 0
+	</update>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="taskid" parameterType="map">
+    	insert into c_t_scheduler(taskclass, taskname, status) VALUES(#{taskclass}, #{taskname}, #{status})
+ 	</insert>
+ 	
+ 	<delete id="deleteCrontab" parameterType="map">
+ 		DELETE FROM c_t_crontab WHERE taskid  = #{taskid} AND (validdate &gt;= STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S') OR validdate &gt;= DATE_ADD(curdate(),INTERVAL 1 DAY)
+ 	</delete>
+ 	
+ 	<update id="updateCrontab" parameterType="map">
+ 		UPDATE c_t_crontab
+		SET invaliddate = DATE_ADD(STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S'), INTERVAL -1 SECOND),
+		status = CASE WHEN (DATE_ADD(STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S'), INTERVAL -1 SECOND)) &gt;= now() THEN 1 ELSE 0 END
+		WHERE (taskid, validdate) = (SELECT taskid, validdate
+		FROM (SELECT T.taskid, T.validdate, RANK() OVER(ORDER BY T.validdate DESC) RK
+		FROM c_t_crontab T
+		WHERE T.taskid = #{taskid}
+		AND T.validdate &lt; STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S')) C
+		WHERE C.RK = 1)
+ 	</update>
+ 	
+ 	<insert id="addCrontab" parameterType="map">
+ 		INSERT INTO c_t_crontab
+		(taskid,
+		crontab,
+		starttime, 
+		endtime, 
+		startdate, 
+		enddate, 
+		delaysecods, 
+		status, 
+		validdate, 
+		invaliddate) 
+		VALUES 
+		(#{taskid}, #{crontab}, #{starttime}, #{endtime}, #{startdate}, #{enddate}, #{delaysecods}, #{status}, STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S'), STR_TO_DATE(#{invaliddate}, '%Y-%m-%d %H:%i:%S'))
+ 	</insert>
+ 	
+ 	<select id="getCrontab" parameterType="map" resultType="map">
+ 		SELECT crontab,
+		starttime,
+		endtime,
+		startdate,
+		enddate,
+		IFNULL(delaysecods, 0) delaysecods,
+		DATE_FORMAT(validdate,'%Y-%m-%d %H:%i:%S') validdate,
+		DATE_FORMAT(invaliddate,'%Y-%m-%d %H:%i:%S') invaliddate
+		FROM (SELECT T.* 
+			FROM c_t_crontab T
+			WHERE T.taskid = #{taskid}
+			AND T.status != 0
+			AND IFNULL(T.invaliddate, DATE_ADD(now(),INTERVAL 1 DAY)) >= now()
+			ORDER BY T.validdate) C
+		limit 1
+ 	</select>
+ 	
+ 	<update id="updateCrontabStatus" parameterType="map">
+ 		update c_t_crontab 
+ 		set status = #{status}
+ 		where taskid = #{taskid}
+ 		and validdate = STR_TO_DATE(#{vailddate}, '%Y-%m-%d %H:%i:%S')
+ 		and status != 0
+ 	</update>
+</mapper>

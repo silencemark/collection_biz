@@ -121,6 +121,13 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getMyCardList(Map<String, Object> data);
 	
 	/**
+	 * 获取我的历史会员卡列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMyHisCardList(Map<String, Object> data);
+	
+	/**
 	 * 获取会员卡信息
 	 * @param data
 	 * @return
@@ -175,6 +182,12 @@ public interface IAppVipCardMapper {
 	void insertOrder(Map<String, Object> data);
 	
 	/**
+	 * 获取当天总订单数量+1
+	 * @return
+	 */
+	int getOrderNum();
+	
+	/**
 	 * 增加溢出资产到卖家个人信息
 	 * @param data
 	 */
@@ -199,4 +212,37 @@ public interface IAppVipCardMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> getRushToBuyList(Map<String, Object> data);
+	
+	/**
+	 * 回退到待出售状态订单
+	 * @param data
+	 */
+	void updateWaitSell(Map<String, Object> data);
+	
+	/**
+	 * 修改当天抢购状态
+	 * @param data
+	 */
+	void updateRushToBuy(Map<String, Object> data);
+	
+	/**
+	 * 冻结买家/卖家账号
+	 * @param data
+	 */
+	void frozenOrder(Map<String, Object> data);
+	
+	/**
+	 * 获取买家/卖家 超过支付时间的订单
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMoreThanWaitTime(Map<String, Object> data);
+	
+	/**
+	 * 获取买家/卖家 超过审核时间的订单
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMoreThanExamineTime(Map<String, Object> data);
+	
 }

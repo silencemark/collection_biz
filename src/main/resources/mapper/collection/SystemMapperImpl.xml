@@ -29,4 +29,9 @@
         </set>
         where userid=#{userid}
     </update>
+    
+    <insert id="insertNotice" parameterType="map">
+    	insert into c_t_notice(title, message, status, createtime)
+    	values(#{title}, #{message}, #{status}, #{createtime})
+    </insert>
 </mapper>

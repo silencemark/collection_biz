@@ -1,0 +1,73 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.collection.dao.IRushBuyClacMapper">
+    <select id="getCardInfo"  resultType="map" parameterType="map">
+	    SELECT
+		cardid,
+		typename,
+		xgocoin,
+		starttime,
+		endtime,
+		yield,
+		commentstartdays,
+		watchdays,
+		minprice,
+		maxprice,
+		(maxprice - minprice) as spread,
+		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime,
+		TIMESTAMPDIFF(MINUTE,STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') ,STR_TO_DATE(#{calctime},'%Y-%m-%d %H:%i:%S')) as minutenum
+		from c_t_app_membercard am
+	    where forder = #{forder}
+	    limit 1 
+	</select>
+	
+    <select id="getRushBuyUser"  resultType="map" parameterType="map">
+	    SELECT ar.userid,ar.cardid,am.starttime,al.levelenum, al.interesttimes,au.nickname
+	    from c_t_app_rushtobuy ar
+	    left join c_t_app_membercard am on ar.cardid = am.cardid 
+	    left join c_t_app_userinfo au on ar.userid = au.userid
+	    left join c_t_app_memberlevel al on au.levelid = al.levelid
+	    where TO_DAYS(ar.createtime) = TO_DAYS(NOW())
+	    and ar.status = 1
+	    and am.forder = #{forder}
+	</select>
+	
+	<select id="getWaitSellCardOrder"  resultType="map" parameterType="map">
+		select ao.orderid, ao.selluserid,ao.cardprice from c_t_app_order  ao
+		left join c_t_app_membercard am on ao.cardid = am.cardid 
+		where am.forder = #{forder}
+		and ao.status = 0
+		order by ao.createtime 
+	</select>
+	
+	<select id="getConfigRate" resultType="map">
+		select rateid, forder ,rate,minute,lastflag from c_t_rate
+	</select>
+	
+	<update id="updateOrder" parameterType="map">
+		UPDATE c_t_app_order 
+		<set>
+            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="buyuserid != null and buyuserid != ''">buyuserid=#{buyuserid},</if>
+            <if test="profitprice != null and profitprice != ''">profitprice=#{profitprice},</if>
+            <if test="rushtime != null and rushtime != ''">rushtime=#{rushtime},</if>
+            <if test="commentstartdays != null and commentstartdays != ''">duetime = DATE_ADD(now(), INTERVAL #{commentstartdays} DAY),</if>
+        </set>
+       	WHERE orderid  = #{orderid} AND status = 0
+	</update>
+	
+	<update id="updateRushToBuy" parameterType="map">
+		update c_t_app_rushtobuy
+		set status = #{aftstatus}
+		<where>
+			<if test="cardid != null and cardid != ''">and cardid=#{cardid}</if>
+			<if test="userid != null and userid != ''">and userid=#{userid}</if>
+			<if test="befstatus != null and befstatus != ''">and status = #{befstatus}</if>
+			and TO_DAYS(createtime) = TO_DAYS(NOW())
+		</where> 
+	</update>
+	
+	<select id="getSysUser" resultType="map">
+		select userid from c_t_app_userinfo 
+		where isadmin = 1 and status = 0 and delflag = 0
+	</select>
+</mapper>

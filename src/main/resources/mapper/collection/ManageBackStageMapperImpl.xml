@@ -109,7 +109,7 @@
     
     <select id="getOrderList" parameterType="map" resultType="map">
     	select ao.orderid, ao.buyuserid, us1.nickname as buynickname, ao.selluserid, us2.nickname as sellnickname, mc.typename, ao.ordernum, ao.cardid,
-			ao.type, ao.cardprice, ao.surpluswatchdays, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime
+			ao.type, ao.cardprice, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime
 		from c_t_app_order ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid

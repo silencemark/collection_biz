@@ -2,7 +2,7 @@
 <mapper namespace="com.collection.dao.IAppIndexMapper">
 
 	<select id="getHomePageBanner" parameterType="map" resultType="map">
-	    select bannerid, imgurl, httpurl, type, status, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid from  c_t_app_banner
+	    select bannerid, imgurl, httpurl, type, status, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid, description from  c_t_app_banner
 	    <where>
 	        <if test="type != null and type != ''">and type=#{type}</if>
 	        and status = 1

@@ -14,7 +14,81 @@ import org.springframework.ui.Model;
 
 public class DateUtil {
 	private static final Logger LOGGER = Logger.getLogger(DateUtil.class);
+	
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
+	
+	static SimpleDateFormat YMDHMS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+	
+	public static String COMM_YMDHMS = "yyyy-MM-dd HH:mm:ss";
+	
+	public static String COMM_YMD = "yyyy-MM-dd";
+	
+	/**
+	 * 获取当前时间yyyy-MM-dd
+	 */
+	public static String sysDate(){
+		return sdf.format(new Date());
+	}
+	
+	/**
+	 * 获取当前时间yyyy-MM-dd HH:mm:ss
+	 */
+	public static String sysDateTime(){
+		return YMDHMS.format(new Date());
+	}
+	
+	/**
+	 * 日期转字符串
+	 * yyyy-MM-dd HH:mm:ss
+	 * @param datstr
+	 * @return
+	 */
+	public static String dateTimeToString(Date datstr){
+		return YMDHMS.format(datstr);
+	}
+	
+	/**
+	 * 日期转字符串
+	 * @param datstr
+	 * @param fmt
+	 * @return
+	 */
+	public static String dateToString(Date datstr, String fmt){
+		SimpleDateFormat sdf = new SimpleDateFormat(fmt);  
+		return sdf.format(datstr);
+	}
+	
+	/**
+	 * 字符串转日期
+	 * yyyy-MM-dd HH:mm:ss
+	 * @param fmt
+	 * @return
+	 */
+	public static Date stringToDateTime(String datstr, String fmt){
+		try {
+			return YMDHMS.parse(datstr);
+		} catch (ParseException e) {
+			LOGGER.info("字符串日期格式转换失败："+e.getMessage());
+			return null;
+		}
+	}
+	
+	/**
+	 * 字符串转日期
+	 * @param datstr
+	 * @param fmt
+	 * @return
+	 */
+	public static Date StringTodate(String datstr, String fmt){
+		SimpleDateFormat sdf = new SimpleDateFormat(fmt);  
+		try {
+			return sdf.parse(datstr);
+		} catch (ParseException e) {
+			LOGGER.info("字符串日期格式转换失败："+e.getMessage());
+			return null;
+		}
+	}
+	
 	/**
 	 * 获取某一时间  这一周日期
 	 * @param mdate
@@ -343,11 +417,11 @@ public class DateUtil {
 		c2.setTime(d2);
 		int result = c1.compareTo(c2);
 		if (result >= 0){
-			//LOGGER.debug("true");
+			LOGGER.debug("true");
 			return true;
 		  
 		}else{
-			// LOGGER.debug("false");
+			 LOGGER.debug("false");
 			return false;
 		 
 	   }

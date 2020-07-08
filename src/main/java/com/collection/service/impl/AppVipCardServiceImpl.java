@@ -33,6 +33,26 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Override
 	public List<Map<String, Object>> getWaitPayCard(Map<String, Object> data) {
+		//查询时，如果你是买家且待支付的订单超过了支付时间，那么冻结你的账户，且订单回退到待出售，短信提醒卖家 和买家
+		Map<String, Object> buyMap = new HashMap<String, Object>();
+		buyMap.put("buyuserid", data.get("userid"));
+		List<Map<String, Object>> waitPayList = this.appVipCardMapper.getMoreThanWaitTime(buyMap);
+		for (Map<String, Object> waitPay : waitPayList) {
+			//冻结买家用户
+			buyMap.put("status", 2);
+			this.appVipCardMapper.frozenOrder(buyMap);
+			//更改买家抢购状态
+			waitPay.put("status", 3);
+			this.appVipCardMapper.updateRushToBuy(waitPay);
+			//订单回到待出售删除 买家id 和 抢购时间
+			this.appVipCardMapper.updateWaitSell(waitPay);
+		}
+		//查询时，如果你是买家且待审核的订单超过了审核时间，那么 自动审核通过
+		List<Map<String, Object>> examineList = this.appVipCardMapper.getMoreThanExamineTime(buyMap);
+		for (Map<String, Object> examine : examineList) {
+			//自动审核
+			this.appVipCardMapper.examinePast(examine);
+		}
 		return appVipCardMapper.getWaitPayCard(data);
 	}
 
@@ -120,6 +140,26 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Override
 	public List<Map<String, Object>> getSaleCardList(Map<String, Object> data) {
+		//查询时，如果你是卖家且待支付的订单超过了支付时间，那么冻结你的账户，且订单回退到待出售，短信提醒卖家 和买家
+		Map<String, Object> buyMap = new HashMap<String, Object>();
+		buyMap.put("selluserid", data.get("userid"));
+		List<Map<String, Object>> waitPayList = this.appVipCardMapper.getMoreThanWaitTime(buyMap);
+		for (Map<String, Object> waitPay : waitPayList) {
+			//冻结买家用户
+			buyMap.put("status", 2);
+			this.appVipCardMapper.frozenOrder(waitPay);
+			//更改买家抢购状态
+			waitPay.put("status", 3);
+			this.appVipCardMapper.updateRushToBuy(waitPay);
+			//订单回到待出售删除 买家id 和 抢购时间
+			this.appVipCardMapper.updateWaitSell(waitPay);
+		}
+		//查询时，如果你是卖家且待审核的订单超过了审核时间，那么 自动审核通过
+		List<Map<String, Object>> examineList = this.appVipCardMapper.getMoreThanExamineTime(buyMap);
+		for (Map<String, Object> examine : examineList) {
+			//自动审核
+			this.appVipCardMapper.examinePast(examine);
+		}
 		return this.appVipCardMapper.getSaleCardList(data);
 	}
 
@@ -161,32 +201,34 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		sellUser = new HashMap<String, Object>();
 		sellUser.put("userid", data.get("selluserid"));
 		Map<String, Object> elder = this.appVipCardMapper.getElderid(sellUser);
-		
-		sellUser = new HashMap<String, Object>();
-		sellUser.put("growthvalue", 1000);
-		sellUser.put("userid", elder.get("parentid"));
-		this.appVipCardMapper.addParentGrowthValue(sellUser);
-		//5、给父级5%收益和爷级2%收益 （爸爷的个人资产） 且新增记录到团队收益表c_t_app_teamprofit
-		double profitprice1 = Double.parseDouble(data.get("profitprice").toString()) * 0.05d;
-		sellUser.put("profitprice", profitprice1);
-		//增加父级收益
-		this.appVipCardMapper.addParentsAndGrandPa(sellUser);
-		sellUser = new HashMap<String, Object>();
-		double profitprice2 = Double.parseDouble(data.get("profitprice").toString()) * 0.02d;
-		sellUser.put("userid", elder.get("grandpaid"));
-		sellUser.put("profitprice", profitprice2);
-		//增加爷爷收益
-		this.appVipCardMapper.addParentsAndGrandPa(sellUser);
-		
-		//新增到父级爷级团队收益表
-		Map<String, Object> teamprofit = new HashMap<String, Object>();
-		teamprofit.put("userid", data.get("selluserid"));
-		teamprofit.put("parentid", elder.get("parentid"));
-		teamprofit.put("parentprofit", profitprice1);
-		teamprofit.put("grandfatherid", elder.get("grandpaid"));
-		teamprofit.put("grandfatherprofit", profitprice2);
-		teamprofit.put("createtime", new Date());
-		this.appVipCardMapper.insertTeamProfit(teamprofit);
+		if(elder != null) {
+			sellUser = new HashMap<String, Object>();
+			sellUser.put("growthvalue", 1000);
+			sellUser.put("userid", elder.get("parentid"));
+			this.appVipCardMapper.addParentGrowthValue(sellUser);
+			//5、给父级5%收益和爷级2%收益 （爸爷的个人资产） 且新增记录到团队收益表c_t_app_teamprofit
+			double profitprice1 = Double.parseDouble(data.get("profitprice").toString()) * 0.05d;
+			sellUser.put("profitprice", profitprice1);
+			//增加父级收益
+			this.appVipCardMapper.addParentsAndGrandPa(sellUser);
+			sellUser = new HashMap<String, Object>();
+			double profitprice2 = Double.parseDouble(data.get("profitprice").toString()) * 0.02d;
+			if(elder.get("grandpaid") != null) {
+				sellUser.put("userid", elder.get("grandpaid"));
+				sellUser.put("profitprice", profitprice2);
+				//增加爷爷收益
+				this.appVipCardMapper.addParentsAndGrandPa(sellUser);
+			}
+			//新增到父级爷级团队收益表
+			Map<String, Object> teamprofit = new HashMap<String, Object>();
+			teamprofit.put("userid", data.get("selluserid"));
+			teamprofit.put("parentid", elder.get("parentid"));
+			teamprofit.put("parentprofit", profitprice1);
+			teamprofit.put("grandfatherid", elder.get("grandpaid"));
+			teamprofit.put("grandfatherprofit", profitprice2);
+			teamprofit.put("createtime", new Date());
+			this.appVipCardMapper.insertTeamProfit(teamprofit);
+		}
 		//6、增加自己资产总和
 		sellUser = new HashMap<String, Object>();
 		sellUser.put("userid", data.get("selluserid"));
@@ -213,6 +255,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		}
 		return this.appVipCardMapper.getMyCardList(data);
 	}
+	
+	@Override
+	public List<Map<String, Object>> getMyHisCardList(Map<String, Object> data) {
+		return this.appVipCardMapper.getMyHisCardList(data);
+	}
+	
 
 	@Override
 	public Map<String, Object> getMemberCardInfo(Map<String, Object> data) {
@@ -253,7 +301,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		Map<String, Object> cardMap = this.appVipCardMapper.getMemberCardByPrice(data);
 		cardMap.put("cardprice", cardprice);
 		cardMap.put("selluserid", data.get("userid"));
-		cardMap.put("ordernum", generateUniqueKey());
+		
+		//查询一个当天的订单数据加一
+		int ordernum = appVipCardMapper.getOrderNum();
+		//生成订单号
+		cardMap.put("ordernum", generateUniqueKey() + ordernum);
 		cardMap.put("ordertype", 1);
 		cardMap.put("createtime", new Date());
 		//4、生成待出售的订单
@@ -279,12 +331,13 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
      * @return
      */
     public static synchronized String generateUniqueKey(){
-        Random random = new Random();
-        // 随机数的9位随机数
-        Integer r = random.nextInt(900000000) + 100000000;
+        //Random random = new Random();
+        // 随机数的3位随机数
+        //Integer r = random.nextInt(900) + 1000;
         // 返回  13位时间
         Long timeMillis = System.currentTimeMillis();
-        // 13位毫秒+9位随机数
-        return  timeMillis + String.valueOf(r);
+        // 10位时间戳 + 当天订单数量总量调用的地方查询 + 1
+        return  timeMillis.toString().substring(0, 10);
     }
+
 }

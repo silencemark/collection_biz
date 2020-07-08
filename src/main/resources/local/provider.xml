@@ -30,7 +30,8 @@
     <bean id="appUserCenterService" class="com.collection.service.impl.AppUserCenterServiceImpl"/>
     <bean id="manageBackStageService" class="com.collection.service.impl.ManageBackStageServiceImpl"/>
     <bean id="manageStatisticsService" class="com.collection.service.impl.ManageStatisticsServiceImpl"/>
-    
+    <bean id="taskService" class="com.collection.service.impl.TaskServiceImpl"/>
+    <bean id="rushBuyClacService" class="com.collection.service.impl.RushBuyClacServiceImpl"/>
     <bean id="systemService" class="com.collection.service.impl.SystemServiceImpl" />
     
     <!-- 声明需要暴露的服务接口     -->
@@ -40,6 +41,7 @@
     <dubbo:service interface="com.collection.service.IAppUserCenterService" ref="appUserCenterService" />
     <dubbo:service interface="com.collection.service.IManageBackStageService" ref="manageBackStageService" />
     <dubbo:service interface="com.collection.service.IManageStatisticsService" ref="manageStatisticsService" />
-    
+    <dubbo:service interface="com.collection.service.ITaskService" ref="taskService" />
+    <dubbo:service interface="com.collection.service.IRushBuyClacService" ref="rushBuyClacService" />
     <dubbo:service interface="com.collection.service.ISystemService" ref="systemService" />
 </beans>

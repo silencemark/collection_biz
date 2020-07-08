@@ -105,7 +105,10 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 		if(cardMap!= null) {
 			cardMap.put("cardprice", data.get("cardprice"));
 			cardMap.put("selluserid", data.get("userid"));
-			String ordernum = AppVipCardServiceImpl.generateUniqueKey();
+			//查询一个当天的订单数据加一
+			int num = appVipCardMapper.getOrderNum();
+			//生成订单号
+			String ordernum = AppVipCardServiceImpl.generateUniqueKey() + num;
 			cardMap.put("ordernum", ordernum);
 			cardMap.put("ordertype", 2);
 			cardMap.put("createtime", new Date());
