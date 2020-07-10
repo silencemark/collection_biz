@@ -53,6 +53,12 @@ public interface IAppUserCenterMapper {
 	void certification(Map<String, Object> data);
 	
 	/**
+	 * 修改用户信息实名认证
+	 * @param data
+	 */
+	void updateUserCertification(Map<String, Object> data);
+	
+	/**
 	 * 获取实名认证进度
 	 * @param data
 	 * @return

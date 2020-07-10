@@ -49,8 +49,17 @@
 		</where>
 	</select>
 	
+	<select id="getIndexInfo" resultType="map">
+		select (select sum(cardprice) from c_t_app_order where status &gt;= 3) sumprice,
+			 (select ifnull(sum(cardprice),0) from c_t_app_order where status &gt;= 3 and  type = 1) sysprice,
+			(select count(0) from c_t_app_userinfo where status = 0 and delflag = 0) usernum,
+			(select count(0) from c_t_app_userinfo au where status = 0 and delflag = 0 and EXISTS (select 1 from c_t_app_order ao where ao.buyuserid = au.userid and ao.status &gt;=3 )) effectiveusernum
+		from dual 
+	</select>
+	
+	
 	<select id="getBannerList" resultType="map" parameterType="map">
-		select bannerid, imgurl, httpurl, type, status, updatetime, createtime 
+		select bannerid, imgurl, httpurl, type, status, updatetime, createtime, description
 		from c_t_app_banner
 		<where>
 			<if test="type != null and type != '全部'">and type = #{type}</if>
@@ -69,7 +78,7 @@
 	</select>
 	
 	<select id="getBannerInfo" resultType="map" parameterType="map">
-		select bannerid, imgurl, httpurl, type, status, updatetime, createtime 
+		select bannerid, imgurl, httpurl, type, status, updatetime, createtime,description
 		from c_t_app_banner
 		<where>
 			<if test="bannerid != null and bannerid != ''">and bannerid = #{bannerid}</if>
@@ -86,6 +95,7 @@
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
             <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
             <if test="status != null and status != ''">status=#{status},</if>
+            <if test="description != null and description != ''">description=#{description},</if>
         </set>
         where bannerid=#{bannerid}
     </update>
@@ -97,6 +107,7 @@
             <if test="type != null and type != ''">type,</if>
             <if test="createtime != null and createtime != ''">createtime,</if>
             <if test="createid != null and createid != ''">createid,</if>
+            <if test="description != null and description != ''">description,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="imgurl != null and imgurl != ''">#{imgurl},</if>
@@ -104,6 +115,7 @@
             <if test="type != null and type != ''">#{type},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
             <if test="createid != null and createid != ''">#{createid},</if>
+            <if test="description != null and description != ''">#{description},</if>
         </trim>
     </insert>
     
@@ -332,6 +344,12 @@
 		</where>
     </select>
     
+    <update id="updateUserCertification" parameterType="map">
+    	update c_t_app_userinfo
+    	set isrealname = #{status}
+    	where userid = (select userid from c_t_app_certification  where certificationid = #{certificationid})
+    </update>
+    
     <update id="updateCertification" parameterType="map">
     	update c_t_app_certification
     	<set>
@@ -358,6 +376,30 @@
     	left join c_t_app_userinfo au on aq.userid = au.userid
     	<where>
 			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+		</where>
+    </select>
+    
+    <select id="getNoticeList" parameterType="map" resultType="map">
+    	select noticeid, title, message,status,createtime
+    	from c_t_notice 
+    	<where>
+			<if test="message != null and message != ''">and locate(#{message}, message) > 0</if>
+			<if test="title != null and title != ''">and locate(#{title}, title) > 0</if>
+			<if test="status != null and status != ''">and status = #{status}</if>
+			<if test="createtime != null and createtime != ''"> and createtime &gt;= #{createtime} and createtime &lt;= DATE_ADD(#{createtime},INTERVAL 1 DAY)  </if>
+		</where>
+		order by createtime desc 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getNoticeListCount" parameterType="map" resultType="int">
+    	select count(0)
+    	from c_t_notice 
+    	<where>
+			<if test="message != null and message != ''">and locate(#{message}, message) > 0</if>
+			<if test="title != null and title != ''">and locate(#{title}, title) > 0</if>
+			<if test="status != null and status != ''">and status = #{status}</if>
+			<if test="createtime != null and createtime != ''"> and createtime &gt;= #{createtime} and createtime &lt;= DATE_ADD(#{createtime},INTERVAL 1 DAY)  </if>
 		</where>
     </select>
     

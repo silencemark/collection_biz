@@ -340,4 +340,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
         return  timeMillis.toString().substring(0, 10);
     }
 
+	@Override
+	public void commentMovie(Map<String, Object> data) {
+		//订单评论次数加一
+		this.appVipCardMapper.addOrderCommentCount(data);
+		data.put("createtime", new Date());
+		this.appVipCardMapper.commentMovie(data);
+	}
+
 }

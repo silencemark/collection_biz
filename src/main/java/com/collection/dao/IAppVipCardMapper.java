@@ -245,4 +245,15 @@ public interface IAppVipCardMapper {
 	 */
 	List<Map<String, Object>> getMoreThanExamineTime(Map<String, Object> data);
 	
+	/**
+	 * 评论视频
+	 * @param data
+	 */
+	void commentMovie(Map<String, Object> data);
+	
+	/**
+	 * 新增订单评论次数
+	 * @param data
+	 */
+	void addOrderCommentCount(Map<String, Object> data);
 }

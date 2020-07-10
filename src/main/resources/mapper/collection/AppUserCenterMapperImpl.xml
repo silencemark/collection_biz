@@ -63,6 +63,13 @@
 	        and delflag=0
 	    </where>
 	</update>
+	
+	<update id="updateUserCertification" parameterType="map">
+		update c_t_app_userinfo
+		set isrealname = #{status}
+		where userid = #{userid}
+	</update>
+	
 	<insert id="certification" parameterType="map">
 		insert into c_t_app_certification
 		 <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -70,6 +77,7 @@
 	        <if test="nationality != null and nationality != ''">nationality,</if>
 	        <if test="realname != null and realname != ''">realname,</if>
 	        <if test="idcard != null and idcard != ''">idcard,</if>
+	        <if test="status != null and status != ''">status,</if>
 	        <if test="createtime != null and createtime != ''">createtime,</if>
 	    </trim>
 	    <trim prefix="values(" suffix=")" suffixOverrides=",">
@@ -77,6 +85,7 @@
 	        <if test="nationality != null and nationality != ''">#{nationality},</if>
 	        <if test="realname != null and realname != ''">#{realname},</if>
 	        <if test="idcard != null and idcard != ''">#{idcard},</if>
+	        <if test="status != null and status != ''">#{status},</if>
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>
@@ -102,6 +111,7 @@
 		from c_t_app_certification 
 		where userid = #{userid}
 		and delflag = 0
+		order by createtime desc 
 		limit 1
 	</select>
 	

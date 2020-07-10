@@ -80,20 +80,26 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 			insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"当前计算时间非当日结算时间 不参与抢购分配业务，当前时间："+new Date(), Constants.FAILED);
 			return;
 		}
-		/**
-		 * 抢购会员卡
-		 */
-		//随机按成功率 筛选出 幸运的 用户发放会员卡
-		int rushnum = (int) (userlist.size() * rushrate / 100d);
-		logger.info("算出的能抢到会员卡的用户个数："+rushnum);
-		if (rushnum == 0) {
-			insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"算出能抢到会员卡的用户个数为0：此次会员卡抢购失败", Constants.FAILED);
-			return;
-		}
-		
-		Random random = new Random();
 		//定义随机发会员卡的用户集合
 		List<Map<String, Object>> indexlist = new ArrayList<Map<String, Object>>();
+		//定义随机发会员卡的用户个数
+		int rushnum = 0;
+		//参与抢购人数小于等于3人且为最后一次结算时时 ，直接全部抢购成功 前面两次还会各抢购成功一个 所以总低于5个会总抢购成功
+		if (userlist != null && userlist.size() <= 3 && lastflag == 1) {
+			rushnum = userlist.size();
+		} else {
+			/**
+			 * 抢购会员卡
+			 */
+			//随机按成功率 筛选出 幸运的 用户发放会员卡
+			rushnum = (int) (userlist.size() * rushrate / 100d);
+			//为0时至少有一个用户抢中
+			if(rushnum == 0) {
+				rushnum = 1;
+			}
+		}
+		logger.info("算出的能抢到会员卡的用户个数："+rushnum);
+		Random random = new Random();
 		for (int i = 0; i < rushnum; i++){
 			//从参与抢购的集合中取随机的一个下标
 			int index = random.nextInt(userlist.size());

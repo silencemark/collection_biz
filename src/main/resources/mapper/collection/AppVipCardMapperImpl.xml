@@ -459,4 +459,29 @@
 		</where>
 	</select>
 	
+	
+	<insert id="commentMovie" parameterType="map">
+		insert into c_t_app_comment
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">userid,</if>
+	        <if test="orderid != null and orderid != ''">orderid,</if>
+	        <if test="movieid != null and movieid != ''">movieid,</if>
+	        <if test="comment != null and comment != ''">comment,</if>
+	        <if test="stars != null and stars != ''">stars,</if>
+	        <if test="createtime != null and createtime != ''">createtime,</if>
+	    </trim>
+	    <trim prefix="values(" suffix=")" suffixOverrides=",">
+	        <if test="userid != null and userid != ''">#{userid},</if>
+	        <if test="orderid != null and orderid != ''">#{orderid},</if>
+	        <if test="movieid != null and movieid != ''">#{movieid},</if>
+	        <if test="comment != null and comment != ''">#{comment},</if>
+	        <if test="stars != null and stars != ''">#{stars},</if>
+	        <if test="createtime != null and createtime != ''">#{createtime},</if>
+	    </trim>
+	</insert>
+	
+	<update id="addOrderCommentCount" parameterType="map">
+		update c_t_app_order set commentcount = commentcount + 1 where orderid = #{orderid}
+	</update>
+	
 </mapper>

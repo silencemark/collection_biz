@@ -154,6 +154,7 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 
 	@Override
 	public void updateCertification(Map<String, Object> data) {
+		this.manageBackStageMapper.updateUserCertification(data);
 		this.manageBackStageMapper.updateCertification(data);
 	}
 
@@ -191,6 +192,21 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	@Override
 	public int getExchangeListCount(Map<String, Object> data) {
 		return this.manageBackStageMapper.getExchangeListCount(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getNoticeList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getNoticeList(data);
+	}
+
+	@Override
+	public int getNoticeListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getNoticeListCount(data);
+	}
+
+	@Override
+	public Map<String, Object> getIndexInfo() {
+		return this.manageBackStageMapper.getIndexInfo();
 	}
 	
 }

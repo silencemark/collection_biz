@@ -58,6 +58,9 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Override
 	public void certification(Map<String, Object> data) {
+		//更改用户状态
+		data.put("status", 1);
+		this.appUserCenterMapper.updateUserCertification(data);
 		data.put("createtime", new Date());
 		this.appUserCenterMapper.certification(data);
 	}
@@ -149,8 +152,44 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public void updateHeadImg(Map<String, Object> data) {
+	public Map<String, Object> updateHeadImg(Map<String, Object> data) {
+		//拿出headimage的base64文件流
+		String base64Data = String.valueOf(data.get("headimage"));
+		Map<String, Object> result = new HashMap<String, Object>();
+        try{  
+            logger.debug("上传文件的数据："+base64Data);
+            logger.debug("对数据进行判断");
+            if(base64Data == null || "".equals(base64Data)){
+                logger.info("上传失败，上传图片数据为空");
+                result.put("status", 1);
+        		result.put("message", "上传失败，上传图片数据为空");
+        		return result;
+            }
+            String tempFileName = System.currentTimeMillis()/1000l+"_app" + ".jpg";
+            logger.debug("生成文件名为："+tempFileName);
+ 
+            //因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
+            byte[] bs = Base64Utils.decodeFromString(base64Data);
+            try{
+                //使用apache提供的工具类操作流
+                FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
+            }catch(Exception ee){
+            	logger.info("上传失败，写入文件失败"+ee.getMessage());
+            	result.put("status", 0);
+        		result.put("message", "上传失败，写入文件失败");
+        		return result;
+            }
+            data.put("headimage", "/upload/images/"+tempFileName);
+        }catch (Exception e) {  
+        	logger.info("上传失败"+ e.getMessage());
+        	result.put("status", 0);
+    		result.put("message", "上传失败");
+    		return result;
+        }
 		this.appUserCenterMapper.updateUserInfo(data);
+		result.put("status", 0);
+		result.put("message", "头像修改成功");
+		return result;
 	}
 
 	@Override
