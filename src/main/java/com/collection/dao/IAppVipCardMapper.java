@@ -214,6 +214,13 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getRushToBuyList(Map<String, Object> data);
 	
 	/**
+	 * 获取我当天抢购的记录
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getRushToBuyById(Map<String, Object> data);
+	
+	/**
 	 * 回退到待出售状态订单
 	 * @param data
 	 */

@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 
+import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.service.IAppVipCardService;
 import com.collection.util.Constants;
@@ -24,6 +25,8 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Autowired IAppVipCardMapper appVipCardMapper;
 
+	@Autowired IAppUserCenterMapper appUserCenterMapper;	
+	
 	private Logger logger = Logger.getLogger(AppVipCardServiceImpl.class);
 	
 	@Override
@@ -313,9 +316,39 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	}
 
 	@Override
-	public void insertRushToBuy(Map<String, Object> data) {
+	public Map<String, Object> insertRushToBuy(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> userinfo = this.appUserCenterMapper.getMyUserInfo(data);
+		//1、判断当前用户是否实名认证、
+		if (!"2".equals(userinfo.get("isrealname").toString())) {
+			result.put("status", 1);
+			result.put("message", "您还没有实名认证");
+			return result;
+		} 
+		//2、是否当前用户绑定收款方式
+		if (!"1".equals(userinfo.get("ispaymentmethod").toString())) {
+			result.put("status", 1);
+			result.put("message", "您还没有绑定收款方式");
+			return result;
+		}
+		//3、是否设置支付密码
+		if (!"1".equals(userinfo.get("ispaypass").toString())) {
+			result.put("status", 1);
+			result.put("message", "您还没有设置支付密码");
+			return result;
+		}
+		//4、防止重复点击抢购接口
+		Map<String, Object> rushMap = this.appVipCardMapper.getRushToBuyById(data);
+		if (rushMap != null && rushMap.size() > 0){
+			result.put("status", 1);
+			result.put("message", "您已经参与抢购，请勿重复点击");
+			return result;
+		}
 		data.put("createtime", new Date());
 		this.appVipCardMapper.insertRushToBuy(data);
+		result.put("status", 0);
+		result.put("message", "参与抢购成功,请到我的抢购中查看抢购结果");
+		return result;
 	}
 
 	@Override

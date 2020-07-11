@@ -417,13 +417,21 @@
 		values(#{userid}, #{cardid}, #{createtime})
 	</insert>
 	
+	<select id="getRushToBuyById" parameterType="map" resultType="map">
+		select userid,cardid,createtime,rushbuyid,status 
+		from s c_t_app_rushtobuy  
+		where userid = #{userid} 
+		and cardid = #{cardid}
+		and to_days(createtime) = to_days(now())
+	</select>
+	
 	<update id="updateRushToBuy" parameterType="map">
 		update c_t_app_rushtobuy
 		set status = #{status}
 		where userid = #{buyuserid}
 		and cardid = #{cardid}
 		and status = 1 
-		and createtime &gt; CURDATE()
+		and createtime &gt; CURDATE()ss
 	</update>
 	
 	<update id="updateWaitSell" parameterType="map">

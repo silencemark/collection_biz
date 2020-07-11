@@ -173,7 +173,7 @@
 	<select id="getMyUserInfo" parameterType="map" resultType="map">
 		select userid,password,phone,nickname,status,delflag,headimage,isrealname,
 			case when ISNULL(paypassword) = 1 then 0 else 1 end as ispaypass,
-	    (select count(0) from c_t_app_paymentmethod where userid = #{userid}) ispaymentmethod
+	    (select count(0) from c_t_app_paymentmethod where userid = #{userid} and (weixinqrcode is not null or alipayqrcode is not null or banknum is not null)) ispaymentmethod
 	    from  c_t_app_userinfo 
 	    <where>
 	    	<if test="userid != null and userid != ''">and userid=#{userid}</if>
