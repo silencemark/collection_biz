@@ -34,7 +34,15 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	
 	@Override
 	public Map<String, Object> getMyCenter(Map<String, Object> data) {
-		return appUserCenterMapper.getMyCenter(data);
+		Map<String, Object> result = appUserCenterMapper.getMyCenter(data);
+		//判断当天是否已经签到
+		Map<String, Object> signMap = this.appUserCenterMapper.getSignTodays(data);
+		if (signMap != null && signMap.size() > 0 ){
+			result.put("isSign", 1);
+		} else {
+			result.put("isSign", 0);
+		}
+		return result;
 	}
 
 	@Override
@@ -47,33 +55,53 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 			result.put("message", "今天已经签到过了");
 			return result;
 		}
-		//签到送1-50成长值 和一个 xgo
-		int value = new Random().nextInt(50) + 1;
-		data.put("growthvalue", value);
-		this.appUserCenterMapper.signIn(data);
-		//新增到签到记录表
-		data.put("xgocoin", 1);
-		data.put("createtime", new Date());
-		this.appUserCenterMapper.insertSign(data);
-		//新增到xgo记录表
-		data.put("type", 1);
-		data.put("remark", "恭喜您获得1个xgo和"+value+"点成长值");
-		this.appUserCenterMapper.addXgoRecord(data);
-		//如果成长值达到下一个值改变会员等级
-		Map<String, Object> levelMap = appUserCenterMapper.getUserNewOldLevel(data);
-		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
-			appUserCenterMapper.updateUserInfoLevel(levelMap);
-			//新增买家通知
-            Map<String, Object> notice = new HashMap<String, Object>();
-    		notice.put("title", "会员等级通知");
-    		notice.put("message", "恭喜您，您的会员等级升级为"+levelMap.get("levelname"));
-    		notice.put("userid", levelMap.get("userid"));
-    		notice.put("createtime", new Date());
-    		this.systemMapper.insertUserNotice(notice);
+		Map<String, Object> userinfo = this.appUserCenterMapper.getMyCenter(data);
+		//普通用户只能签到送xgo
+		if (userinfo!= null && "0".equals(userinfo.get("levelenum").toString())) {
+			//签到送一个 xgo
+			data.put("growthvalue", 0);
+			this.appUserCenterMapper.signIn(data);
+			//新增到签到记录表
+			data.put("xgocoin", 1);
+			data.put("createtime", new Date());
+			this.appUserCenterMapper.insertSign(data);
+			//新增到xgo记录表
+			data.put("type", 1);
+			data.put("remark", "恭喜您签到获得1个xgo币");
+			this.appUserCenterMapper.addXgoRecord(data);
+			
+			result.put("status", 0);
+			result.put("remark", data.get("remark"));
+			return result;
+		} else {
+			//签到送1-50成长值 和一个 xgo
+			int value = new Random().nextInt(50) + 1;
+			data.put("growthvalue", value);
+			this.appUserCenterMapper.signIn(data);
+			//新增到签到记录表
+			data.put("xgocoin", 1);
+			data.put("createtime", new Date());
+			this.appUserCenterMapper.insertSign(data);
+			//新增到xgo记录表
+			data.put("type", 1);
+			data.put("remark", "恭喜您获得1个xgo币和"+value+"点成长值");
+			this.appUserCenterMapper.addXgoRecord(data);
+			//如果成长值达到下一个值改变会员等级
+			Map<String, Object> levelMap = appUserCenterMapper.getUserNewOldLevel(data);
+			if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
+				appUserCenterMapper.updateUserInfoLevel(levelMap);
+				//新增买家通知
+	            Map<String, Object> notice = new HashMap<String, Object>();
+	    		notice.put("title", "会员等级通知");
+	    		notice.put("message", "恭喜您，您的会员等级升级为"+levelMap.get("levelname"));
+	    		notice.put("userid", levelMap.get("userid"));
+	    		notice.put("createtime", new Date());
+	    		this.systemMapper.insertUserNotice(notice);
+			}
+			result.put("status", 0);
+			result.put("remark", data.get("remark"));
+			return result;
 		}
-		result.put("status", 0);
-		result.put("remark", data.get("remark"));
-		return result;
 	}
 
 	@Override
