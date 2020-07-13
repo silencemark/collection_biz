@@ -247,4 +247,76 @@ public interface IManageBackStageMapper {
 	 * @return
 	 */
 	int getExchangeListCount(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡视频管理列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getMemberMovieList(Map<String, Object> data);
+	
+	/**
+	 * 获取会员卡视频管理列表次数
+	 * @param data
+	 * @return
+	 */
+	int getMemberMovieListCount(Map<String, Object> data);
+	
+	/**
+	 * 修改会员卡视频信息
+	 * @param data
+	 */
+	void updateMemberMovie(Map<String, Object> data);
+	
+	/**
+	 * 新增会员卡视频信息
+	 * @param data
+	 */
+	void insertMemberMovie(Map<String, Object> data);
+	
+	/**
+	 * 获取系统消息列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getSysNoticeList(Map<String, Object> data);
+	
+	/**
+	 * 获取系统消息列表列表次数
+	 * @param data
+	 * @return
+	 */
+	int getSysNoticeListCount(Map<String, Object> data);
+	
+	/**
+	 * 发送系统通知消息
+	 * @param data
+	 */
+	void sendSysNotice(List<Map<String, Object>> data);
+	
+	/**
+	 * 获取抢购概率列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getRateList(Map<String, Object> data);
+	
+	/**
+	 * 获取抢购概率列表次数
+	 * @param data
+	 * @return
+	 */
+	int getRateListCount(Map<String, Object> data);
+	
+	/**
+	 * 修改抢购概率信息
+	 * @param data
+	 */
+	void updateRate(Map<String, Object> data);
+	
+	/**
+	 * 新增抢购概率信息
+	 * @param data
+	 */
+	void insertRate(Map<String, Object> data);
 }

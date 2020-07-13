@@ -25,4 +25,9 @@ public class SystemServiceImpl implements ISystemService{
 		data.put("updatetime", new Date());
 		this.systemMapper.updateUserInfo(data);
 	}
+
+	@Override
+	public void insertUserNotice(Map<String, Object> data) {
+		this.systemMapper.insertUserNotice(data);
+	}
 }

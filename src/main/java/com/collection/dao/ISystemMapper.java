@@ -25,4 +25,10 @@ public interface ISystemMapper {
 	 * @param data
 	 */
 	void insertNotice(Map<String, Object> data);
+	
+	/**
+	 * 新增用户通知
+	 * @param data
+	 */
+	void insertUserNotice(Map<String, Object> data);
 }

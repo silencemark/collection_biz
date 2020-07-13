@@ -50,8 +50,21 @@ public interface IRushBuyClacMapper {
 	void updateRushToBuy(Map<String, Object> data);
 	
 	/**
+	 * 扣除抢购所需xgo币
+	 * @param data
+	 */
+	void deductionXgo(Map<String, Object> data);
+	
+	/**
 	 * 获取所有系统用户
 	 * @return
 	 */
 	List<Map<String, Object>> getSysUser(); 
+	
+	/**
+	 * 获取所有未抢购成功的用户id
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> selectRushToBuyUserid(Map<String, Object> data);
 }

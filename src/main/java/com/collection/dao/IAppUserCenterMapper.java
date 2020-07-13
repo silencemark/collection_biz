@@ -22,10 +22,24 @@ public interface IAppUserCenterMapper {
 	void signIn(Map<String, Object> data);
 	
 	/**
+	 * 获取当天签到信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getSignTodays(Map<String, Object> data);
+	
+	/**
 	 * 根据用户信息的当前成长值匹配修改会员等级
 	 * @param data
 	 */
 	void updateUserInfoLevel(Map<String, Object> data);
+	
+	/**
+	 * 获取用户当前用户等级 和 当前成长值对应的用户等级信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getUserNewOldLevel(Map<String, Object> data);
 	
 	/**
 	 * 获取的会员体系成长值
@@ -45,6 +59,12 @@ public interface IAppUserCenterMapper {
 	 * @param data
 	 */
 	void insertSign(Map<String, Object> data);
+	
+	/**
+	 * 新增xgo记录明细
+	 * @param data
+	 */
+	void addXgoRecord(Map<String, Object> data);
 	
 	/**
 	 * 进行认证
@@ -156,4 +176,44 @@ public interface IAppUserCenterMapper {
 	 * @param data
 	 */
 	void addMyQuestion(Map<String, Object> data);
+	
+	/**
+	 * 获取用户的通知信息列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getUserNotice(Map<String, Object> data);
+	
+	/**
+	 * 获取用户的消息未读数量
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getNoticeUnreadNum(Map<String, Object> data);
+	
+	/**
+	 *  改变用户通知消息 的未读/已读状态
+	 * @param data
+	 */
+	void updateNoticeStatus(Map<String, Object> data);
+	
+	/**
+	 * 获取xgo明细记录列表信息
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getXgoRecord(Map<String, Object> data);
+	
+	/**
+	 * 减少xgo数量
+	 * @param data
+	 */
+	void reduceUserXgo(Map<String, Object> data);
+	
+	/**
+	 * 增加xgo数量
+	 * @param data
+	 */
+	void addUserXgo(Map<String, Object> data);
+	
 }

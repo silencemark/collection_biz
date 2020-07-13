@@ -34,4 +34,10 @@
     	insert into c_t_notice(title, message, status, createtime)
     	values(#{title}, #{message}, #{status}, #{createtime})
     </insert>
+    
+    <insert id="insertUserNotice" parameterType="map">
+    	insert into c_t_usernotice(userid, title, message, createtime)
+    	values(#{userid}, #{title}, #{message}, #{createtime})
+    </insert>
+    
 </mapper>

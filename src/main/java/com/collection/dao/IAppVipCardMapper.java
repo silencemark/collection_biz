@@ -88,10 +88,10 @@ public interface IAppVipCardMapper {
 	Map<String, Object> getElderid(Map<String, Object> data);
 	
 	/**
-	 * 邀请者加成长值
+	 * 用户加成长值
 	 * @param data
 	 */
-	void addParentGrowthValue(Map<String, Object> data);
+	void addGrowthValue(Map<String, Object> data);
 	
 	/**
 	 * 父级加收益5%
@@ -128,11 +128,18 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getMyHisCardList(Map<String, Object> data);
 	
 	/**
-	 * 获取会员卡信息
+	 * 根据订单id获取会员卡信息
 	 * @param data
 	 * @return
 	 */
 	Map<String, Object> getMemberCardInfo(Map<String, Object> data);
+	
+	/**
+	 * 根据id获取会员卡信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getMemberCardInfoById(Map<String, Object> data);
 	
 	/**
 	 * 获取可出售订单id列表
@@ -263,4 +270,5 @@ public interface IAppVipCardMapper {
 	 * @param data
 	 */
 	void addOrderCommentCount(Map<String, Object> data);
+
 }

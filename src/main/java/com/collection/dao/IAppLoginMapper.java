@@ -44,7 +44,7 @@ public interface IAppLoginMapper {
 	 * 根据邀请码获取父ID
 	 * @return 
 	 */
-	int getParentIdByInviteCode(Map<String, Object> data);
+	Map<String, Object> getParentIdByInviteCode(Map<String, Object> data);
 	
 	/**
 	 * @param data

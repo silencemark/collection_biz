@@ -1,5 +1,6 @@
 package com.collection.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.collection.dao.IManageBackStageMapper;
 import com.collection.service.IManageBackStageService;
+
 /**
  * 后台管理相关功能
  * @author silence
@@ -207,6 +209,69 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	@Override
 	public Map<String, Object> getIndexInfo() {
 		return this.manageBackStageMapper.getIndexInfo();
+	}
+
+	@Override
+	public List<Map<String, Object>> getMemberMovieList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getMemberMovieList(data);
+	}
+
+	@Override
+	public int getMemberMovieListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getMemberMovieListCount(data);
+	}
+
+	@Override
+	public void updateMemberMovie(Map<String, Object> data) {
+		 this.manageBackStageMapper.updateMemberMovie(data);
+	}
+
+	@Override
+	public void insertMemberMovie(Map<String, Object> data) {
+		 this.manageBackStageMapper.insertMemberMovie(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getSysNoticeList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getSysNoticeList(data);
+	}
+
+	@Override
+	public int getSysNoticeListCount(Map<String, Object> data) {
+		return  this.manageBackStageMapper.getSysNoticeListCount(data);
+	}
+
+	@Override
+	public void sendSysNotice(Map<String, Object> data) {
+		//查询所有用户
+		List<Map<String, Object>> userlist = this.manageBackStageMapper.getUserList(null);
+		Date createtime = new Date();
+		for(Map<String, Object> user: userlist) {
+			user.putAll(data);
+			user.put("createtime", createtime);
+			user.put("type", 1);
+		}
+		this.manageBackStageMapper.sendSysNotice(userlist);
+	}
+
+	@Override
+	public void updateRate(Map<String, Object> data) {
+		this.manageBackStageMapper.updateRate(data);
+	}
+
+	@Override
+	public void insertRate(Map<String, Object> data) {
+		this.manageBackStageMapper.insertRate(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getRateList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getRateList(data);
+	}
+
+	@Override
+	public int getRateListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getRateListCount(data);
 	}
 	
 }

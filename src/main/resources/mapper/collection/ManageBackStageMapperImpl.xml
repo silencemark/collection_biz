@@ -15,7 +15,7 @@
 		select u.userid, u.phone, u.nickname, u.headimage, u.status,u.delflag,u.invitecode,u.invitecodehttpurl,u.invitecodeqrcode,u.parentid,u.levelid,
 		u.xgocoin,u.sumprofit,u.sumassets,u.growthvalue,u.isrealname, u.createtime, u.updatetime
 		 from  c_t_app_userinfo u
-		 left join c_t_app_certification c on u.userid = c.userid and c.status=1
+		 left join c_t_app_certification c on u.userid = c.userid and c.status=2
 		<where>
 			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
 			<if test="nickname != null and nickname != ''">and locate(#{nickname},u.nickname) > 0</if>
@@ -39,7 +39,7 @@
 	
 	<select id="getUserListCount" parameterType="map" resultType="int">
 		select count(0) from  c_t_app_userinfo u
-		 left join c_t_app_certification c on u.userid = c.userid and c.status=1
+		 left join c_t_app_certification c on u.userid = c.userid and c.status=2
 		<where>
 			<if test="phone != null and phone != ''">and locate(#{phone},u.phone) > 0</if>
 			<if test="nickname != null and nickname != ''">and locate(#{phone},u.nickname) > 0</if>
@@ -432,4 +432,142 @@
 		</where>
     </select>
     
+     <select id="getMemberMovieList" parameterType="map" resultType="map">
+    	select am.movieid, am.cardid, am.coverimg , am.title, am.description, am.httpurl, am.status,mc.typename,
+		am.createtime, am.updatetime
+		from c_t_app_membermovie am
+		left join c_t_app_membercard mc on am.cardid = mc.cardid
+		<where>
+			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
+			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="cardid != null and cardid != ''">and am.cardid = #{cardid}</if>
+		</where>
+		order by am.createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getMemberMovieListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_membermovie am
+		<where>
+			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
+			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
+			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="cardid != null and cardid != ''">and am.cardid = #{cardid}</if>
+		</where>
+    </select>
+    
+    <update id="updateMemberMovie" parameterType="map">
+    	update c_t_app_membermovie
+    	<set>
+            <if test="coverimg != null and coverimg != ''">coverimg=#{coverimg},</if>
+            <if test="title != null and title != ''">title=#{title},</if>
+            <if test="description != null and description != ''">description=#{description},</if>
+            <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+            <if test="status != null and status != ''">status=#{status},</if>
+        </set>
+        where movieid=#{movieid}
+    </update>
+    
+    <insert id="insertMemberMovie" parameterType="map">
+    	insert into c_t_app_membermovie
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+    		<if test="cardid != null and cardid != ''">cardid,</if>
+            <if test="coverimg != null and coverimg != ''">coverimg,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="description != null and title != ''">description,</if>
+            <if test="httpurl != null and httpurl != ''">httpurl,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="createid != null and createid != ''">createid,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+        	<if test="cardid != null and cardid != ''">#{cardid},</if>
+            <if test="coverimg != null and coverimg != ''">#{coverimg},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="description != null and description != ''">#{description},</if>
+            <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="createid != null and createid != ''">#{createid},</if>
+        </trim>
+    </insert>
+    
+    <select id="getSysNoticeList" parameterType="map" resultType="map">
+    	select title, message,createtime
+    	from c_t_usernotice
+		<where>
+			<if test="title != null and title != ''">and locate(#{title},title) > 0</if>
+			<if test="message != null and message != ''">and locate(#{message},message) > 0</if>
+			<if test="createtime != null and createtime != ''"> and createtime &gt;= #{createtime} and createtime &lt;= DATE_ADD(#{createtime},INTERVAL 1 DAY)  </if>
+			and  type = 1
+		</where>
+		group by title,message,createtime
+		order by createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getSysNoticeListCount" parameterType="map" resultType="int">
+    	select count(0) from (select title, message,createtime
+    	from c_t_usernotice
+		<where>
+			<if test="title != null and title != ''">and locate(#{title},title) > 0</if>
+			<if test="message != null and message != ''">and locate(#{message},message) > 0</if>
+			<if test="createtime != null and createtime != ''"> and createtime &gt;= #{createtime} and createtime &lt;= DATE_ADD(#{createtime},INTERVAL 1 DAY)  </if>
+			 and type = 1
+		</where>
+		group by title,message,createtime) A
+    </select>
+    
+    <insert id="sendSysNotice" parameterType="List">
+        insert into c_t_usernotice
+        (userid, title, message, type,createtime)
+        values
+         <foreach collection="list" index="index" item="item" separator=",">
+		(#{item.userid},#{item.title},#{item.message},#{item.type}, #{item.createtime})
+		</foreach>
+    </insert>
+    
+    <update id="updateRate" parameterType="map">
+    	update c_t_rate
+    	<set>
+            <if test="forder != null and forder != ''">forder=#{forder},</if>
+            <if test="minute != null and minute != ''">minute=#{minute},</if>
+            <if test="rate != null and rate != ''">rate=#{rate},</if>
+            <if test="lastflag != null and lastflag != ''">lastflag=#{lastflag},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+        </set>
+        where movieid=#{movieid}
+    </update>
+    
+    <insert id="insertRate" parameterType="map">
+    	insert into c_t_rate
+    	<trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="forder != null and forder != ''">forder,</if>
+            <if test="minute != null and minute != ''">minute,</if>
+            <if test="rate != null and title != ''">rate,</if>
+            <if test="lastflag != null and lastflag != ''">lastflag,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="forder != null and forder != ''">#{forder},</if>
+            <if test="minute != null and minute != ''">#{minute},</if>
+            <if test="rate != null and rate != ''">#{rate},</if>
+            <if test="lastflag != null and lastflag != ''">#{lastflag},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+        </trim>
+    </insert>
+    
+    <select id="getRateList" parameterType="map" resultType="map">
+    	select rateid, forder, minute, rate, lastflag,updatetime,createtime
+    	from c_t_rate
+		order by createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+    </select>
+    
+    <select id="getRateListCount" parameterType="map" resultType="int">
+    	select  count(0) from c_t_rate
+    </select>
 </mapper>

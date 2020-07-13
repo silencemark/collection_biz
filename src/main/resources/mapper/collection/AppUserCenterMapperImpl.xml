@@ -28,20 +28,28 @@
 		where userid = #{userid}
 	</update>
 	
+	<select id="getSignTodays" parameterType="map" resultType="map">
+		select signid, userid, growthvalue, xgocoin,createtime  from c_t_app_sign 
+		where userid = #{userid}
+		and to_days(createtime) = to_days(now())
+	</select>
+	
+	
 	<update id="updateUserInfoLevel" parameterType="map">
 		update c_t_app_userinfo 
-		set levelid = (select levelid from ( 
-		SELECT
-			ml.levelid
-		FROM
-		  c_t_app_userinfo us 
+		set levelid = #{levelid}
+		where userid = #{userid}
+	</update>
+	
+	<select id="getUserNewOldLevel" parameterType="map" resultType="map">
+		SELECT ml.levelid, us.levelid as oldlevelid, ml.levelname, us.userid
+		FROM c_t_app_userinfo us 
 		left JOIN c_t_app_memberlevel ml ON 
 		 ml.mingrowthvalue &lt;= us.growthvalue
 		AND ml.maxgrowthvalue &gt; us.growthvalue
 		where us.userid = #{userid}
-		LIMIT 1) A)
-		where userid = #{userid}
-	</update>
+		LIMIT 1 
+	</select>
 	
 	<select id="myGrowthValue" parameterType="map" resultType="map">
 		select us.growthvalue,ml.levelname,CONCAT('V',ml.levelenum) as levelenum, CONCAT('V',ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
@@ -171,7 +179,7 @@
 	</update>
 	
 	<select id="getMyUserInfo" parameterType="map" resultType="map">
-		select userid,password,phone,nickname,status,delflag,headimage,isrealname,
+		select userid,password,phone,nickname,status,delflag,headimage,isrealname,xgocoin,
 			case when ISNULL(paypassword) = 1 then 0 else 1 end as ispaypass,
 	    (select count(0) from c_t_app_paymentmethod where userid = #{userid} and (weixinqrcode is not null or alipayqrcode is not null or banknum is not null)) ispaymentmethod
 	    from  c_t_app_userinfo 
@@ -274,4 +282,52 @@
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>
+	
+	<select id="getUserNotice" parameterType="map" resultType="map">
+		select noticeid,title, message,status,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,userid
+    	from c_t_usernotice 
+    	where userid =#{userid}
+		order by createtime desc  
+	</select>
+	
+	<select id="getNoticeUnreadNum" parameterType="map" resultType="map">
+		select count(0) as count
+    	from c_t_usernotice 
+    	where userid =#{userid}
+    	and status = 0
+	</select>
+	
+	<insert id="addXgoRecord" parameterType="map">
+		insert into c_t_app_xgorecord(userid,xgocoin,type,remark,createtime)
+		values(#{userid}, #{xgocoin}, #{type}, #{remark}, #{createtime})
+	</insert>
+	
+	<update id="updateNoticeStatus" parameterType="map">
+		 update c_t_usernotice
+		 set status = #{status}
+		 <where>
+		 	<if test="userid != null and userid != ''">and userid=#{userid}</if>
+		 	<if test="noticeid != null and noticeid != ''">and noticeid=#{noticeid}</if>
+		 </where>
+	</update>
+	
+	<select id="getXgoRecord" parameterType="map" resultType="map">
+		select xgorecordid,userid, xgocoin,type,remark, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime
+    	from c_t_app_xgorecord 
+    	where userid =#{userid}
+		order by createtime desc
+	</select>
+	
+	<update id="reduceUserXgo" parameterType="map">
+		update c_t_app_userinfo
+		set xgocoin = xgocoin - #{xgocoin}
+		where userid = #{userid}
+	</update>
+	
+	<update id="addUserXgo" parameterType="map">
+		update c_t_app_userinfo
+		set xgocoin = xgocoin + #{xgocoin}
+		where userid = #{userid}
+	</update>
+	
 </mapper>

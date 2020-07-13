@@ -10,10 +10,12 @@ import java.util.Random;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
 import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
+import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppUserCenterService;
 /**
  * 个人中心相关
@@ -23,7 +25,10 @@ import com.collection.service.IAppUserCenterService;
 public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Autowired IAppUserCenterMapper appUserCenterMapper;
+	
 	@Autowired IAppVipCardMapper appVipCardMapper;
+	
+	@Autowired ISystemMapper systemMapper;
 
 	private Logger logger = Logger.getLogger(AppUserCenterServiceImpl.class);
 	
@@ -33,17 +38,42 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public void signIn(Map<String, Object> data) {
+	public Map<String, Object> signIn(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//判断当天是否已经签到
+		Map<String, Object> signMap = this.appUserCenterMapper.getSignTodays(data);
+		if (signMap != null && signMap.size() > 0 ){
+			result.put("status", 1);
+			result.put("message", "今天已经签到过了");
+			return result;
+		}
 		//签到送1-50成长值 和一个 xgo
-		int value = new Random().nextInt(50)+1;
+		int value = new Random().nextInt(50) + 1;
 		data.put("growthvalue", value);
 		this.appUserCenterMapper.signIn(data);
 		//新增到签到记录表
 		data.put("xgocoin", 1);
-		data.put("createtim", new Date());
+		data.put("createtime", new Date());
 		this.appUserCenterMapper.insertSign(data);
+		//新增到xgo记录表
+		data.put("type", 1);
+		data.put("remark", "恭喜您获得1个xgo和"+value+"点成长值");
+		this.appUserCenterMapper.addXgoRecord(data);
 		//如果成长值达到下一个值改变会员等级
-		appUserCenterMapper.updateUserInfoLevel(data);
+		Map<String, Object> levelMap = appUserCenterMapper.getUserNewOldLevel(data);
+		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
+			appUserCenterMapper.updateUserInfoLevel(levelMap);
+			//新增买家通知
+            Map<String, Object> notice = new HashMap<String, Object>();
+    		notice.put("title", "会员等级通知");
+    		notice.put("message", "恭喜您，您的会员等级升级为"+levelMap.get("levelname"));
+    		notice.put("userid", levelMap.get("userid"));
+    		notice.put("createtime", new Date());
+    		this.systemMapper.insertUserNotice(notice);
+		}
+		result.put("status", 0);
+		result.put("remark", data.get("remark"));
+		return result;
 	}
 
 	@Override
@@ -175,14 +205,14 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
                 FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
             }catch(Exception ee){
             	logger.info("上传失败，写入文件失败"+ee.getMessage());
-            	result.put("status", 0);
+            	result.put("status", 1);
         		result.put("message", "上传失败，写入文件失败");
         		return result;
             }
             data.put("headimage", "/upload/images/"+tempFileName);
         }catch (Exception e) {  
         	logger.info("上传失败"+ e.getMessage());
-        	result.put("status", 0);
+        	result.put("status", 1);
     		result.put("message", "上传失败");
     		return result;
         }
@@ -250,7 +280,7 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
                 FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
             }catch(Exception ee){
             	logger.info("上传失败，写入微信二维码失败"+ee.getMessage());
-            	result.put("status", 0);
+            	result.put("status", 1);
         		result.put("message", "上传失败，写入文件失败");
         		return result;
             }
@@ -267,7 +297,7 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
                 FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/images/"+ tempFileName), bs);  
             }catch(Exception ee){
             	logger.info("上传失败，写入支付宝二维码失败"+ee.getMessage());
-            	result.put("status", 0);
+            	result.put("status", 1);
         		result.put("message", "上传失败，写入文件失败");
         		return result;
             }
@@ -288,6 +318,68 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	public void addMyQuestion(Map<String, Object> data) {
 		data.put("createtime", new Date());
 		this.appUserCenterMapper.addMyQuestion(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getUserNotice(Map<String, Object> data) {
+		return this.appUserCenterMapper.getUserNotice(data);
+	}
+
+	@Override
+	public Map<String, Object> getNoticeUnreadNum(Map<String, Object> data) {
+		return this.appUserCenterMapper.getNoticeUnreadNum(data);
+	}
+
+	@Override
+	public void updateNoticeStatus(Map<String, Object> data) {
+		this.appUserCenterMapper.updateNoticeStatus(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getXgoRecord(Map<String, Object> data) {
+		return this.appUserCenterMapper.getXgoRecord(data);
+	}
+
+	@Override
+	@Transactional
+	public Map<String, Object> giveXgoToOther(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//查询当前用户信息
+		Map<String, Object> userinfo = new HashMap<String, Object>();
+		userinfo.put("userid", data.get("userid"));
+		Map<String, Object> myinfo = this.appUserCenterMapper.getMyCenter(userinfo);
+		//查询对方用户信息，判断输入的对方账户是否存在
+		userinfo = new HashMap<String, Object>();
+		userinfo.put("phone", data.get("phone"));
+		userinfo = this.appUserCenterMapper.getMyCenter(userinfo);
+		if (userinfo == null || userinfo.isEmpty()) {
+			result.put("status", 1);
+    		result.put("message", "转赠失败，输入手机号错误，系统没有此用户");
+    		return result;
+		}
+		//当前用户扣除xgo
+		Map<String, Object> xgoMap = new HashMap<String, Object>();
+		xgoMap.put("userid", data.get("userid"));
+		xgoMap.put("xgocoin", data.get("xgocoin"));
+		this.appUserCenterMapper.reduceUserXgo(xgoMap);
+		//新增到xgo记录表
+		xgoMap.put("createtime", new Date());
+		xgoMap.put("type", 2);
+		xgoMap.put("remark", "您转赠给用户"+userinfo.get("nickname")+"："+data.get("xgocoin")+"个xgo币");
+		this.appUserCenterMapper.addXgoRecord(xgoMap);
+		
+		//对方用户新增xgo
+		xgoMap.put("userid", userinfo.get("userid"));
+		xgoMap.put("xgocoin", data.get("xgocoin"));
+		this.appUserCenterMapper.addUserXgo(xgoMap);
+		//新增到xgo记录表
+		xgoMap.put("type", 1);
+		xgoMap.put("remark", "用户"+myinfo.get("nickname")+"转赠给您："+data.get("xgocoin")+"个xgo币");
+		this.appUserCenterMapper.addXgoRecord(xgoMap);
+		
+		result.put("status", 0);
+		result.put("message", "转赠成功");
+		return result;
 	}
 	
 	

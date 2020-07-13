@@ -41,12 +41,9 @@
 	
 	</insert>	
 	
-	<select id="getParentIdByInviteCode" resultType="int" parameterType="map">
+	<select id="getParentIdByInviteCode" resultType="map" parameterType="map">
 		select userid from c_t_app_userinfo 
-		<where>
-			<if test="invitecode != null and invitecode != ''">and invitecode=#{invitecode}</if>
-		</where>
-		limit 1
+		where invitecode=#{invitecode}
 	</select>
 	
 	<update id="updateUserInfo" parameterType="map">
