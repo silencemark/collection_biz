@@ -368,7 +368,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		//用户信息
 		Map<String, Object> userinfo = this.appUserCenterMapper.getMyUserInfo(data);
 		//1、账号冻结不能出售
-		if (!"2".equals(userinfo.get("status").toString())) {
+		if ("2".equals(userinfo.get("status").toString())) {
 			result.put("status", 1);
 			result.put("message", "您的账号已被冻结，不能出售订单");
 			return result;
