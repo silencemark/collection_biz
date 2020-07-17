@@ -26,6 +26,7 @@
             <if test="phone != null and phone != ''">phone,</if>
             <if test="nickname != null and nickname != ''">nickname,</if>
             <if test="invitecode != null and invitecode != ''">invitecode,</if>
+            <if test="invitecodehttpurl != null and invitecodehttpurl != ''">invitecodehttpurl,</if>
            <if test="parentid != null and parentid != ''">parentid,</if> 
             <if test="createtime != null and createtime != ''">createtime,</if>
         </trim>
@@ -35,6 +36,7 @@
             <if test="phone != null and phone != ''">#{phone},</if>
             <if test="nickname != null and nickname != ''">#{nickname},</if>
             <if test="invitecode != null and invitecode != ''">#{invitecode},</if>
+            <if test="invitecodehttpurl != null and invitecodehttpurl != ''">#{invitecodehttpurl},</if>
             <if test="parentid != null and parentid != ''">#{parentid},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
         </trim>

@@ -273,5 +273,35 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	public int getRateListCount(Map<String, Object> data) {
 		return this.manageBackStageMapper.getRateListCount(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getAdvertList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getAdvertList(data);
+	}
+
+	@Override
+	public Map<String, Object> getAdvertInfo(Map<String, Object> data) {
+		return this.manageBackStageMapper.getAdvertInfo(data);
+	}
+
+	@Override
+	public int getAdvertListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getAdvertListCount(data);
+	}
+
+	@Override
+	public void insertAdvert(Map<String, Object> data) {
+		this.manageBackStageMapper.insertAdvert(data);
+	}
+
+	@Override
+	public void updateAdvert(Map<String, Object> data) {
+		this.manageBackStageMapper.updateAdvert(data);
+	}
+
+	@Override
+	public void deleteAdvert(Map<String, Object> data) {
+		this.manageBackStageMapper.deleteAdvert(data);
+	}
 	
 }

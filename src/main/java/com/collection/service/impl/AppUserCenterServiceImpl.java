@@ -385,6 +385,16 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
     		result.put("message", "转赠失败，输入手机号错误，系统没有此用户");
     		return result;
 		}
+		int myxgo = Integer.parseInt(myinfo.get("xgocoin").toString());
+		int xgocoin = 0;
+		if (data.get("xgocoin") != null){
+			xgocoin = Integer.parseInt(data.get("xgocoin").toString());
+		}
+		if (myxgo - xgocoin < 10){
+			result.put("status", 1);
+    		result.put("message", "转赠失败，账户最低需要剩10个xgo");
+    		return result;
+		}
 		//当前用户扣除xgo
 		Map<String, Object> xgoMap = new HashMap<String, Object>();
 		xgoMap.put("userid", data.get("userid"));

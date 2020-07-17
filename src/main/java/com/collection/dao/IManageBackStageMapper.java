@@ -89,6 +89,45 @@ public interface IManageBackStageMapper {
 	void updateBanner(Map<String, Object> data);
 	
 	/**
+	 * 获取广告信息列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getAdvertList(Map<String, Object> data);
+	
+	/**
+	 * 获取广告信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getAdvertInfo(Map<String, Object> data);
+	
+	/**
+	 * 获取广告信息次数
+	 * @param data
+	 * @return
+	 */
+	int getAdvertListCount(Map<String, Object> data);
+	
+	/**
+	 * 新增广告
+	 * @param data
+	 */
+	void insertAdvert(Map<String, Object> data);
+	
+	/**
+	 * 修改广告
+	 * @param data
+	 */
+	void updateAdvert(Map<String, Object> data);
+	
+	/**
+	 * 删除广告
+	 * @param data
+	 */
+	void deleteAdvert(Map<String, Object> data);
+	
+	/**
 	 * 获取订单列表
 	 * @param data
 	 * @return

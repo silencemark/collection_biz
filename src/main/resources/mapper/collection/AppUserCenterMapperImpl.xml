@@ -52,7 +52,7 @@
 	</select>
 	
 	<select id="myGrowthValue" parameterType="map" resultType="map">
-		select us.growthvalue,ml.levelname,CONCAT('V',ml.levelenum) as levelenum, CONCAT('V',ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+		select us.growthvalue,ml.levelname,ml.levelenum, (ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
 		from c_t_app_userinfo us 
 		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 		 where userid = #{userid}
@@ -145,10 +145,9 @@
 	</select>
 	
 	<select id="myAssets" parameterType="map" resultType="map">
-		select (select IFNULL(sum(cardprice),0) from c_t_app_order where buyuserid =#{userid} and status &gt; 1) as allorder,
-		(select IFNULL(sum(cardprice), 0) from c_t_app_order where buyuserid = #{userid} and status in (2, 3)) as buyorder,
-		(select IFNULL(sum(cardprice), 0) from c_t_app_order where selluserid = #{userid} and status in (0, 1)) as sellorder,
-		sumassets,sumprofit from c_t_app_userinfo us where userid = #{userid}
+		select (select round(IFNULL(sum(cardprice),0), 2) from c_t_app_order where buyuserid =#{userid} and status &gt; 1) as allorder,
+		(select round(IFNULL(sum(cardprice), 0), 2) from c_t_app_order where buyuserid = #{userid} and status in (3, 4)) as buyorder,
+		round(sumassets, 2) as sumassets,round(sumprofit, 2) as sumprofit from c_t_app_userinfo us where userid = #{userid}
 	</select>
 	
 	<select id="getExchangeList" parameterType="map" resultType="map">

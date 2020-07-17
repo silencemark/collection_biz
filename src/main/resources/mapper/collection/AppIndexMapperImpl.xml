@@ -14,7 +14,7 @@
 	</select>
 	
 	<select id="getHomePageMovie" parameterType="map" resultType="map">
-	    select type,movieid, coverimg, title, httpurl, description, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid, DATE_FORMAT(updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
+	    select type, coverimg, title, httpurl, description
 	    from  c_t_app_movie
 	    <where>
 	        <if test="type != null and type != '' and type != 0">and type=#{type}</if>
@@ -23,13 +23,16 @@
 	</select>
 	
 	<select id="getMemberMovieList" parameterType="map" resultType="map">
-	    select 1 as type,mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, DATE_FORMAT(mo.createtime,'%Y-%m-%d %H:%i:%S') as createtime, mo.createid, DATE_FORMAT(mo.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime, updateid 
+	    select 1 as type ,max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
+		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description 
 	    from c_t_app_order ao
 	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
-	    <where>
+		<where>
 	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
 	         and ao.status = 3
+	         and mo.movieid is not null
 	    </where>
+		) A group by A.title 
 	</select>
 	
 	

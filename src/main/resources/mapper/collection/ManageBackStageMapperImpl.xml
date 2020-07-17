@@ -119,6 +119,64 @@
         </trim>
     </insert>
     
+    <select id="getAdvertList" resultType="map" parameterType="map">
+		select advertid, advertcontent, imgurl, httpurl, createtime
+		from c_t_app_advert
+		<where>
+			<if test="advertcontent != null and advertcontent != ''">and locate(#{advertcontent}, advertcontent) > 0</if>
+		</where>
+		order by createtime desc
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<select id="getAdvertListCount" resultType="int" parameterType="map">
+		select  count(0) from c_t_app_advert
+		<where>
+			<if test="advertcontent != null and advertcontent != ''">and locate(#{advertcontent}, advertcontent) > 0</if>
+		</where>
+	</select>
+	
+	<select id="getAdvertInfo" resultType="map" parameterType="map">
+		select advertid, advertcontent, imgurl, httpurl, createtime
+		from c_t_app_advert
+		<where>
+			<if test="advertid != null and advertid != ''">and advertid = #{advertid}</if>
+		</where>
+		limit 1 
+	</select>
+	
+	<update id="updateAdvert" parameterType="map">
+        update c_t_app_advert
+        <set>
+            <if test="advertcontent != null and advertcontent != ''">advertcontent=#{advertcontent},</if>
+            <if test="imgurl != null and imgurl != ''">imgurl=#{imgurl},</if>
+            <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+        </set>
+        where advertid=#{advertid}
+    </update>
+    
+    <delete id="deleteAdvert" parameterType="map">
+    	delete from c_t_app_advert where  advertid=#{advertid}
+    </delete>
+    
+    <insert id="insertAdvert" parameterType="map">
+        insert into c_t_app_advert
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="advertcontent != null and advertcontent != ''">advertcontent,</if>
+            <if test="imgurl != null and imgurl != ''">imgurl,</if>
+            <if test="httpurl != null and httpurl != ''">httpurl,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="createid != null and createid != ''">createid,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="advertcontent != null and advertcontent != ''">#{advertcontent},</if>
+            <if test="imgurl != null and imgurl != ''">#{imgurl},</if>
+            <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="createid != null and createid != ''">#{createid},</if>
+        </trim>
+    </insert>
+    
     <select id="getOrderList" parameterType="map" resultType="map">
     	select ao.orderid, ao.buyuserid, us1.nickname as buynickname, ao.selluserid, us2.nickname as sellnickname, mc.typename, ao.ordernum, ao.cardid,
 			ao.type, ao.cardprice, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime
