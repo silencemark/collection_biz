@@ -414,7 +414,6 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 		xgoMap.put("type", 1);
 		xgoMap.put("remark", "用户"+myinfo.get("nickname")+"转赠给您："+data.get("xgocoin")+"个xgo币");
 		this.appUserCenterMapper.addXgoRecord(xgoMap);
-		
 		result.put("status", 0);
 		result.put("message", "转赠成功");
 		return result;

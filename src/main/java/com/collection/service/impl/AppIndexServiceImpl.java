@@ -70,6 +70,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			List<Map<String, Object>> memberMovie = appIndexMapper.getMemberMovieList(data);
 			Map<String, Object> typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 1);
+			typeMap.put("typename", "会员专享");
 			typeMap.put("movielist", memberMovie);
 			resultlist.add(typeMap);
 			return resultlist;
@@ -77,11 +78,28 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			List<Map<String, Object>> homePageMovie = appIndexMapper.getHomePageMovie(data);
 			Map<String, Object> typeMap = new HashMap<String, Object>();
 			typeMap.put("type", data.get("type"));
+			switch (Integer.parseInt(data.get("type").toString())) {
+			case 2:
+				typeMap.put("typename", "珍藏电影");
+				break;
+			case 3:
+				typeMap.put("typename", "推荐动漫");
+				break;
+			case 4:
+				typeMap.put("typename", "热血电视剧");
+				break;
+			}
 			typeMap.put("movielist", homePageMovie);
 			resultlist.add(typeMap);
 			return resultlist;
 		}
 		
+	}
+
+	@Override
+	public List<Map<String, Object>> getHomePageVideoDesc(
+			Map<String, Object> data) {
+		return this.appIndexMapper.getHomePageVideoDesc(data);
 	}
 
 }
