@@ -33,12 +33,28 @@ public interface IAppIndexMapper {
 	List<Map<String, Object>> getHomePageMovie(Map<String, Object> data);
 	
 	/**
+	 * 获取首页免费影片列表条数
+	 * @param data
+	 * @return
+	 * @author silence
+	 */
+	int getHomePageMovieCount(Map<String, Object> data);
+	
+	
+	/**
 	 * 获取会员专享列表信息
 	 * @param data
 	 * @return
 	 * @author silence
 	 */
 	List<Map<String, Object>> getMemberMovieList(Map<String, Object> data);
+	
+	/**
+	 * 获取会员专享视频条数
+	 * @param data
+	 * @return
+	 */
+	int getMemberMovieListCount(Map<String, Object> data);
 	
 	/**
 	 * 模糊查询首页免费影片

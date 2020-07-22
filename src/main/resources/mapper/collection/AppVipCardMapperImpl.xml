@@ -36,6 +36,7 @@
 	</select>
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
+		select * from (
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.rushtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
@@ -43,7 +44,7 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield, mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield, mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
@@ -57,13 +58,13 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 2
 			and ao.buyuserid = #{userid}
-		union 
+<!-- 		union 
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			0,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
@@ -71,11 +72,13 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
-			where ao.status = 4
-			and ao.buyuserid = #{userid}
+			where ao.status = -1
+			and ao.buyuserid = #{userid} -->
+			)  A 
+			order by A.rushtime desc
 	</select>
 	
 	<select id="getRushToBuyList" parameterType="map" resultType="map">
@@ -142,6 +145,7 @@
 	</select>
 	
 	<select id="getSaleCardList" parameterType="map" resultType="map">
+		select * from (
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.rushtime, interval 1 hour)) as remaintime,
 			DATE_FORMAT(ao.buytime,'%Y-%m-%d %H:%i:%s') as buytime,
@@ -156,6 +160,7 @@
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 1
 			and ao.selluserid = #{userid}
+			
 		union 
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
@@ -185,6 +190,8 @@
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status = 0
 			and ao.selluserid = #{userid}
+			)  A 
+			order by A.selltime desc
 	</select>
 	
 	<select id="getExamineInfo" parameterType="map" resultType="map">
@@ -274,6 +281,7 @@
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
+			order by ao.buytime desc 
 	</select>
 	
 	<select id="getMyHisCardList" parameterType="map" resultType="map">
@@ -289,6 +297,7 @@
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where (ao.status in (3,4,5) and ao.selluserid = #{userid}) 
 			or (ao.status = 5 and ao.buyuserid = #{userid}) 
+			order by ao.buytime desc 
 	</select>
 	
 	
@@ -369,7 +378,12 @@
 	</select>
 	
 	<select id="getMemberCardInfoById" parameterType="map" resultType="map">
-		select cardid,typename,cardicon,cardimg,xgocoin,minprice,maxprice,starttime,endtime,watchdays,commentcount,yield,introduction,description,forder
+		select cardid,typename,cardicon,cardimg,xgocoin,minprice,maxprice,starttime,endtime,watchdays,commentcount,yield,introduction,description,forder,
+		case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') &lt;= now() AND
+									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') &gt; now()
+						THEN  1
+						ELSE  0
+				END as isbuy
 		from c_t_app_membercard
 		where cardid = #{cardid}
 		limit 1
@@ -507,4 +521,8 @@
 		update c_t_app_order set commentcount = commentcount + 1 where orderid = #{orderid}
 	</update>
 	
+	<update id="addMovieHot" parameterType="map">
+		update ${tablename} set hotforder = hotforder + 1 
+		where movieid = #{movieid}
+	</update>
 </mapper>

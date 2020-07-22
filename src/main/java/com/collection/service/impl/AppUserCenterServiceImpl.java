@@ -161,6 +161,14 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Override
 	public Map<String, Object> exchangeVipCard(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//判断余额是否充足
+		Map<String, Object> userinfo = this.appUserCenterMapper.getMyCenter(data);
+		if(Double.parseDouble(userinfo.get("sumassets").toString()) < Double.parseDouble(data.get("cardprice").toString())) {
+			result.put("status", 1);
+			result.put("message", "您的可提现资金不足");
+			return result;
+		}
 		//1、根据价格生成一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
 		Map<String, Object> cardMap = this.appVipCardMapper.getMemberCardByPrice(data);
 		if(cardMap!= null) {
@@ -182,15 +190,13 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 			data.put("amount", data.get("cardprice"));
 			data.put("ordernum", ordernum);
 			this.appUserCenterMapper.insertExchange(data);
-			data = new HashMap<String, Object>();
-			data.put("status", 0);
-			data.put("message", "兑换成功");
-			return data;
+			result.put("status", 0);
+			result.put("message", "兑换成功");
+			return result;
 		} else {
-			data = new HashMap<String, Object>();
-			data.put("status", 1);
-			data.put("message", "没有符合的会员卡，请输入合适的价格");
-			return data;
+			result.put("status", 1);
+			result.put("message", "没有符合的会员卡，请输入合适的价格");
+			return result;
 		}
 	}
 

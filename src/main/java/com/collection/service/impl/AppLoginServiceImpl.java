@@ -54,7 +54,7 @@ public class AppLoginServiceImpl implements IAppLoginService{
 			//生成当前用户邀请码 生成方式
 			String invitecode = generateInvitationCodeTwo(userid + "");
 			data.put("invitecode", invitecode);
-			data.put("invitecodehttpurl", "app/video/register.html?invitecode="+invitecode);
+			data.put("invitecodehttpurl", "app/video/index.html?invitecode="+invitecode);
 			//新增用户
 			appLoginMapper.insertUserInfo(data);
 			

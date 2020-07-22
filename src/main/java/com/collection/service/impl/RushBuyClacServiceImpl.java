@@ -166,6 +166,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					//根据抢购时间和出售所需天数计算一个到期时间duetime
 					orderInfo.put("commentstartdays", cardInfo.get("commentstartdays"));
 					orderInfo.put("rushtime", new Date());
+					orderInfo.put("createtime", new Date());
 					this.appVipCardMapper.insertOrder(orderInfo);
 					
 					//用户抢购记录置为抢购成功
@@ -183,8 +184,10 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					rushToBuyMap.put("type", 2);
 					rushToBuyMap.put("remark", "恭喜您抢购"+cardInfo.get("typename")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
 					this.appUserCenterMapper.addXgoRecord(rushToBuyMap);
-					
+					//给买家提示通知
 					insertUserNotice("抢购"+cardInfo.get("typename"), "恭喜您抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", indexlist.get(i).get("userid").toString());
+					//给卖家提示通知
+					insertUserNotice("出售系统"+cardInfo.get("typename"), "恭喜您出售价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", sysUserList.get(index).get("userid").toString());
 					insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
 					allcount ++;
 				} catch (Exception e) {
@@ -229,7 +232,10 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					rushToBuyMap.put("type", 2);
 					rushToBuyMap.put("remark", "恭喜您抢购"+cardInfo.get("typename")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
 					this.appUserCenterMapper.addXgoRecord(rushToBuyMap);
+					//给买家提示通知
 					insertUserNotice("抢购"+cardInfo.get("typename"), "恭喜您抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", indexlist.get(i).get("userid").toString());
+					//给卖家提示通知
+					insertUserNotice("出售"+cardInfo.get("typename"), "恭喜您出售价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", orderlist.get(i).get("selluserid").toString());
 					insertNotice("抢购成功", cardInfo.get("typename")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
 					allcount++;
 				} catch (Exception e) {
@@ -244,6 +250,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 			rushMap.put("aftstatus", 3);
 			rushMap.put("befstatus", 1);
 			this.rushBuyClacMapper.updateRushToBuy(rushMap);
+			//查询所有抢购中的用户
 			List<Map<String, Object>> alluserlist = this.rushBuyClacMapper.selectRushToBuyUserid(rushMap);
 			Date createtime = new Date();
 			for (Map<String, Object> user: alluserlist){
@@ -252,7 +259,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 				user.put("type", 0 );
 				user.put("createtime", createtime);
 			}
-			this.manageBackStageMapper.sendSysNotice(userlist);
+			this.manageBackStageMapper.sendSysNotice(alluserlist);
 		}
 		insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"此次会员卡分配完成，共"+allcount+"个用户抢到会员卡", Constants.SUCCESS);
 	}

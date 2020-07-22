@@ -20,11 +20,22 @@
 	        <if test="type != null and type != '' and type != 0">and type=#{type}</if>
 	        and status = 1
 	    </where>
+	    order by hotforder desc 
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
 	</select>
+	
+	<select id="getHomePageMovieCount" parameterType="map" resultType="int">
+	    select count(0) from  c_t_app_movie
+	    <where>
+	        <if test="type != null and type != '' and type != 0">and type=#{type}</if>
+	        and status = 1
+	    </where>
+	</select>
+	
 	
 	<select id="getMemberMovieList" parameterType="map" resultType="map">
 	    select 1 as type ,max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
-		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description 
+		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, ao.orderid
 	    from c_t_app_order ao
 	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
 		<where>
@@ -32,7 +43,23 @@
 	         and ao.status = 3
 	         and mo.movieid is not null
 	    </where>
+	    order by mo.hotforder desc 
 		) A group by A.title 
+		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	<select id="getMemberMovieListCount" parameterType="map" resultType="int">
+	    select count(0) from (select 1 as type ,max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
+		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, ao.orderid
+	    from c_t_app_order ao
+	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
+		<where>
+	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
+	         and ao.status = 3
+	         and mo.movieid is not null
+	    </where>
+	    order by mo.hotforder desc 
+		) A group by A.title ) C
 	</select>
 	
 	<select id="getHomePageVideoDesc" parameterType="map" resultType="map">

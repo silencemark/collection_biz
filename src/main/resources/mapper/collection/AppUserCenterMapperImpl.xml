@@ -147,12 +147,21 @@
 	<select id="myAssets" parameterType="map" resultType="map">
 		select (select round(IFNULL(sum(cardprice),0), 2) from c_t_app_order where buyuserid =#{userid} and status &gt; 1) as allorder,
 		(select round(IFNULL(sum(cardprice), 0), 2) from c_t_app_order where buyuserid = #{userid} and status in (3, 4)) as buyorder,
-		round(sumassets, 2) as sumassets,round(sumprofit, 2) as sumprofit from c_t_app_userinfo us where userid = #{userid}
+		round(sumassets, 2) as sumassets,round(sumprofit, 2) as sumprofit,
+		(select IFNULL(SUM(ROUND(ao.profitprice/mc.commentstartdays,2)),0)
+			from c_t_app_order ao 
+		  left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			where ao.buyuserid = #{userid}
+			and ao.status = 3) as yesterdayprofit,ml.interesttimes
+		from c_t_app_userinfo us 
+		left join c_t_app_memberlevel ml 
+		on us.levelid = ml.levelid  
+		where userid = #{userid}
 	</select>
 	
 	<select id="getExchangeList" parameterType="map" resultType="map">
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.commentcount,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
-			mc.typename,
+			mc.typename,	
 			mc.yield
 			from c_t_app_exchange ex
 			left join c_t_app_order ao on ex.orderid = ao.orderid
@@ -168,12 +177,12 @@
 	</insert>
 	
 	<select id="myInviteCode" parameterType="map" resultType="map">
-		select userid,invitecode,invitecodehttpurl,invitecodeqrcode from c_t_app_userinfo where userid = #{userid}
+		select userid,invitecode,invitecodehttpurl,invitecodeqrcode, qrcode from c_t_app_userinfo where userid = #{userid}
 	</select>
 	
 	<update id="updateQrcode" parameterType="map">
 		update c_t_app_userinfo 
-		set invitecodeqrcode = #{invitecodeqrcode}
+		set invitecodeqrcode = #{invitecodeqrcode}, qrcode = #{qrcode}
 		where userid = #{userid}
 	</update>
 	
@@ -273,11 +282,13 @@
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 	        <if test="userid != null and userid != ''">userid,</if>
 	        <if test="questioncontent != null and questioncontent != ''">questioncontent,</if>
+	        <if test="qtype != null and qtype != ''">qtype,</if>
 	        <if test="createtime != null and createtime != ''">createtime,</if>
 	    </trim>
 	    <trim prefix="values(" suffix=")" suffixOverrides=",">
 	        <if test="userid != null and userid != ''">#{userid},</if>
 	        <if test="questioncontent != null and questioncontent != ''">#{questioncontent},</if>
+	        <if test="qtype != null and qtype != ''">#{qtype},</if>
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>

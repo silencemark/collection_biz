@@ -94,7 +94,7 @@
             <if test="type != null and type != ''">type=#{type},</if>
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
             <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
-            <if test="status != null and status != ''">status=#{status},</if>
+            <if test="status != null">status=#{status},</if>
             <if test="description != null and description != ''">description=#{description},</if>
         </set>
         where bannerid=#{bannerid}
@@ -220,18 +220,21 @@
     	union select buyuserid from c_t_app_order where orderid = #{orderid})
     </update>
     
+    
+    
     <update id="updateOrderStatus" parameterType="map">
     	update c_t_app_order set status = #{status} where orderid = #{orderid}
     </update>
     
     <select id="getIndexMovieList" parameterType="map" resultType="map">
-    	select am.movieid, am.coverimg , am.title, am.description, am.httpurl, am.type, am.status,
+    	select am.movieid, am.coverimg , am.title, am.description, am.httpurl, am.type, am.status, am.hotforder,
 		am.createtime, am.updatetime
 		from c_t_app_movie am
 		<where>
 			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
 			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="type != null and type != ''">and am.type = #{type}</if>
 		</where>
 		order by am.createtime desc
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
@@ -243,6 +246,7 @@
 			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
 			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
 			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="type != null and type != ''">and am.type = #{type}</if>
 		</where>
     </select>
     
@@ -256,6 +260,7 @@
             <if test="type != null and type != ''">type=#{type},</if>
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
             <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
+            <if test="hotforder != null and hotforder != ''">hotforder=#{hotforder},</if>
             <if test="status != null and status != ''">status=#{status},</if>
         </set>
         where movieid=#{movieid}
@@ -269,6 +274,7 @@
             <if test="description != null and title != ''">description,</if>
             <if test="httpurl != null and httpurl != ''">httpurl,</if>
             <if test="type != null and type != ''">type,</if>
+            <if test="hotforder != null and hotforder != ''">hotforder,</if>
             <if test="createtime != null and createtime != ''">createtime,</if>
             <if test="createid != null and createid != ''">createid,</if>
         </trim>
@@ -278,6 +284,7 @@
             <if test="description != null and description != ''">#{description},</if>
             <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
             <if test="type != null and type != ''">#{type},</if>
+            <if test="hotforder != null and hotforder != ''">#{hotforder},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
             <if test="createid != null and createid != ''">#{createid},</if>
         </trim>
@@ -424,6 +431,7 @@
     	left join c_t_app_userinfo au on aq.userid = au.userid
     	<where>
 			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+			<if test="qtype != null and qtype != ''">and qtype = #{qtype}</if>
 		</where>
 		order by aq.updatetime desc 
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
@@ -434,6 +442,7 @@
     	left join c_t_app_userinfo au on aq.userid = au.userid
     	<where>
 			<if test="nickname != null and nickname != ''">and locate(#{nickname},au.nickname) > 0</if>
+			<if test="qtype != null and qtype != ''">and qtype = #{qtype}</if>
 		</where>
     </select>
     
@@ -491,7 +500,7 @@
     </select>
     
      <select id="getMemberMovieList" parameterType="map" resultType="map">
-    	select am.movieid, am.cardid, am.coverimg , am.title, am.description, am.httpurl, am.status,mc.typename,
+    	select am.movieid, am.cardid, am.coverimg , am.title, am.description, am.httpurl, am.status,mc.typename,am.hotforder,
 		am.createtime, am.updatetime
 		from c_t_app_membermovie am
 		left join c_t_app_membercard mc on am.cardid = mc.cardid
@@ -522,6 +531,7 @@
             <if test="title != null and title != ''">title=#{title},</if>
             <if test="description != null and description != ''">description=#{description},</if>
             <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
+            <if test="hotforder != null and hotforder != ''">hotforder=#{hotforder},</if>
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
             <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
             <if test="status != null and status != ''">status=#{status},</if>
@@ -538,6 +548,7 @@
             <if test="description != null and title != ''">description,</if>
             <if test="httpurl != null and httpurl != ''">httpurl,</if>
             <if test="type != null and type != ''">type,</if>
+            <if test="hotforder != null and hotforder != ''">hotforder,</if>
             <if test="createtime != null and createtime != ''">createtime,</if>
             <if test="createid != null and createid != ''">createid,</if>
         </trim>
@@ -548,6 +559,7 @@
             <if test="description != null and description != ''">#{description},</if>
             <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
             <if test="type != null and type != ''">#{type},</if>
+            <if test="hotforder != null and hotforder != ''">#{hotforder},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
             <if test="createid != null and createid != ''">#{createid},</if>
         </trim>
@@ -628,4 +640,14 @@
     <select id="getRateListCount" parameterType="map" resultType="int">
     	select  count(0) from c_t_rate
     </select>
+    
+    <select id="getOrderBuyAndSellInfo" parameterType="map" resultType="map">
+    	select orderid,ordernum,buyuserid,selluserid from c_t_app_order
+    	where orderid = #{orderid}
+    </select>
+    
+    <update id="returnOrder" parameterType="map">
+    	update c_t_app_order set buyuserid = null,commentcount = 0, status = 0,buytime = null,duetime=null,rushtime=null
+    	where orderid = #{orderid}
+    </update>
 </mapper>

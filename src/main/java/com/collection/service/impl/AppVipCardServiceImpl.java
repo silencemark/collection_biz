@@ -453,6 +453,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			result.put("message", "您的XGO币不足，抢购失败");
 			return result;
 		}
+		//7.查询结算时间是否已经超过，已过不能抢购（再查询一次抢购的会员卡 是否 可抢购即可）
+		if ("0".equals(cardinfo.get("isbuy").toString())) {
+			result.put("status", 1);
+			result.put("message", "任务领取时间已结束");
+			return result;
+		}
 		data.put("createtime", new Date());
 		this.appVipCardMapper.insertRushToBuy(data);
 		result.put("status", 0);
@@ -488,6 +494,17 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		this.appVipCardMapper.addOrderCommentCount(data);
 		data.put("createtime", new Date());
 		this.appVipCardMapper.commentMovie(data);
+	}
+
+	@Override
+	public void addMovieHot(Map<String, Object> data) {
+		//如果是会员电影是会员电影加一 
+		if("2".equals(data.get("type"))) {
+			data.put("tablename", "c_t_app_membermovie");
+		} else {
+			data.put("tablename", "c_t_app_movie");
+		}
+		this.appVipCardMapper.addMovieHot(data);
 	}
 
 }

@@ -148,6 +148,12 @@ public interface IManageBackStageMapper {
 	void frozenOrder(Map<String, Object> data);
 	
 	/**
+	 * 退还订单给卖家
+	 * @param data
+	 */
+	void returnOrder(Map<String, Object> data);
+	
+	/**
 	 * 审核拒绝更改状态
 	 * @param data
 	 */
@@ -358,4 +364,11 @@ public interface IManageBackStageMapper {
 	 * @param data
 	 */
 	void insertRate(Map<String, Object> data);
+	
+	/**
+	 * 获取买卖双方订单信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getOrderBuyAndSellInfo(Map<String, Object> data);
 }

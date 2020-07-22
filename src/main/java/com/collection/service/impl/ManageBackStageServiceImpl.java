@@ -1,12 +1,14 @@
 package com.collection.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.collection.dao.IManageBackStageMapper;
+import com.collection.dao.ISystemMapper;
 import com.collection.service.IManageBackStageService;
 
 /**
@@ -17,6 +19,8 @@ import com.collection.service.IManageBackStageService;
 public class ManageBackStageServiceImpl implements IManageBackStageService{
 
 	@Autowired IManageBackStageMapper manageBackStageMapper ;
+	
+	@Autowired ISystemMapper systemMapper;
 	
 	@Override
 	public Map<String, Object> getUserInfo(Map<String, Object> data) {
@@ -75,17 +79,53 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 
 	@Override
 	public void frozenOrder(Map<String, Object> data) {
+		Map<String, Object> orderinfo = this.manageBackStageMapper.getOrderBuyAndSellInfo(data);
 		//订单状态为冻结/解冻
 		this.manageBackStageMapper.updateOrderStatus(data);
 		if("-2".equals(data.get("status").toString())){
 			//冻结双方用户
 			data.put("status", 2);
 			this.manageBackStageMapper.frozenOrder(data);
+			//新增买家通知
+			addUserNotice("冻结通知", "由于您抢购的订单数据异常，您的账号已被冻结（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("buyuserid").toString());
+			//新增卖家通知
+			addUserNotice("冻结通知", "由于您出售的订单数据异常，您的账号已被冻结（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("selluserid").toString());
 		} else {
 			//解冻结双方用户
 			data.put("status", 0);
 			this.manageBackStageMapper.frozenOrder(data);
+			//新增买家通知
+			addUserNotice("账号状态通知", "由于您抢购的订单已解除数据异常，您的账号已恢复正常（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("buyuserid").toString());
+			//新增卖家通知
+			addUserNotice("账号状态通知", "由于您出售的订单已解除数据异常，您的账号已恢复正常（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("selluserid").toString());
 		}
+	}
+	
+	/**
+	 * 新增用户通知消息 
+	 * @param title
+	 * @param message
+	 * @param userid
+	 */
+	public void addUserNotice(String title, String message, String userid) {
+		Map<String, Object> notice = new HashMap<String, Object>();
+		notice.put("title", title);
+		notice.put("message", message);
+		notice.put("userid", userid);
+		notice.put("createtime", new Date());
+		this.systemMapper.insertUserNotice(notice);
+	}
+	
+	
+	@Override
+	public void returnOrder(Map<String, Object> data) {
+		Map<String, Object> orderinfo = this.manageBackStageMapper.getOrderBuyAndSellInfo(data);
+		//订单归还给卖家 订单回到待出售，删除 买家id 和 抢购时间，支付时间，到期时间（出售时间） 清空好评数量
+		this.manageBackStageMapper.returnOrder(data);
+		//新增买家通知
+		addUserNotice("订单通知", "由于您抢购的订单付款异常，您抢购的订单已被退回给卖家（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("buyuserid").toString());
+		//新增卖家通知
+		addUserNotice("订单通知", "由于您出售的订单买家付款异常，您的订单经过系统审核，已退回给您，请在待出售订单中查看详细信息（订单号："+orderinfo.get("ordernum")+"）", orderinfo.get("selluserid").toString());
 	}
 
 	@Override
