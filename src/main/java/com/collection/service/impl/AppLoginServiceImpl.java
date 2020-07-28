@@ -72,7 +72,7 @@ public class AppLoginServiceImpl implements IAppLoginService{
 				//4、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "邀请通知");
-				notice.put("message", "恭喜你，您邀请的好友已经注册成功，您获得2元资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您邀请的好友已经注册成功，您获得2元可兑换资产奖励，请注意查收");
 				notice.put("userid", parent.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);

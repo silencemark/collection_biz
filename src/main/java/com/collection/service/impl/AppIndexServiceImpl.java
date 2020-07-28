@@ -166,7 +166,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 		//3、系统通知
 		Map<String, Object> notice = new HashMap<String, Object>();
 		notice.put("title", "社区通知");
-		notice.put("message", "恭喜你，您完成每日发布动态任务，您获得1元资产奖励，请注意查收");
+		notice.put("message", "恭喜你，您完成每日发布动态任务，您获得1元可兑换资产奖励，请注意查收");
 		notice.put("userid", data.get("userid"));
 		notice.put("createtime", new Date());
 		this.systemMapper.insertUserNotice(notice);

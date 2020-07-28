@@ -287,7 +287,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 					//4、通知父亲通知
 		            notice = new HashMap<String, Object>();
 		    		notice.put("title", "邀请通知");
-		    		notice.put("message", "恭喜您，您邀请的好友完成了第一次任务，您获得8元资产奖励，请注意查收");
+		    		notice.put("message", "恭喜您，您邀请的好友完成了第一次任务，您获得8元可兑换资产奖励，请注意查收");
 		    		notice.put("userid", elder.get("parentid"));
 		    		notice.put("createtime", new Date());
 		    		this.systemMapper.insertUserNotice(notice);
