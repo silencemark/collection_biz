@@ -17,6 +17,8 @@ import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppUserCenterService;
+import com.collection.sms.sendSms;
+import com.collection.util.Constants;
 /**
  * 个人中心相关
  * @author silence
@@ -97,6 +99,12 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	    		notice.put("userid", levelMap.get("userid"));
 	    		notice.put("createtime", new Date());
 	    		this.systemMapper.insertUserNotice(notice);
+	    		// 发送短信通知
+	    		try {
+	    			sendSms.sendSms(levelMap.get("phone").toString(), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()));
+	    		} catch (Exception e) {
+	    			logger.info("短信发送错误"+e.getMessage());
+	    		}
 			}
 			result.put("status", 0);
 			result.put("remark", data.get("remark"));
@@ -162,8 +170,30 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	@Override
 	public Map<String, Object> exchangeVipCard(Map<String, Object> data) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		//判断余额是否充足
 		Map<String, Object> userinfo = this.appUserCenterMapper.getMyCenter(data);
+		//判断用户是否冻结
+		//1、账号冻结不能兑换
+		if ("2".equals(userinfo.get("status").toString())) {
+			result.put("status", 1);
+			result.put("message", "您的账号已被冻结，不能兑换");
+			return result;
+		}
+		//2、判断该用户的下级用户是否超过25个 且没有一个有效用户（青铜会员），满足条件便不能提现 
+		Map<String, Object> effectiveUser = this.appUserCenterMapper.getEffectiveUserCount(data);
+		if(effectiveUser != null && Integer.parseInt(effectiveUser.get("alluser").toString()) > 25 && Integer.parseInt(effectiveUser.get("effectuser").toString()) == 0 ) {
+			result.put("status", 1);
+			result.put("message", "您的账号异常，不能提现，请联系管理员");
+			return result;
+		}
+		
+		if ("2".equals(userinfo.get("status").toString())) {
+			result.put("status", 1);
+			result.put("message", "您的账号已被冻结，不能兑换");
+			return result;
+		}
+		
+		
+		//判断余额是否充足
 		if(Double.parseDouble(userinfo.get("sumassets").toString()) < Double.parseDouble(data.get("cardprice").toString())) {
 			result.put("status", 1);
 			result.put("message", "您的可提现资金不足");
@@ -423,6 +453,11 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 		result.put("status", 0);
 		result.put("message", "转赠成功");
 		return result;
+	}
+
+	@Override
+	public List<Map<String, Object>> getRank(Map<String, Object> data) {
+		return this.appUserCenterMapper.getRank(data);
 	}
 	
 	

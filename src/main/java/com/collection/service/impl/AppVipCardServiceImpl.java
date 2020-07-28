@@ -16,6 +16,8 @@ import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppVipCardService;
+import com.collection.sms.sendSms;
+import com.collection.util.Constants;
 /**
  * VIP会员卡相关功能
  * @author silence
@@ -34,6 +36,22 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	@Override
 	public List<Map<String, Object>> getVipCardList(Map<String, Object> data) {
 		return appVipCardMapper.getVipCardList(data);
+	}
+	
+	
+	public void insertUserNotice(String title, String sysMessage,String message, String userid, String phone){
+		Map<String, Object> notice = new HashMap<String, Object>();
+		notice.put("title", title);
+		notice.put("message", sysMessage);
+		notice.put("userid", userid);
+		notice.put("createtime", new Date());
+		this.systemMapper.insertUserNotice(notice);
+		// 发送短信通知
+		try {
+			sendSms.sendSms(phone, message);
+		} catch (Exception e) {
+			logger.info("短信发送错误"+e.getMessage());
+		}
 	}
 
 	@Override
@@ -149,12 +167,14 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
     		notice.put("userid", cardinfo.get("selluserid"));
     		notice.put("createtime", new Date());
     		this.systemMapper.insertUserNotice(notice);
+    		//新增短信通知卖家买家付款成功
+    		insertUserNotice("出售"+cardinfo.get("typename"), Constants.sysSmsTranslate4.replace("typename", cardinfo.get("typename").toString()), Constants.smsTranslate4.replace("typename", cardinfo.get("typename").toString()), cardinfo.get("selluserid").toString(), cardinfo.get("sellphone").toString());
             
-            datamap.put("payorder", "/upload/images/"+tempFileName);
+    		datamap.put("payorder", "/upload/images/"+tempFileName);
             datamap.put("buytime", new Date());
             this.appVipCardMapper.payVipCard(datamap);
     		result.put("status", 0);
-    		result.put("message", "上传成功，等待审核");
+    		result.put("message", "付款上传成功，等待审核");
         }catch (Exception e) {  
         	logger.error("上传失败"+ e.getMessage());
         	result.put("status", 0);
@@ -219,6 +239,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Transactional
 	public void examineAfter(Map<String, Object> data){
+		
+		Map<String, Object> userinfo = new HashMap<String, Object>();
+		userinfo.put("userid", data.get("selluserid"));
+		userinfo = this.appUserCenterMapper.getMyCenter(userinfo);
+		
 		//1、新增买家通知
         Map<String, Object> notice = new HashMap<String, Object>();
 		notice.put("title", "抢购通知");
@@ -239,11 +264,36 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		Map<String, Object> elder = this.appVipCardMapper.getElderid(sellUser);
 		if(elder != null) {
 			if (count == 1) {
+				//卖家的爹加1000成长值
 				sellUser = new HashMap<String, Object>();
 				sellUser.put("growthvalue", 1000);
 				sellUser.put("userid", elder.get("parentid"));
 				this.appVipCardMapper.addGrowthValue(sellUser);
-				//新增卖家通知
+				
+				/**
+				 * 卖家的父级加8块钱首次任务奖励 且 入库奖励记录表 累计50便不再奖励
+				 */
+				//1、查询累计奖励金额总数
+				double rewardprice = this.appVipCardMapper.getSumRewardPrice(sellUser);
+				//2、小于50可以奖励、直接累加可提现资产
+				if (rewardprice < 50) {
+					//累加可提现资产
+					sellUser.put("profitprice", 8);
+					this.appVipCardMapper.addParentsAndGrandPa(sellUser);
+					//3、入库记录表
+					sellUser.put("rewardprice", 8);
+					sellUser.put("type", 2);
+					this.appVipCardMapper.addRewardRecord(sellUser);
+					//4、通知父亲通知
+		            notice = new HashMap<String, Object>();
+		    		notice.put("title", "邀请通知");
+		    		notice.put("message", "恭喜您，您邀请的好友完成了第一次任务，您获得8元资产奖励，请注意查收");
+		    		notice.put("userid", elder.get("parentid"));
+		    		notice.put("createtime", new Date());
+		    		this.systemMapper.insertUserNotice(notice);
+				}
+				
+				//新增父亲通知
 	            notice = new HashMap<String, Object>();
 	    		notice.put("title", "成长值通知");
 	    		notice.put("message", "恭喜您，您邀请的好友完成了第一次任务，恭喜您获得1000点成长值");
@@ -255,11 +305,8 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	    		Map<String, Object> levelMap = appUserCenterMapper.getUserNewOldLevel(notice);
 	    		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
 	    			appUserCenterMapper.updateUserInfoLevel(levelMap);
-	    			//新增买家通知
-	                notice = new HashMap<String, Object>();
-	        		notice.put("title", "会员等级通知");
-	        		notice.put("message", "恭喜您，您的会员等级升级为"+levelMap.get("levelname"));
-	        		this.systemMapper.insertUserNotice(notice);
+	    			//新增卖家通知/发送短信通知和系统通知
+	        		insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), elder.get("parentid").toString(),  elder.get("phone").toString());
 	    		}
 			}
 			//3、给父级5%收益和爷级2%收益 （爸爷的个人资产） 且新增记录到团队收益表c_t_app_teamprofit
@@ -268,6 +315,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			//增加父级收益
 			this.appVipCardMapper.addParentsAndGrandPa(sellUser);
 			//通知父亲收益
+			notice = new HashMap<String, Object>();
+			notice.put("title", "收益通知");
+			notice.put("message", "恭喜你，您邀请的好友"+userinfo.get("nickname")+"给您带来了"+profitprice1+"元收益，请注意查看");
+			notice.put("userid", elder.get("parentid"));
+			notice.put("createtime", new Date());
+			this.systemMapper.insertUserNotice(notice);
 			
 			sellUser = new HashMap<String, Object>();
 			double profitprice2 = Double.parseDouble(data.get("profitprice").toString()) * 0.02d;
@@ -277,7 +330,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 				//增加爷爷收益
 				this.appVipCardMapper.addParentsAndGrandPa(sellUser);
 				//通知爷爷 收益
-				
+				notice = new HashMap<String, Object>();
+				notice.put("title", "收益通知");
+				notice.put("message", "恭喜你，您邀请的好友"+elder.get("nickname")+"给您带来了"+profitprice2+"元收益，请注意查看");
+				notice.put("userid", elder.get("grandpaid"));
+				notice.put("createtime", new Date());
+				this.systemMapper.insertUserNotice(notice);
 			}
 			//新增到父级爷级团队收益表
 			Map<String, Object> teamprofit = new HashMap<String, Object>();
@@ -298,12 +356,8 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		Map<String, Object> levelMap = appUserCenterMapper.getUserNewOldLevel(sellUser);
 		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
 			appUserCenterMapper.updateUserInfoLevel(levelMap);
-			//新增买家通知
-			sellUser = new HashMap<String, Object>();
-			sellUser.put("title", "会员等级通知");
-    		sellUser.put("message", "恭喜您，您的会员等级升级为"+levelMap.get("levelname"));
-    		sellUser.put("createtime", new Date());
-    		this.systemMapper.insertUserNotice(notice);
+			//新增卖家成长通知/发送短信通知和系统通知
+    		insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), data.get("selluserid").toString(),  userinfo.get("phone").toString());
 		}
 		//5、增加自己资产总和
 		sellUser = new HashMap<String, Object>();
@@ -431,19 +485,19 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		}
 		//3、判断当前用户是否实名认证、
 		if (!"2".equals(userinfo.get("isrealname").toString())) {
-			result.put("status", 1);
+			result.put("status", 2);
 			result.put("message", "您还没有实名认证");
 			return result;
 		} 
 		//4、是否当前用户绑定收款方式
 		if (!"1".equals(userinfo.get("ispaymentmethod").toString())) {
-			result.put("status", 1);
+			result.put("status", 2);
 			result.put("message", "您还没有绑定收款方式");
 			return result;
 		}
 		//5、是否设置支付密码
 		if (!"1".equals(userinfo.get("ispaypass").toString())) {
-			result.put("status", 1);
+			result.put("status", 2);
 			result.put("message", "您还没有设置支付密码");
 			return result;
 		}

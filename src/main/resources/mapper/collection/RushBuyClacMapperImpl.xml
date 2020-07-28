@@ -21,7 +21,7 @@
 	</select>
 	
     <select id="getRushBuyUser"  resultType="map" parameterType="map">
-	    SELECT ar.userid,ar.cardid,am.starttime,al.levelenum, al.interesttimes,au.nickname
+	    SELECT ar.userid,ar.cardid,am.starttime,al.levelenum, al.interesttimes,au.nickname,au.phone
 	    from c_t_app_rushtobuy ar
 	    left join c_t_app_membercard am on ar.cardid = am.cardid 
 	    left join c_t_app_userinfo au on ar.userid = au.userid
@@ -32,7 +32,9 @@
 	</select>
 	
 	<select id="getWaitSellCardOrder"  resultType="map" parameterType="map">
-		select ao.orderid, ao.selluserid,ao.cardprice from c_t_app_order  ao
+		select ao.orderid, ao.selluserid,ao.cardprice,au.nickname,au.phone
+		from c_t_app_order  ao
+		left join c_t_app_userinfo au on ao.selluserid = au.userid
 		left join c_t_app_membercard am on ao.cardid = am.cardid 
 		where am.forder = #{forder}
 		and ao.status = 0
@@ -62,7 +64,7 @@
 			<if test="cardid != null and cardid != ''">and cardid=#{cardid}</if>
 			<if test="userid != null and userid != ''">and userid=#{userid}</if>
 			<if test="befstatus != null and befstatus != ''">and status = #{befstatus}</if>
-			and TO_DAYS(createtime) = TO_DAYS(NOW())
+			and TO_DAYS(createtime) &lt;= TO_DAYS(NOW())
 		</where> 
 	</update>
 	
@@ -70,7 +72,7 @@
 		select userid from c_t_app_rushtobuy
 		where cardid=#{cardid} 
 		and status = #{befstatus}
-		and TO_DAYS(createtime) = TO_DAYS(NOW())
+		and TO_DAYS(createtime) &lt;= TO_DAYS(NOW())
 	</select>
 	
 	<update id="deductionXgo" parameterType="map">
@@ -79,8 +81,9 @@
 		where userid = #{userid}
 	</update>
 	
-	<select id="getSysUser" resultType="map">
+	<select id="getSysUser" resultType="map" parameterType="map">
 		select userid from c_t_app_userinfo 
 		where isadmin = 1 and status = 0 and delflag = 0
+		and userid != #{userid}
 	</select>
 </mapper>

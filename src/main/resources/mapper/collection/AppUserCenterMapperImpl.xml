@@ -42,7 +42,7 @@
 	</update>
 	
 	<select id="getUserNewOldLevel" parameterType="map" resultType="map">
-		SELECT ml.levelid, us.levelid as oldlevelid, ml.levelname, us.userid
+		SELECT ml.levelid, us.levelid as oldlevelid, ml.levelname, us.userid, us.phone
 		FROM c_t_app_userinfo us 
 		left JOIN c_t_app_memberlevel ml ON 
 		 ml.mingrowthvalue &lt;= us.growthvalue
@@ -340,4 +340,17 @@
 		where userid = #{userid}
 	</update>
 	
+	<select id="getRank" parameterType="map" resultType="map" >
+		select userid,nickname,headimage,sumassets,(@curRank := @curRank + 1) AS ranknum
+		 from c_t_app_userinfo p,(select @curRank := 0) q
+		where delflag = 0
+		and isadmin = 0
+		order by sumassets desc 
+	</select>
+	
+	<select id="getEffectiveUserCount" parameterType="map" resultType="map" >
+		select (select count(0) from c_t_app_userinfo where parentid =#{userid}) alluser,
+		(select count(0) from c_t_app_userinfo where parentid =#{userid} and levelid > 1) effectuser
+		from dual
+	</select>
 </mapper>

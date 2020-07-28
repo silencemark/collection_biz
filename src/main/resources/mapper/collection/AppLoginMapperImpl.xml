@@ -44,7 +44,7 @@
 	</insert>	
 	
 	<select id="getParentIdByInviteCode" resultType="map" parameterType="map">
-		select userid from c_t_app_userinfo 
+		select userid,nickname from c_t_app_userinfo 
 		where invitecode=#{invitecode}
 	</select>
 	

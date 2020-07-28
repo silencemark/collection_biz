@@ -1,13 +1,22 @@
 package com.collection.service.impl;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.JavaType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 
 import com.collection.dao.IAppIndexMapper;
+import com.collection.dao.IAppVipCardMapper;
+import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppIndexService;
 /**
  * app首页相关
@@ -17,6 +26,12 @@ import com.collection.service.IAppIndexService;
 public class AppIndexServiceImpl implements IAppIndexService{
 
 	@Autowired IAppIndexMapper appIndexMapper;
+	
+	@Autowired IAppVipCardMapper appVipCardMapper;
+	
+	@Autowired ISystemMapper systemMapper;
+	
+	private Logger logger = Logger.getLogger(AppIndexServiceImpl.class);
 
 	@Override
 	public List<Map<String, Object>> getHomePageBanner(Map<String, Object> data) {
@@ -30,13 +45,18 @@ public class AppIndexServiceImpl implements IAppIndexService{
 
 	@Override
 	public List<Map<String, Object>> getHomePageMovie(Map<String, Object> data) {
+		boolean fristflag = false;
 		//分页处理如果没传 默认就是 第一页  每页6条
 		if(data.get("startnum") == null || "".equals(data.get("startnum").toString())) {
 			data.put("startnum", 0);
+			fristflag = true;
 		}
 		if(data.get("rownum") == null || "".equals(data.get("rownum").toString())) {
 			data.put("rownum", 6);
+			fristflag = true;
 		}
+		data.put("startnum", Integer.parseInt(data.get("startnum").toString()));
+		data.put("rownum", Integer.parseInt(data.get("rownum").toString()));
 		//如果类型是全部 则包含会员视频和普通视频
 		//type = 1 会员专享(会员专享的不在这个表，在会员视频表）
 		List<Map<String, Object>> resultlist = new ArrayList<Map<String,Object>>();
@@ -51,6 +71,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			homePageMovie = appIndexMapper.getHomePageMovie(data);
 			Map<String, Object> typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 2);
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "珍藏电影");
 			typeMap.put("movielist", homePageMovie);
@@ -61,6 +82,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			homePageMovie = appIndexMapper.getHomePageMovie(data);
 			typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 3);
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "推荐动漫");
 			typeMap.put("movielist", homePageMovie);
@@ -71,6 +93,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			homePageMovie = appIndexMapper.getHomePageMovie(data);
 			typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 4);
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "电视剧");
 			typeMap.put("movielist", homePageMovie);
@@ -79,6 +102,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			List<Map<String, Object>> memberMovie = appIndexMapper.getMemberMovieList(data);
 			typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 1);
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "会员专享");
 			typeMap.put("movielist", memberMovie);
@@ -89,6 +113,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			homePageMovie = appIndexMapper.getMemberMovieList(data);
 			Map<String, Object> typeMap = new HashMap<String, Object>();
 			typeMap.put("type", 1);
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "会员专享");
 			typeMap.put("movielist", homePageMovie);
@@ -110,6 +135,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 				typeMap.put("typename", "电视剧");
 				break;
 			}
+			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("movielist", homePageMovie);
 			resultlist.add(typeMap);
@@ -122,6 +148,172 @@ public class AppIndexServiceImpl implements IAppIndexService{
 	public List<Map<String, Object>> getHomePageVideoDesc(
 			Map<String, Object> data) {
 		return this.appIndexMapper.getHomePageVideoDesc(data);
+	}
+
+	@Override
+	public Map<String, Object> addCommunity(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//1、率先判断当天是否发布过（一天发一次）
+		Map<String, Object> communitymap = this.appIndexMapper.getTodayCommunity(data);
+		if(communitymap != null && communitymap.size() > 0 ){
+			result.put("status", 1);
+     		result.put("message", "上传失败，每天只能发布一条动态");
+     		return result;
+		}
+		//2、每日发送送1元可兑换资产
+		data.put("profitprice", 1);
+		this.appVipCardMapper.addParentsAndGrandPa(data);
+		//3、系统通知
+		Map<String, Object> notice = new HashMap<String, Object>();
+		notice.put("title", "社区通知");
+		notice.put("message", "恭喜你，您完成每日发布动态任务，您获得1元资产奖励，请注意查收");
+		notice.put("userid", data.get("userid"));
+		notice.put("createtime", new Date());
+		this.systemMapper.insertUserNotice(notice);
+		//4、首先入库社区朋友圈表并拿到主建id
+		this.appIndexMapper.addCommunity(data);
+		//获取用户上传的图片集合‘
+		@SuppressWarnings("unchecked")
+		ObjectMapper mapper = new ObjectMapper();  
+	    //使用jackson解析数据  
+	    JavaType jt = mapper.getTypeFactory().constructParametricType(ArrayList.class, Map.class);     
+	    List<Map<String, Object>> image = null;
+		try {
+			image = (List<Map<String, Object>>)mapper.readValue(data.get("imagelist").toString(), jt);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		logger.info(data.toString());
+		List<Map<String, Object>> imagelist = new ArrayList<Map<String,Object>>();
+		Map<String, Object> datamap = new HashMap<String, Object>();
+		int count = 0;
+		for(Map<String, Object> ima : image) {
+			String base64Data = ima.get("imgurl").toString();
+	        try{  
+	            logger.debug("上传文件的数据："+base64Data);
+	            logger.debug("对数据进行判断");
+	            if(base64Data == null || "".equals(base64Data)){
+	                logger.info("上传失败，上传图片数据为空");
+	                result.put("status", 1);
+	        		result.put("message", "上传失败，上传图片数据为空");
+	        		return result;
+	            }
+	            String tempFileName = System.currentTimeMillis()/1000l+"_community" +count+ ".jpg";
+	            logger.debug("生成文件名为："+tempFileName);
+	            //因为BASE64Decoder的jar问题，此处使用spring框架提供的工具包
+	            byte[] bs = Base64Utils.decodeFromString(base64Data);
+	            try{
+	                //使用apache提供的工具类操作流
+	                FileUtils.writeByteArrayToFile(new File("/home/silence/collection_web/upload/community/"+ tempFileName), bs);  
+	            }catch(Exception ee){
+	            	logger.info("上传失败，写入文件失败"+ee.getMessage());
+	            	result.put("status", 1);
+	        		result.put("message", "上传失败，写入文件失败");
+	        		return result;
+	            }
+	           
+	            datamap = new HashMap<String, Object>();
+	            datamap.put("imgurl", "/upload/community/"+tempFileName);
+	            datamap.put("communityid", data.get("communityid"));
+	            datamap.put("createtime", new Date());
+	            imagelist.add(datamap);
+	        } catch (Exception e) {  
+	        	logger.error("上传失败"+ e.getMessage());
+	        	result.put("status", 1);
+	    		result.put("message", "上传失败");
+	    		return result;
+	        }
+	        count++;
+		}
+		if (imagelist != null && imagelist.size() > 0) {
+			//2、批量入库社区图片表
+			this.appIndexMapper.addCommunityImg(imagelist);
+			//3、修改社区封面图 为第一张
+			data.put("coverimg", imagelist.get(0).get("imgurl"));
+			this.appIndexMapper.updateCommunity(data);
+		}
+		result.put("status", 0);
+		result.put("message", "上传成功");
+		return result;
+	}
+
+	@Override
+	public Map<String, Object> getCommunityList(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//分页处理如果没传 默认就是 第一页  每页6条
+		if(data.get("startnum") == null || "".equals(data.get("startnum").toString())) {
+			data.put("startnum", 0);
+		}
+		if(data.get("rownum") == null || "".equals(data.get("rownum").toString())) {
+			data.put("rownum", 10);
+		}
+		data.put("startnum", Integer.parseInt(data.get("startnum").toString()));
+		data.put("rownum", Integer.parseInt(data.get("rownum").toString()));
+		//定义一个pagenum
+		int communitynum =  appIndexMapper.getCommunityListCount(data);
+		//定义一个查询集合内存
+		List<Map<String, Object>> communitylist = appIndexMapper.getCommunityList(data);
+		for (Map<String, Object> community : communitylist) {
+			//查询所有的社区的图片
+			List<Map<String, Object>> imglist = this.appIndexMapper.getCommunityImgList(community);
+			community.put("imglist", imglist);
+		}
+		result.put("communitynum", communitynum);
+		result.put("communitylist", communitylist);
+		return result;
+	}
+
+	@Override
+	public void likeCommunity(Map<String, Object> data) {
+		//查询用户是否有过该社区动态的点赞记录
+		Map<String, Object> like = this.appIndexMapper.getCommunityLike(data);
+		if (like == null || like.isEmpty()) {
+			//朋友圈点赞加一
+			data.put("likesnum", 1);
+			this.appIndexMapper.likeCommunity(data);
+			//新增点赞记录表
+			this.appIndexMapper.insertLikeCommunity(data);
+		} else {
+			//取消点赞
+			if("1".equals(like.get("status").toString())) {
+				//朋友圈点赞减一
+				data.put("likesnum", -1);
+			} else {
+				//朋友圈点赞加一
+				data.put("likesnum", 1);
+			}
+			this.appIndexMapper.likeCommunity(data);
+			//修改点赞记录表
+			like.put("status", data.get("status"));
+			this.appIndexMapper.updateCommunityLike(like);
+		}
+	}
+
+	@Override
+	public void addCommunityReply(Map<String, Object> data) {
+		this.appIndexMapper.addCommunityReply(data);
+	}
+
+	@Override
+	public void addCommunityComment(Map<String, Object> data) {
+		this.appIndexMapper.addCommunityComment(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getCommunityComment(
+			Map<String, Object> data) {
+		return this.appIndexMapper.getCommunityComment(data);
+	}
+
+	@Override
+	public Map<String, Object> getCommunityDetail(Map<String, Object> data) {
+		Map<String, Object> result = appIndexMapper.getCommunityDetail(data);
+		//查询所有的社区的图片
+		List<Map<String, Object>> imglist = this.appIndexMapper.getCommunityImgList(result);
+		result.put("imglist", imglist);
+		result.put("status", 0);
+		result.put("message", "查询详情成功");
+		return result;
 	}
 
 }

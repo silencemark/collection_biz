@@ -32,7 +32,7 @@
 				left join c_t_app_rushtobuy ar on am.cardid = ar.cardid and ar.userid = #{userid}
 				and ar.createtime &gt; CURDATE() and ar.status != 3
 				) A
-			order by isbuy desc, havebuy, forder
+			order by isbuy desc, forder
 	</select>
 	
 	<select id="getWaitPayCard" parameterType="map" resultType="map">
@@ -78,7 +78,7 @@
 			where ao.status = -1
 			and ao.buyuserid = #{userid} -->
 			)  A 
-			order by A.rushtime desc
+			order by A.status desc,A.rushtime desc
 	</select>
 	
 	<select id="getRushToBuyList" parameterType="map" resultType="map">
@@ -102,11 +102,11 @@
 				c_t_app_rushtobuy  bu
 				left join	c_t_app_membercard mc on bu.cardid = mc.cardid
 				where bu.userid = #{userid} and bu.status = 1
-			order by bu.status,bu.createtime desc
+			order by bu.status desc,bu.createtime desc
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
-		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,ao.buyuserid,ao.selluserid,
+		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,ao.buyuserid,ao.selluserid,us1.phone as sellphone,
 		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,IFNULL(us.xgocoin,0) xgocoin,
 		mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,mc.typename,
 		DATE_FORMAT(DATE_ADD(ao.createtime,INTERVAL mc.watchdays DAY),'%Y-%m-%d %H:%i:%S') duetime,
@@ -114,6 +114,7 @@
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
+		left join c_t_app_userinfo us1 on ao.selluserid = us1.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
 		left join c_t_app_userinfo sus on ao.selluserid = sus.userid
 		where ao.orderid=#{orderid} and ao.status = 1
@@ -191,7 +192,7 @@
 			where ao.status = 0
 			and ao.selluserid = #{userid}
 			)  A 
-			order by A.selltime desc
+			order by A.status desc,A.selltime desc
 	</select>
 	
 	<select id="getExamineInfo" parameterType="map" resultType="map">
@@ -227,7 +228,11 @@
 	</update>
 	
 	<select id="getElderid" parameterType="map" resultType="map">
-		select parentid as grandpaid,userid as parentid from c_t_app_userinfo where userid=(select parentid from c_t_app_userinfo where userid = #{userid})
+		select us1.parentid as grandpaid,us1.userid as parentid, us1.phone,us1.nickname,
+		us2.phone as grandphone,us2.nickname as grandnickname
+		from c_t_app_userinfo us1
+		left join c_t_app_userinfo us2 on us1.parentid = us2.userid
+		where us1.userid=(select parentid from c_t_app_userinfo where userid = #{userid})
 	</select>
 	
 	<update id="addGrowthValue" parameterType="map">
@@ -281,7 +286,7 @@
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
-			order by ao.buytime desc 
+			order by ao.status desc, ao.buytime desc 
 	</select>
 	
 	<select id="getMyHisCardList" parameterType="map" resultType="map">
@@ -325,7 +330,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status = 3
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,ao.rushtime,now()) &gt; mc.commentstartdays
+			and timestampdiff(day,ao.rushtime,now()) &gt;= mc.commentstartdays
 			and ao.commentcount >= mc.commentcount
 	</select>
 	
@@ -334,7 +339,7 @@
 		left join c_t_app_membercard  mc on ao.cardid = mc.cardid
 		where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
-			and timestampdiff(day,ao.rushtime,now()) &gt; mc.watchdays
+			and timestampdiff(day,ao.rushtime,now()) &gt;= mc.watchdays
 	</select>
 	
 	
@@ -352,7 +357,7 @@
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
 			mc.commentcount,
-			(ao.cardprice + ao.profitprice) as maxprice
+			round((ao.cardprice + ao.profitprice),2) as maxprice
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
@@ -525,4 +530,14 @@
 		update ${tablename} set hotforder = hotforder + 1 
 		where movieid = #{movieid}
 	</update>
+	
+	<select id="getSumRewardPrice" parameterType="map" resultType="double">
+		select ifnull(sum(rewardprice), 0) as rewardprice from c_t_app_rewardrecord
+		where userid = #{userid}
+	</select>
+	
+	<insert id="addRewardRecord" parameterType="map">
+		insert into c_t_app_rewardrecord(rewardprice, userid, type, createtime)
+		values(#{rewardprice}, #{userid}, #{type}, now())
+	</insert>
 </mapper>

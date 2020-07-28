@@ -56,10 +56,10 @@ public interface IRushBuyClacMapper {
 	void deductionXgo(Map<String, Object> data);
 	
 	/**
-	 * 获取所有系统用户
+	 * 获取所有系统用户(除了正在分配的用户 防止抢到自己的)
 	 * @return
 	 */
-	List<Map<String, Object>> getSysUser(); 
+	List<Map<String, Object>> getSysUser(Map<String, Object> user); 
 	
 	/**
 	 * 获取所有未抢购成功的用户id

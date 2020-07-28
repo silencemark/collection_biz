@@ -276,4 +276,17 @@ public interface IAppVipCardMapper {
 	 * @param data
 	 */
 	void addMovieHot(Map<String, Object> data);
+	
+	/**
+	 * 获取奖励总金额
+	 * @param data
+	 * @return
+	 */
+	double getSumRewardPrice(Map<String, Object> data);
+	
+	/**
+	 * 新增奖励记录
+	 * @param data
+	 */
+	void addRewardRecord(Map<String, Object> data);
 }

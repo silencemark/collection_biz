@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.collection.dao.IAppLoginMapper;
 import com.collection.dao.IAppUserCenterMapper;
+import com.collection.dao.IAppVipCardMapper;
+import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppLoginService;
 /**
  * 前端用户相关
@@ -21,6 +23,10 @@ public class AppLoginServiceImpl implements IAppLoginService{
 	@Autowired IAppLoginMapper appLoginMapper;
 
 	@Autowired IAppUserCenterMapper appUserCenterMapper;
+	
+	@Autowired IAppVipCardMapper appVipCardMapper;
+	
+	@Autowired ISystemMapper systemMapper;
 	
 	private Logger logger = Logger.getLogger(AppLoginServiceImpl.class);
 	
@@ -49,7 +55,28 @@ public class AppLoginServiceImpl implements IAppLoginService{
 		logger.info("注册传入参数："+data.toString());
 		Map<String, Object> parent = this.appLoginMapper.getParentIdByInviteCode(data);
 		if (parent != null && parent.size() > 0 ) {
-			logger.info("查询邀请者id："+parent.toString());
+			/**
+			 * 父级加两块钱邀请奖励 且 入库奖励记录表 累计50便不再奖励
+			 */
+			//1、查询累计奖励金额总数
+			double rewardprice = this.appVipCardMapper.getSumRewardPrice(parent);
+			//2、小于50可以奖励、直接累加可提现资产
+			if (rewardprice < 50) {
+				//累加可提现资产
+				parent.put("profitprice", 2);
+				this.appVipCardMapper.addParentsAndGrandPa(parent);
+				//3、入库记录表
+				parent.put("rewardprice", 2);
+				parent.put("type", 1);
+				this.appVipCardMapper.addRewardRecord(parent);
+				//4、系统通知
+				Map<String, Object> notice = new HashMap<String, Object>();
+				notice.put("title", "邀请通知");
+				notice.put("message", "恭喜你，您邀请的好友已经注册成功，您获得2元资产奖励，请注意查收");
+				notice.put("userid", parent.get("userid"));
+				notice.put("createtime", new Date());
+				this.systemMapper.insertUserNotice(notice);
+			}
 			data.put("parentid", parent.get("userid"));
 			//生成当前用户邀请码 生成方式
 			String invitecode = generateInvitationCodeTwo(userid + "");
@@ -64,7 +91,7 @@ public class AppLoginServiceImpl implements IAppLoginService{
 			xgoMap.put("xgocoin", 10);
 			xgoMap.put("createtime", new Date());
 			xgoMap.put("type", 1);
-			xgoMap.put("remark", "恭喜您注册成功，送您10个xgo币");
+			xgoMap.put("remark", "恭喜您注册成功，系统赠送您10个xgo币");
 			this.appUserCenterMapper.addXgoRecord(xgoMap);
 			result.put("status", 0);
 			result.put("message", "注册成功");

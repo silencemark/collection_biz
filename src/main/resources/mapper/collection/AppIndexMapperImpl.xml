@@ -84,4 +84,128 @@
 		) A group by A.title 
 	</select>
 	
+	<insert id="addCommunity" useGeneratedKeys="true" keyProperty="communityid" parameterType="map">
+    	insert into c_t_app_community(userid, content, createtime) 
+    	VALUES(#{userid}, #{content}, now())
+ 	</insert>
+ 	
+ 	<insert id="addCommunityImg" parameterType="List">
+        insert into c_t_app_communityimg
+        (imgurl, communityid, createtime)
+        values
+         <foreach collection="list" index="index" item="item" separator=",">
+		(#{item.imgurl},#{item.communityid},now())
+		</foreach>
+    </insert>
+	<update id="updateCommunity" parameterType="map">
+		update c_t_app_community
+		set coverimg = #{coverimg}
+		where communityid = #{communityid}
+	</update>
+	
+	<select id="getCommunityList" parameterType="map" resultType="map">
+	    select ac.communityid, ac.coverimg, ac.userid, ac.content, ac.likesnum, DATE_FORMAT(ac.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    ifnull(ac.headimage,au.headimage) as headimage,ifnull(ac.nickname,au.nickname) as nickname,ifnull(cl.status, 0) as likestatus 
+	    from  c_t_app_community ac 
+	    left join c_t_app_userinfo au on ac.userid = au.userid
+	    left join c_t_app_communitylike cl on cl.communityid = ac.communityid and cl.userid=#{userid}
+	    <where>
+	        <if test="uid != null and uid != '' ">and ac.userid=#{uid}</if>
+	        and ac.status = 0
+	    </where>
+	    order by ac.likesnum desc,createtime desc 
+	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
+	</select>
+	
+	
+	<select id="getCommunityDetail" parameterType="map" resultType="map">
+	    select ac.communityid, ac.coverimg, ac.userid, ac.content, ac.likesnum, DATE_FORMAT(ac.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    au.headimage,au.nickname, ifnull(cl.status, 0) as likestatus,
+	    case when ac.userid = #{userid} 
+	    then 1
+	    else 0
+	    end as isowner
+	    from c_t_app_community ac 
+	    left join c_t_app_userinfo au on ac.userid = au.userid
+	    left join c_t_app_communitylike cl on cl.communityid = ac.communityid and cl.userid=#{userid}
+	    where  ac.communityid=#{communityid}
+	        and ac.status = 0
+	    limit 1 
+	</select>
+
+	<select id="getCommunityListCount" parameterType="map" resultType="int">
+	    select count(0) from  c_t_app_community
+	    <where>
+	        <if test="uid != null and uid != '' ">and userid=#{uid}</if>
+	        and status = 0
+	    </where>
+	</select>
+	
+	<select id="getCommunityImgList" parameterType="map" resultType="map">
+	    select imgid,imgurl, communityid, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime
+	    from  c_t_app_communityimg
+	    <where>
+	        <if test="communityid != null and communityid != '' ">and communityid=#{communityid}</if>
+	        and status = 0
+	    </where>
+	    order by createtime asc 
+	</select>
+	
+	<update id="likeCommunity" parameterType="map">
+		update c_t_app_community
+		set likesnum = likesnum + #{likesnum}
+		where communityid = #{communityid}
+	</update>
+	
+	<insert id="insertLikeCommunity" parameterType="map">
+		insert into c_t_app_communitylike(communityid, userid, createtime)
+		VALUES(#{communityid}, #{userid}, now())
+	</insert>
+	
+	<select id="getCommunityComment" parameterType="map" resultType="map">
+	    select ac.commentid,ac.userid,ac.communityid,ac.comment,ac.replycontent,
+	    DATE_FORMAT(ac.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    DATE_FORMAT(ac.replytime,'%Y-%m-%d %H:%i:%S') as replytime,
+	    ifnull(ac.headimage,au.headimage) as headimage,ifnull(ac.nickname,au.nickname) as nickname
+	    from  c_t_app_communitycomment ac 
+	    left join c_t_app_userinfo au on ac.userid = au.userid
+		where ac.status = 0 
+		and ac.communityid = #{communityid}
+		order by ac.replytime desc, ac.createtime desc
+	</select>
+	
+	
+	<insert id="addCommunityComment" parameterType="map">
+		insert into c_t_app_communitycomment
+		(userid, communityid,comment,createtime)
+		values(#{userid}, #{communityid},#{comment},now())
+	</insert>
+	
+	<update id="addCommunityReply" parameterType="map">
+		update c_t_app_communitycomment
+		set replycontent = #{replycontent}, replytime = #{replytime}
+		where commentid = #{commentid} 
+	</update>
+	
+	<select id="getCommunityLike" parameterType="map" resultType="map">
+		select likeid,communityid,userid,status,createtime
+		from c_t_app_communitylike
+		where userid = #{userid}
+		and communityid = #{communityid}
+		limit 1
+	</select>
+	
+	<update id="updateCommunityLike" parameterType="map">
+		update c_t_app_communitylike
+		set status = #{status}
+		where likeid = #{likeid}
+	</update>
+	
+	<select id="getTodayCommunity" parameterType="map" resultType="map">
+		select ac.communityid, ac.coverimg, ac.userid, ac.content, ac.likesnum, DATE_FORMAT(ac.createtime,'%Y-%m-%d %H:%i:%S') as createtime
+		from c_t_app_community ac
+		where ac.userid = #{userid} 
+		and ac.status = 0
+		and TO_DAYS(ac.createtime) = TO_DAYS(now())
+	</select>
 </mapper>

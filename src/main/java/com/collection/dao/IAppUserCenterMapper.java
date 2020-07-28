@@ -216,4 +216,18 @@ public interface IAppUserCenterMapper {
 	 */
 	void addUserXgo(Map<String, Object> data);
 	
+	/**
+	 * 获取获取排行榜用户信息
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getRank(Map<String, Object> data);
+	
+	/**
+	 * 获取下级有效用户个数 和 总下级个数
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getEffectiveUserCount(Map<String, Object> data);
+	
 }
