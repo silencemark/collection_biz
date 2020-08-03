@@ -197,7 +197,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		List<Map<String, Object>> waitPayList = this.appVipCardMapper.getMoreThanWaitTime(buyMap);
 		for (Map<String, Object> waitPay : waitPayList) {
 			//冻结买家用户
-			buyMap.put("status", 2);
+			waitPay.put("status", 2);
 			this.appVipCardMapper.frozenOrder(waitPay);
 			//更改买家抢购状态
 			waitPay.put("status", 3);
