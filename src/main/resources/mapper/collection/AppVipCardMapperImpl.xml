@@ -321,8 +321,8 @@
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
-			where ao.status = 3
-			and ao.orderid = #{orderid}
+			where ao.orderid = #{orderid}
+			limit 1 
 	</select> 
 	
 	<select id="getSellOrderListByid" parameterType="map" resultType="map">

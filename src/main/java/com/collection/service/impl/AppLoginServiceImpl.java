@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppLoginService;
+import com.collection.util.FileDeal;
 /**
  * 前端用户相关
  * @author silence
@@ -47,7 +49,7 @@ public class AppLoginServiceImpl implements IAppLoginService{
 	@Override
 	public Map<String, Object> insertUserInfo(Map<String, Object> data) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		int userid= this.appLoginMapper.getMaxUserid();
+		String userid= FileDeal.getUUID();
 		data.put("userid", userid);
 		data.put("nickname", data.get("phone"));
 		data.put("createtime", new Date());
@@ -72,14 +74,14 @@ public class AppLoginServiceImpl implements IAppLoginService{
 				//4、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "邀请通知");
-				notice.put("message", "恭喜你，您邀请的好友已经注册成功，您获得2元可兑换资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您邀请的好友"+data.get("phone")+"已经注册成功，您获得2元可兑换资产奖励，请注意查收");
 				notice.put("userid", parent.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);
 			}
 			data.put("parentid", parent.get("userid"));
 			//生成当前用户邀请码 生成方式
-			String invitecode = generateInvitationCodeTwo(userid + "");
+			String invitecode = generateInvitationCodeTwo(this.appLoginMapper.getMaxUserid()+"");
 			data.put("invitecode", invitecode);
 			data.put("invitecodehttpurl", "app/video/index.html?invitecode="+invitecode);
 			//新增用户

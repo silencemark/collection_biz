@@ -290,12 +290,23 @@
         </trim>
     </insert>
     
+    <select id="getMemberCardInfo" parameterType="map" resultType="map">
+    	select cardid,typename,forder,cardicon,cardimg,minprice,maxprice,xgocoin,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,createtime,updatetime,status
+    	from c_t_app_membercard
+    	<where>
+			<if test="cardid != null and cardid != ''">and cardid = #{cardid}</if>
+			<if test="starttime != null and starttime != ''">and starttime = #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and endtime = #{endtime}</if>
+		</where>
+		limit 1  
+    </select>
+    
     <select id="getMemberCardList" parameterType="map" resultType="map">
     	select cardid,typename,forder,cardicon,cardimg,minprice,maxprice,xgocoin,starttime,endtime,commentstartdays,watchdays,commentcount,yield,introduction,description,createtime,updatetime,status
     	from c_t_app_membercard
     	<where>
-			<if test="typename != null and typename != ''">and locate(#{typename},am.typename) > 0</if>
-			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="typename != null and typename != ''">and locate(#{typename}, typename) > 0</if>
+			<if test="status != null and status != ''">and status = #{status}</if>
 		</where>
 		order by forder
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
@@ -304,8 +315,8 @@
     <select id="getMemberCardListCount" parameterType="map" resultType="int">
     	select count(0) from c_t_app_membercard
     	<where>
-			<if test="typename != null and typename != ''">and locate(#{typename},am.typename) > 0</if>
-			<if test="status != null and status != ''">and am.status = #{status}</if>
+			<if test="typename != null and typename != ''">and locate(#{typename},typename) > 0</if>
+			<if test="status != null and status != ''">and status = #{status}</if>
 		</where>
     </select>
     

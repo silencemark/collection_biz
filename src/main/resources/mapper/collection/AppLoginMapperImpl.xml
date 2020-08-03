@@ -10,7 +10,7 @@
 	</select>
 	
 	<select id="getMaxUserid" resultType="int">
-		select IFNULL(max(userid), 0) + 1 from c_t_app_userinfo
+		select count(0) + 1 from c_t_app_userinfo
 	</select>
 	
 	<select id="checkPhone" parameterType="map" resultType="map">

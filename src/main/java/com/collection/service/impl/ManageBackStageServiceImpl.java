@@ -1,5 +1,8 @@
 package com.collection.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -344,4 +347,30 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 		this.manageBackStageMapper.deleteAdvert(data);
 	}
 	
+	public Map<String, Object> getMemberCardInfo(Map<String, Object> data) {
+		return this.manageBackStageMapper.getMemberCardInfo(data);
+	}
+
+	@Override
+	public String getCrontabTime(Map<String, Object> data) {
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		//先查询配置的结算时间间隔分钟数和次数
+		List<Map<String, Object>> ratelist = this.manageBackStageMapper.getRateList(data);
+		String crontab = "";
+		try {
+			for (Map<String, Object> rate: ratelist){
+				Calendar c = Calendar.getInstance();
+				//开始时间HH:mm
+				c.setTime(sdf.parse(data.get("starttime").toString()));
+				c.add(Calendar.MINUTE, Integer.parseInt(rate.get("minute").toString()));
+				crontab += (sdf.format(c.getTime()) + ":00,");
+			}
+			if(!"".equals(crontab)) {
+				crontab = crontab.substring(0, crontab.length()-1);
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return crontab;
+	}
 }

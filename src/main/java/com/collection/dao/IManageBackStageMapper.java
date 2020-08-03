@@ -192,6 +192,13 @@ public interface IManageBackStageMapper {
 	List<Map<String, Object>> getMemberCardList(Map<String, Object> data);
 	
 	/**
+	 * 获取会员卡信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getMemberCardInfo(Map<String, Object> data);
+	
+	/**
 	 * 获取会员卡信息总数
 	 * @param data
 	 * @return
