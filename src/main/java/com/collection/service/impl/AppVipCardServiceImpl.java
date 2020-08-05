@@ -73,7 +73,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			//新增买家通知
             Map<String, Object> notice = new HashMap<String, Object>();
     		notice.put("title", "冻结通知");
-    		notice.put("message", "由于您未及时支付订单，您的账号已被冻结");
+    		notice.put("message", "由于您未及时支付订单,订单号："+waitPay.get("ordernum")+",您的账号已被冻结");
     		notice.put("userid", waitPay.get("buyuserid"));
     		notice.put("createtime", new Date());
     		this.systemMapper.insertUserNotice(notice);
@@ -81,7 +81,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
     		//新增卖家通知
             notice = new HashMap<String, Object>();
     		notice.put("title", "出售订单通知");
-    		notice.put("message", "由于您出售的订单买家未及时支付订单，买家已被冻结，您的订单回到待出售状态");
+    		notice.put("message", "由于您出售的订单买家未及时支付订单,订单号："+waitPay.get("ordernum")+",买家【"+waitPay.get("buynickname")+"】已被冻结，您的订单回到待出售状态");
     		notice.put("userid", waitPay.get("selluserid"));
     		notice.put("createtime", new Date());
     		this.systemMapper.insertUserNotice(notice);
@@ -161,14 +161,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
             }
             //新增通知
             Map<String, Object> cardinfo = appVipCardMapper.getPayVipCardInfo(datamap);
-            Map<String, Object> notice = new HashMap<String, Object>();
-    		notice.put("title", "出售"+cardinfo.get("typename"));
-    		notice.put("message", "您出售的"+cardinfo.get("typename")+"买家支付成功，请尽快审核");
-    		notice.put("userid", cardinfo.get("selluserid"));
-    		notice.put("createtime", new Date());
-    		this.systemMapper.insertUserNotice(notice);
-    		//新增短信通知卖家买家付款成功
-    		insertUserNotice("出售"+cardinfo.get("typename"), Constants.sysSmsTranslate4.replace("typename", cardinfo.get("typename").toString()), Constants.smsTranslate4.replace("typename", cardinfo.get("typename").toString()), cardinfo.get("selluserid").toString(), cardinfo.get("sellphone").toString());
+    		insertUserNotice("出售"+cardinfo.get("typename"), Constants.sysSmsTranslate4.replace("typename", cardinfo.get("typename").toString()).replace("nickname", cardinfo.get("buynickname").toString()), Constants.smsTranslate4.replace("typename", cardinfo.get("typename").toString()), cardinfo.get("selluserid").toString(), cardinfo.get("sellphone").toString());
             
     		datamap.put("payorder", "/upload/images/"+tempFileName);
             datamap.put("buytime", new Date());
@@ -208,7 +201,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			//新增买家通知
             Map<String, Object> notice = new HashMap<String, Object>();
     		notice.put("title", "冻结通知");
-    		notice.put("message", "由于您未及时支付订单，您的账号已被冻结");
+    		notice.put("message", "由于您未及时支付订单,订单号："+waitPay.get("ordernum")+",您的账号已被冻结");
     		notice.put("userid", waitPay.get("buyuserid"));
     		notice.put("createtime", new Date());
     		this.systemMapper.insertUserNotice(notice);
@@ -216,7 +209,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
     		//新增卖家通知
             notice = new HashMap<String, Object>();
     		notice.put("title", "出售订单通知");
-    		notice.put("message", "由于您出售的订单买家未及时支付订单，买家已被冻结，您的订单回到待出售状态");
+    		notice.put("message", "由于您出售的订单买家未及时支付订单,订单号："+waitPay.get("ordernum")+"，买家【"+waitPay.get("buynickname")+"】已被冻结，您的订单回到待出售状态");
     		notice.put("userid", waitPay.get("selluserid"));
     		notice.put("createtime", new Date());
     		this.systemMapper.insertUserNotice(notice);
@@ -425,6 +418,13 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		if ("2".equals(userinfo.get("status").toString())) {
 			result.put("status", 1);
 			result.put("message", "您的账号已被冻结，不能出售订单");
+			return result;
+		}
+		//2、查询一次当前任务卡的最大出售价格
+		Map<String, Object> cardInfo = this.appVipCardMapper.getSellCardInfo(data);
+		if(Double.parseDouble(cardInfo.get("maxprice").toString()) < Double.parseDouble(data.get("cardprice").toString())) {
+			result.put("status", 1);
+			result.put("message", "您输入的价格大于任务卡可出售的最大金额，不能出售");
 			return result;
 		}
 		//1、如果出售价格 大于最大限制(20000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表

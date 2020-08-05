@@ -131,6 +131,13 @@ public interface IAppIndexMapper {
 	void insertLikeCommunity(Map<String, Object> data);
 	
 	/**
+	 * 查询点赞的数量
+	 * @param data
+	 * @return
+	 */
+	int getCommunityLikeCount(Map<String, Object> data);
+	
+	/**
 	 * 新增回复
 	 * @param data
 	 */

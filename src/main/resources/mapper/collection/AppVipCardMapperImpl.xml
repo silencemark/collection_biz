@@ -106,7 +106,7 @@
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
-		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,ao.buyuserid,ao.selluserid,us1.phone as sellphone,
+		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,ao.buyuserid,us.nickname as buynickname,ao.selluserid,us1.phone as sellphone,
 		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,IFNULL(us.xgocoin,0) xgocoin,
 		mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,mc.typename,
 		DATE_FORMAT(DATE_ADD(ao.createtime,INTERVAL mc.watchdays DAY),'%Y-%m-%d %H:%i:%S') duetime,
@@ -232,7 +232,7 @@
 		us2.phone as grandphone,us2.nickname as grandnickname
 		from c_t_app_userinfo us1
 		left join c_t_app_userinfo us2 on us1.parentid = us2.userid
-		where us1.userid=(select parentid from c_t_app_userinfo where userid = #{userid})
+		where us1.userid = (select parentid from c_t_app_userinfo where userid = #{userid})
 	</select>
 	
 	<update id="addGrowthValue" parameterType="map">
@@ -484,11 +484,14 @@
 	</update>
 	
 	<select id="getMoreThanWaitTime" parameterType="map" resultType="map">
-		select orderid,buyuserid,cardid from c_t_app_order
+		select ao.orderid,ao.ordernum,ao.buyuserid,ao.cardid, au1.nickname as buynickname,au1.phone as buyphone,au2.nickname as sellnickname, au2.phone as sellphone
+		from c_t_app_order ao
+		left join c_t_app_userinfo au1 on ao.buyuserid = au1.userid
+		left join c_t_app_userinfo au2 on ao.selluserid = au2.userid
 		<where>
-			<if test="selluserid != null and selluserid != ''">and selluserid = #{selluserid}</if>
-			<if test="buyuserid != null and buyuserid != ''">and buyuserid = #{buyuserid}</if>
-			and status = 1 and rushtime  &lt;= date_add(now(), interval -1 hour) 
+			<if test="selluserid != null and selluserid != ''">and ao.selluserid = #{selluserid}</if>
+			<if test="buyuserid != null and buyuserid != ''">and ao.buyuserid = #{buyuserid}</if>
+			and ao.status = 1 and ao.rushtime  &lt;= date_add(now(), interval -1 hour) 
 		</where>
 	</select>
 	

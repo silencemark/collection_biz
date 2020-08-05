@@ -22,4 +22,60 @@
 		GROUP BY c.datelist
 	</select>
 	
+	<select id="getSumUserStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,
+	    ifnull(count(ao.userid),0) as count
+ 		FROM calendar c 
+		left join c_t_app_userinfo ao on ao.createtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY) and ao.status = 0
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
+	<select id="getNewUserStatistics" parameterType="map" resultType="map">
+	    SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,
+	    ifnull(count(ao.userid),0) as count
+ 		FROM calendar c
+		left join c_t_app_userinfo ao on ao.createtime &gt; c.datelist and ao.createtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY) and ao.status = 0
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
+	<select id="getActivityStatistics" parameterType="map" resultType="map">
+	     SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,
+	    ifnull(count(ao.userid),0) as count
+ 		FROM calendar c
+		left join (select au.userid, a.rushtime from c_t_app_order a
+			left join c_t_app_userinfo au on a.buyuserid = au.userid 
+			where au.userid is not null 
+			group by au.userid, date_format(a.rushtime,'%Y-%m-%d')) ao 
+		on ao.rushtime &gt; c.datelist and ao.rushtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY)
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
+	<select id="getBuyStatistics" parameterType="map" resultType="map">
+	     SELECT DATE_FORMAT(c.datelist,'%Y-%m-%d') as comparetime,
+	    ifnull(count(ao.userid),0) as count
+ 		FROM calendar c
+		left join (select au.userid, a.rushtime from c_t_app_order a
+			left join c_t_app_userinfo au on a.buyuserid = au.userid 
+			where au.userid is not null 
+			group by au.userid, date_format(a.rushtime,'%Y-%m-%d')) ao 
+		on ao.rushtime &gt; c.datelist and ao.rushtime &lt; DATE_ADD(c.datelist,INTERVAL 1 DAY)
+		<where>
+			<if test="starttime != null and starttime != ''">and c.datelist &gt;= #{starttime}</if>
+			<if test="endtime != null and endtime != ''">and c.datelist &lt;= #{endtime}</if>
+		</where>
+		GROUP BY c.datelist
+	</select>
+	
 </mapper>

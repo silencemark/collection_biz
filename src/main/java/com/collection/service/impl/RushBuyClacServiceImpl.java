@@ -96,6 +96,8 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 		List<Map<String, Object>> orderlist = this.rushBuyClacMapper.getWaitSellCardOrder(data);
 		logger.info("获取待出售的会员卡订单数量：" + orderlist.toString());
 		insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"获取待出售订单数量为"+orderlist.size(), Constants.SUCCESS);
+		//定义查询所有系统用户集合
+		List<Map<String, Object>> sysUserList = new ArrayList<Map<String,Object>>();
 		//获取多次结算的每次结算的抢购成功率
 		List<Map<String, Object>> ratelist = this.rushBuyClacMapper.getConfigRate();
 		//根据当前计算时间匹配当前计算是第第几批结算以及抢购成功率
@@ -120,7 +122,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 		List<Map<String, Object>> indexlist = new ArrayList<Map<String, Object>>();
 		//定义随机发会员卡的用户个数
 		int rushnum = 0;
-		//参与抢购人数小于等于3人且为最后一次结算时时 ，直接全部抢购成功 前面两次还会各抢购成功一个 所以总低于5个会总抢购成功
+		//参与抢购人数小于等于3人且为最后一次结算时时 ，直接全部抢购成功 前面两次还会各抢购成功一个 所以总数低于5个会总抢购成功
 		if (userlist != null && userlist.size() <= 3 && lastflag == 1) {
 			rushnum = userlist.size();
 		} else {
@@ -154,7 +156,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					 * 出售系统会员卡
 					 */
 					//查询所有系统用户
-					List<Map<String, Object>> sysUserList = this.rushBuyClacMapper.getSysUser(indexlist.get(i));
+					sysUserList = this.rushBuyClacMapper.getSysUser(indexlist.get(i));
 					//从系统用户中随机取一个用户新增一张待出售的会员卡
 					int index = random.nextInt(sysUserList.size());
 					Map<String, Object> orderInfo = new HashMap<String, Object>();
@@ -275,7 +277,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 			Date createtime = new Date();
 			for (Map<String, Object> user: alluserlist){
 				user.put("title", "抢购"+cardInfo.get("typename"));
-				user.put("message", cardInfo.get("typename")+"抢购失败");
+				user.put("message", "很抱歉，本次参与抢购人数过多，"+cardInfo.get("typename")+"抢购失败，请再接再厉");
 				user.put("type", 0 );
 				user.put("createtime", createtime);
 			}
@@ -283,6 +285,43 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 			//全部状态置为抢购失败
 			this.rushBuyClacMapper.updateRushToBuy(rushMap);
 			
+			
+			/**
+			 * 最后一次结算包含一个系统回收订单逻辑 以下几个条件时系统回收
+			 * 1、待出售订单数量orderlist大于分配能抢购成功人数indexlist（总人数的20%-30%）
+			 * 2、待出售订单数量orderlist小于参与抢购的总人数userlist
+			 * 3、随机分配给系统用户回收订单
+			 */
+			if (orderlist.size() > indexlist.size() && orderlist.size() <= userlist.size()) {
+				for(int i = indexlist.size(); i < orderlist.size(); i++) {
+					//查询所有系统用户
+					sysUserList = this.rushBuyClacMapper.getSysUser(indexlist.get(i));
+					//从系统用户中随机取一个用户回收任务卡
+					int index = random.nextInt(sysUserList.size());
+					Map<String, Object> orderMap = new HashMap<String, Object>();
+					orderMap.put("buyuserid", sysUserList.get(index).get("userid"));
+					orderMap.put("orderid", orderlist.get(i).get("orderid"));
+					orderMap.put("status", 1);
+					//根据买家等级和会员卡收益率和会员卡价格计算一个收益价格profitprice
+					double cardprice = Double.parseDouble(orderlist.get(i).get("cardprice").toString());
+					double yield = Double.parseDouble(cardInfo.get("yield").toString());
+					double interesttimes = Double.parseDouble(sysUserList.get(index).get("interesttimes").toString());
+					double profitprice = cardprice * yield * interesttimes / 100;
+					orderMap.put("profitprice", profitprice);
+					//根据抢购时间和出售所需天数计算一个到期时间duetime
+					orderMap.put("commentstartdays", cardInfo.get("commentstartdays"));
+					orderMap.put("rushtime", new Date());
+					this.rushBuyClacMapper.updateOrder(orderMap);
+					
+					//给买家提示通知
+					insertSystemUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), sysUserList.get(index).get("userid").toString());
+					//给卖家提示通知
+					insertUserNotice("出售"+cardInfo.get("typename"), Constants.sysSmsTranslate1.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), Constants.smsTranslate1.replace("typename", cardInfo.get("typename").toString()), orderlist.get(i).get("selluserid").toString(), orderlist.get(i).get("phone").toString());
+					//系统通知
+					insertNotice("回收抢购", cardInfo.get("typename")+":"+data.get("calctime")+"系统用户【"+sysUserList.get(index).get("nickname")+"】回收分配价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
+					allcount++;
+				}
+			}
 		}
 		insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"此次会员卡分配完成，共"+allcount+"个用户抢到会员卡", Constants.SUCCESS);
 	}

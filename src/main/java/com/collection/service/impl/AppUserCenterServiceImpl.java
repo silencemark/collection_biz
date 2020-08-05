@@ -185,21 +185,13 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 			result.put("message", "您的账号异常，不能提现，请联系管理员");
 			return result;
 		}
-		
-		if ("2".equals(userinfo.get("status").toString())) {
-			result.put("status", 1);
-			result.put("message", "您的账号已被冻结，不能兑换");
-			return result;
-		}
-		
-		
-		//判断余额是否充足
+		//3、判断余额是否充足
 		if(Double.parseDouble(userinfo.get("sumassets").toString()) < Double.parseDouble(data.get("cardprice").toString())) {
 			result.put("status", 1);
 			result.put("message", "您的可提现资金不足");
 			return result;
 		}
-		//1、根据价格生成一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
+		//4、根据价格生成一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
 		Map<String, Object> cardMap = this.appVipCardMapper.getMemberCardByPrice(data);
 		if(cardMap!= null) {
 			cardMap.put("cardprice", data.get("cardprice"));

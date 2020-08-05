@@ -82,8 +82,10 @@
 	</update>
 	
 	<select id="getSysUser" resultType="map" parameterType="map">
-		select userid from c_t_app_userinfo 
-		where isadmin = 1 and status = 0 and delflag = 0
-		and userid != #{userid}
+		select au.userid,al.levelenum, al.interesttimes,au.nickname,au.phone
+		from c_t_app_userinfo au
+		left join c_t_app_memberlevel al on au.levelid = al.levelid
+		where au.isadmin = 1 and au.status = 0 and au.delflag = 0
+		and au.userid != #{userid}
 	</select>
 </mapper>

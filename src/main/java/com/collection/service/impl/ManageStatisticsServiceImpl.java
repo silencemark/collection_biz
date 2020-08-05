@@ -27,5 +27,23 @@ public class ManageStatisticsServiceImpl implements IManageStatisticsService{
 			Map<String, Object> data) {
 		return manageStatisticsMapper.getNewMoneyStatistics(data);
 	}
+
+	@Override
+	public List<Map<String, Object>> getSumUserStatistics(
+			Map<String, Object> data) {
+		return manageStatisticsMapper.getSumUserStatistics(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getNewUserStatistics(
+			Map<String, Object> data) {
+		return manageStatisticsMapper.getNewUserStatistics(data);
+	}
+
+	@Override
+	public List<Map<String, Object>> getActivityStatistics(
+			Map<String, Object> data) {
+		return manageStatisticsMapper.getActivityStatistics(data);
+	}
 	
 }

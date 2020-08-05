@@ -195,6 +195,12 @@
 		limit 1
 	</select>
 	
+	<select id="getCommunityLikeCount" parameterType="map" resultType="int">
+		select count(0)
+		from c_t_app_communitylike
+		where communityid = #{communityid}
+	</select>
+	
 	<update id="updateCommunityLike" parameterType="map">
 		update c_t_app_communitylike
 		set status = #{status}
