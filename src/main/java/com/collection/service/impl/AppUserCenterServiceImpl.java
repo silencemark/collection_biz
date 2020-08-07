@@ -451,6 +451,37 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	public List<Map<String, Object>> getRank(Map<String, Object> data) {
 		return this.appUserCenterMapper.getRank(data);
 	}
-	
-	
+
+	@Override
+	public List<Map<String, Object>> getAddressList(Map<String, Object> data) {
+		return this.appUserCenterMapper.getAddressList(data);
+	}
+
+	@Override
+	public void updateAddress(Map<String, Object> data) {
+		this.appUserCenterMapper.updateAddress(data);
+	}
+
+	@Override
+	public void insertAddress(Map<String, Object> data) {
+		this.appUserCenterMapper.insertAddress(data);
+	}
+
+	@Override
+	public void setDefaultAddress(Map<String, Object> data) {
+		//1、当前用户所有的地址变成不默认
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("userid", data.get("userid"));
+		map.put("isdefault", 0);
+		this.appUserCenterMapper.updateAddress(data);
+		//1、当前地址变成默认
+		map.put("isdefault", 1);
+		map.put("addressid", data.get("addressid"));
+		this.appUserCenterMapper.updateAddress(data);
+	}
+
+	@Override
+	public void deleteAddress(Map<String, Object> data) {
+		this.appUserCenterMapper.deleteAddress(data);
+	}
 }

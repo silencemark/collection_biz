@@ -33,6 +33,13 @@ public interface IAppVipCardMapper {
 	Map<String, Object> getPayVipCardInfo(Map<String, Object> data);
 	
 	/**
+	 * 获取会员卡对应的手办列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getGarageKitList(Map<String, Object> data);
+	
+	/**
 	 * 上传支付凭证
 	 * @param data
 	 */
@@ -289,4 +296,5 @@ public interface IAppVipCardMapper {
 	 * @param data
 	 */
 	void addRewardRecord(Map<String, Object> data);
+	
 }

@@ -230,4 +230,28 @@ public interface IAppUserCenterMapper {
 	 */
 	Map<String, Object> getEffectiveUserCount(Map<String, Object> data);
 	
+	/**
+	 * 查询我的收货地址列表
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getAddressList(Map<String, Object> data);
+	
+	/**
+	 * 修改收货地址
+	 * @param data
+	 */
+	void updateAddress(Map<String, Object> data);
+	
+	/**
+	 * 新增收货地址
+	 * @param data
+	 */
+	void insertAddress(Map<String, Object> data);
+	
+	/**
+	 * 删除收货地址
+	 * @param data
+	 */
+	void deleteAddress(Map<String, Object> data);
 }

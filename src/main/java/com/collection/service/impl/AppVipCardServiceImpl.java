@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.util.Base64Utils;
 
 import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
+import com.collection.dao.IRushBuyClacMapper;
 import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppVipCardService;
 import com.collection.sms.sendSms;
@@ -30,6 +32,8 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	@Autowired IAppUserCenterMapper appUserCenterMapper;	
 	
 	@Autowired ISystemMapper systemMapper;	
+	
+	@Autowired IRushBuyClacMapper rushBuyClacMapper;
 	
 	private Logger logger = Logger.getLogger(AppVipCardServiceImpl.class);
 	
@@ -99,14 +103,22 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Override
 	public Map<String, Object> getPayVipCardInfo(Map<String, Object> data) {
+		//Map<String, Object> result = appVipCardMapper.getPayVipCardInfo(data);
+		//result.put("garagekitlist", this.appVipCardMapper.getGarageKitList(data));
 		return appVipCardMapper.getPayVipCardInfo(data);
 	}
 
 	@Override
 	public Map<String, Object> payVipCard(Map<String, Object> datamap) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		if(datamap.get("kitid") == null || "".equals(datamap.get("kitid").toString())){
+			logger.info("上传失败，请选择您抢购的手办");
+            result.put("status", 1);
+     		result.put("message", "上传失败，选择您抢购的手办");
+     		return result;
+		}
 		//拿出payorder的base64文件流
 		String base64Data = String.valueOf(datamap.get("payorder"));
-		Map<String, Object> result = new HashMap<String, Object>();
         try{  
             logger.debug("上传文件的数据："+base64Data);
             logger.debug("对数据进行判断");
@@ -447,6 +459,17 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		this.appVipCardMapper.updateCardOrderStatus(map);
 		//3、根据价格匹配一张会员卡（规则是按在价格区间，持有时限正序第一个） 算出一个隔日的待出售时间
 		Map<String, Object> cardMap = this.appVipCardMapper.getMemberCardByPrice(data);
+		//4、如果专区改变，那么需要随机重新随机下一个等级手办出售
+		if (!cardMap.get("cardid").toString().equals(cardInfo.get("cardid").toString())) {
+			//查询当前会员卡对应的所有手办
+			List<Map<String, Object>> garageKitList = this.rushBuyClacMapper.getGarageKitListByCard(cardInfo);
+			//随机获取一个 当前价位的手办
+			Random random = new Random();
+			int kitindex = random.nextInt(garageKitList.size());
+			cardMap.put("kitid", garageKitList.get(kitindex).get("kitid"));
+		} else {
+			cardMap.put("kitid", cardInfo.get("kitid"));
+		}
 		cardMap.put("cardprice", cardprice);
 		cardMap.put("selluserid", data.get("userid"));
 		
@@ -559,6 +582,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			data.put("tablename", "c_t_app_movie");
 		}
 		this.appVipCardMapper.addMovieHot(data);
+	}
+
+
+	@Override
+	public List<Map<String, Object>> getGarageKitList(Map<String, Object> data) {
+		return this.appVipCardMapper.getGarageKitList(data);
 	}
 
 }

@@ -25,6 +25,13 @@ public interface IRushBuyClacMapper {
 	Map<String, Object> getCardInfo(Map<String, Object> data);
 	
 	/**
+	 * 获取手办信息
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getGarageKitListByCard(Map<String, Object> data);
+	
+	/**
 	 * 获取等待出售的会员卡订单
 	 * @param data
 	 * @return

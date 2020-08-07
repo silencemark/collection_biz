@@ -301,30 +301,30 @@ public interface IManageBackStageMapper {
 	int getExchangeListCount(Map<String, Object> data);
 	
 	/**
-	 * 获取会员卡视频管理列表
+	 * 获取会员卡手办管理列表
 	 * @param data
 	 * @return
 	 */
-	List<Map<String, Object>> getMemberMovieList(Map<String, Object> data);
+	List<Map<String, Object>> getGarageKitList(Map<String, Object> data);
 	
 	/**
-	 * 获取会员卡视频管理列表次数
+	 * 获取会员卡手办管理列表次数
 	 * @param data
 	 * @return
 	 */
-	int getMemberMovieListCount(Map<String, Object> data);
+	int getGarageKitListCount(Map<String, Object> data);
 	
 	/**
-	 * 修改会员卡视频信息
+	 * 修改会员卡手办信息
 	 * @param data
 	 */
-	void updateMemberMovie(Map<String, Object> data);
+	void updateGarageKit(Map<String, Object> data);
 	
 	/**
-	 * 新增会员卡视频信息
+	 * 新增会员卡手办信息
 	 * @param data
 	 */
-	void insertMemberMovie(Map<String, Object> data);
+	void insertGarageKit(Map<String, Object> data);
 	
 	/**
 	 * 获取系统消息列表

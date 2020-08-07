@@ -255,26 +255,6 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 	}
 
 	@Override
-	public List<Map<String, Object>> getMemberMovieList(Map<String, Object> data) {
-		return this.manageBackStageMapper.getMemberMovieList(data);
-	}
-
-	@Override
-	public int getMemberMovieListCount(Map<String, Object> data) {
-		return this.manageBackStageMapper.getMemberMovieListCount(data);
-	}
-
-	@Override
-	public void updateMemberMovie(Map<String, Object> data) {
-		 this.manageBackStageMapper.updateMemberMovie(data);
-	}
-
-	@Override
-	public void insertMemberMovie(Map<String, Object> data) {
-		 this.manageBackStageMapper.insertMemberMovie(data);
-	}
-
-	@Override
 	public List<Map<String, Object>> getSysNoticeList(Map<String, Object> data) {
 		return this.manageBackStageMapper.getSysNoticeList(data);
 	}
@@ -372,5 +352,25 @@ public class ManageBackStageServiceImpl implements IManageBackStageService{
 			e.printStackTrace();
 		}
 		return crontab;
+	}
+
+	@Override
+	public List<Map<String, Object>> getGarageKitList(Map<String, Object> data) {
+		return this.manageBackStageMapper.getGarageKitList(data);
+	}
+
+	@Override
+	public int getGarageKitListCount(Map<String, Object> data) {
+		return this.manageBackStageMapper.getGarageKitListCount(data);
+	}
+
+	@Override
+	public void updateGarageKit(Map<String, Object> data) {
+		this.manageBackStageMapper.updateGarageKit(data);
+	}
+
+	@Override
+	public void insertGarageKit(Map<String, Object> data) {
+		this.manageBackStageMapper.insertGarageKit(data);
 	}
 }

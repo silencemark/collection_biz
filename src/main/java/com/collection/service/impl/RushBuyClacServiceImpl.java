@@ -84,6 +84,8 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 	public void rushBuyCalc(Map<String, Object> data) {
 		//获取会员卡信息，且计算当前计算时间距离抢购开始时间的分钟数
 		Map<String, Object> cardInfo = this.rushBuyClacMapper.getCardInfo(data);
+		//查询当前会员卡对应的所有手办
+		List<Map<String, Object>> garageKitList = this.rushBuyClacMapper.getGarageKitListByCard(cardInfo);
 		logger.info("当前抢购的会员卡信息：" + cardInfo.toString());
 		//获取抢购的人数
 		List<Map<String, Object>> userlist = this.rushBuyClacMapper.getRushBuyUser(data);
@@ -168,6 +170,9 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					//生成订单号
 					orderInfo.put("ordernum", AppVipCardServiceImpl.generateUniqueKey() + ordernum);
 					orderInfo.put("cardid", cardInfo.get("cardid"));
+					//随机获取一个 当前价位的手办
+					int kitindex = random.nextInt(garageKitList.size());
+					orderInfo.put("kitid", garageKitList.get(kitindex).get("kitid"));
 					//获取最大最小价格的价差spread 和最小价格
 					double minprice = Double.parseDouble(cardInfo.get("minprice").toString());
 					double spread = Double.parseDouble(cardInfo.get("spread").toString());
@@ -203,14 +208,14 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					//新增到xgo记录表
 					rushToBuyMap.put("createtime", new Date());
 					rushToBuyMap.put("type", 2);
-					rushToBuyMap.put("remark", "恭喜您抢购"+cardInfo.get("typename")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
+					rushToBuyMap.put("remark", "恭喜您抢购"+garageKitList.get(kitindex).get("title")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
 					this.appUserCenterMapper.addXgoRecord(rushToBuyMap);
 					//给买家提示通知
-					insertUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), Constants.smsTranslate3.replace("typename", cardInfo.get("typename").toString()), indexlist.get(i).get("userid").toString(), indexlist.get(i).get("phone").toString());
+					insertUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", garageKitList.get(kitindex).get("title").toString()), Constants.smsTranslate3.replace("typename", garageKitList.get(kitindex).get("title").toString()), indexlist.get(i).get("userid").toString(), indexlist.get(i).get("phone").toString());
 					//给卖家提示通知
-					insertSystemUserNotice("出售系统"+cardInfo.get("typename"), "恭喜您出售价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", sysUserList.get(index).get("userid").toString());
+					insertSystemUserNotice("出售系统"+cardInfo.get("typename"), "恭喜您出售价值"+cardprice+"元的"+garageKitList.get(kitindex).get("title")+"成功", sysUserList.get(index).get("userid").toString());
 					//系统提示
-					insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
+					insertNotice("抢购"+cardInfo.get("typename"), garageKitList.get(kitindex).get("title")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+garageKitList.get(kitindex).get("title")+"成功", Constants.SUCCESS);
 					allcount ++;
 				} catch (Exception e) {
 					logger.error(e.getMessage());
@@ -224,7 +229,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					//当抢购人员分配到自己正在出售的会员卡此等极端情况 直接不给他分配了 当做他没抢到
 					if(indexlist.get(i).get("userid").equals(orderlist.get(i).get("selluserid"))) {
 						logger.info("当抢购时分配到到自己正在出售的会员卡，就不分配了 userid:"+indexlist.get(i).get("userid"));
-						insertNotice("抢购"+cardInfo.get("typename"), cardInfo.get("typename")+":"+data.get("calctime")+"-"+indexlist.get(i).get("nickname")+"抢购时分配到到自己正在出售的会员卡：该用户抢购失败", Constants.FAILED);
+						insertNotice("抢购"+cardInfo.get("typename"), orderlist.get(i).get("title")+":"+data.get("calctime")+"-"+indexlist.get(i).get("nickname")+"抢购时分配到到自己正在出售的会员卡：该用户抢购失败", Constants.FAILED);
 						continue;
 					}
 					orderMap.put("status", 1);
@@ -252,14 +257,14 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					//新增到xgo记录表
 					rushToBuyMap.put("createtime", new Date());
 					rushToBuyMap.put("type", 2);
-					rushToBuyMap.put("remark", "恭喜您抢购"+cardInfo.get("typename")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
+					rushToBuyMap.put("remark", "恭喜您抢购"+orderlist.get(i).get("title")+"成功，使用"+cardInfo.get("xgocoin")+"个xgo币");
 					this.appUserCenterMapper.addXgoRecord(rushToBuyMap);
 					//给买家提示通知
-					insertUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), Constants.smsTranslate3.replace("typename", cardInfo.get("typename").toString()), indexlist.get(i).get("userid").toString(), indexlist.get(i).get("phone").toString());
+					insertUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", orderlist.get(i).get("title").toString()), Constants.smsTranslate3.replace("typename", orderlist.get(i).get("title").toString()), indexlist.get(i).get("userid").toString(), indexlist.get(i).get("phone").toString());
 					//给卖家提示通知
-					insertUserNotice("出售"+cardInfo.get("typename"), Constants.sysSmsTranslate1.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), Constants.smsTranslate1.replace("typename", cardInfo.get("typename").toString()), orderlist.get(i).get("selluserid").toString(), orderlist.get(i).get("phone").toString());
+					insertUserNotice("出售"+cardInfo.get("typename"), Constants.sysSmsTranslate1.replace("price", cardprice+"").replace("typename", orderlist.get(i).get("title").toString()), Constants.smsTranslate1.replace("typename", orderlist.get(i).get("title").toString()), orderlist.get(i).get("selluserid").toString(), orderlist.get(i).get("phone").toString());
 					//系统通知
-					insertNotice("抢购成功", cardInfo.get("typename")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
+					insertNotice("抢购成功", cardInfo.get("typename")+":"+data.get("calctime")+"恭喜用户"+indexlist.get(i).get("nickname")+"抢购价值"+cardprice+"元的"+orderlist.get(i).get("title")+"成功", Constants.SUCCESS);
 					allcount++;
 				} catch (Exception e) {
 					continue;
@@ -314,11 +319,11 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 					this.rushBuyClacMapper.updateOrder(orderMap);
 					
 					//给买家提示通知
-					insertSystemUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), sysUserList.get(index).get("userid").toString());
+					insertSystemUserNotice("抢购"+cardInfo.get("typename"), Constants.sysSmsTranslate3.replace("price", cardprice+"").replace("typename", orderlist.get(i).get("title").toString()), sysUserList.get(index).get("userid").toString());
 					//给卖家提示通知
-					insertUserNotice("出售"+cardInfo.get("typename"), Constants.sysSmsTranslate1.replace("price", cardprice+"").replace("typename", cardInfo.get("typename").toString()), Constants.smsTranslate1.replace("typename", cardInfo.get("typename").toString()), orderlist.get(i).get("selluserid").toString(), orderlist.get(i).get("phone").toString());
+					insertUserNotice("出售"+cardInfo.get("typename"), Constants.sysSmsTranslate1.replace("price", cardprice+"").replace("typename", orderlist.get(i).get("title").toString()), Constants.smsTranslate1.replace("typename", orderlist.get(i).get("title").toString()), orderlist.get(i).get("selluserid").toString(), orderlist.get(i).get("phone").toString());
 					//系统通知
-					insertNotice("回收抢购", cardInfo.get("typename")+":"+data.get("calctime")+"系统用户【"+sysUserList.get(index).get("nickname")+"】回收分配价值"+cardprice+"元的"+cardInfo.get("typename")+"成功", Constants.SUCCESS);
+					insertNotice("回收抢购", cardInfo.get("typename")+":"+data.get("calctime")+"系统用户【"+sysUserList.get(index).get("nickname")+"】回收分配价值"+cardprice+"元的"+orderlist.get(i).get("title")+"成功", Constants.SUCCESS);
 					allcount++;
 				}
 			}

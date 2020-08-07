@@ -44,9 +44,11 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield, mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime
+			mc.yield, mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 1
 			and ao.buyuserid = #{userid}
@@ -58,9 +60,11 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,ao.rushtime,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 2
 			and ao.buyuserid = #{userid}
@@ -100,19 +104,21 @@
 				mc.forder
 			FROM
 				c_t_app_rushtobuy  bu
-				left join	c_t_app_membercard mc on bu.cardid = mc.cardid
+				left join c_t_app_membercard mc on bu.cardid = mc.cardid
 				where bu.userid = #{userid} and bu.status = 1
 			order by bu.status desc,bu.createtime desc
 	</select>
 	
 	<select id="getPayVipCardInfo" parameterType="map" resultType="map">
-		select ao.orderid, mc.cardimg, mc.introduction, mc.description, ao.ordernum,ao.buyuserid,us.nickname as buynickname,ao.selluserid,us1.phone as sellphone,
+		select ao.orderid, mc.cardimg, mc.introduction, mc.description as carddescription, ao.ordernum,ao.buyuserid,us.nickname as buynickname,ao.selluserid,us1.phone as sellphone,
 		DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime, ao.cardprice,IFNULL(us.xgocoin,0) xgocoin,
 		mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,mc.typename,
 		DATE_FORMAT(DATE_ADD(ao.createtime,INTERVAL mc.watchdays DAY),'%Y-%m-%d %H:%i:%S') duetime,
-		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname,sus.phone
+		pay.weixinnum,pay.weixinqrcode,pay.weixinrealname,pay.alipaynum,pay.alipayqrcode,pay.alipayrealname,pay.bank,pay.banknum,pay.bankrealname,sus.phone,
+		ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_userinfo us1 on ao.selluserid = us1.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
@@ -120,12 +126,21 @@
 		where ao.orderid=#{orderid} and ao.status = 1
 	</select>
 	
+	<!-- <select id="getGarageKitList" parameterType="map" resultType="map">
+		select ki.kitid, ki.coverimg, ki.iconimg, ki.title, ki.description from c_t_app_garagekit ki
+		where ki.cardid = (select cardid from c_t_app_order where orderid=#{orderid})
+		and status = 1
+	</select> -->
+	
+	
 	<update id="payVipCard" parameterType="map">
 		update c_t_app_order
 		<set>
 	      <if test="status != null">status = #{status},</if>
 	      <if test="buytime != null">buytime = #{buytime},</if>
 	      <if test="payorder != null">payorder = #{payorder},</if>
+	      <if test="kitid != null and kitid != '' ">kitid = #{kitid},</if>
+	      
 	   </set>
 	   where orderid = #{orderid}
 	</update>
@@ -155,13 +170,14 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.rushtime  &gt; date_add(now(), interval -1 hour) 
 			and ao.status = 1
 			and ao.selluserid = #{userid}
-			
 		union 
 		select ao.ordernum, ao.orderid,ao.cardid,ao.buyuserid, ao.selluserid,ao.status,ao.ordertype,ao.profitprice,ao.cardprice,
 			timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
@@ -171,9 +187,11 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.buytime  &gt; date_add(now(), interval -1 hour) 	
 			and ao.status = 2
 			and ao.selluserid = #{userid}
@@ -186,9 +204,11 @@
 			mc.typename,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			 from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.status = 0
 			and ao.selluserid = #{userid}
 			)  A 
@@ -198,9 +218,10 @@
 	<select id="getExamineInfo" parameterType="map" resultType="map">
 		select ao.orderid, ao.buyuserid, ao.selluserid,mc.cardimg,ao.ordernum, DATE_FORMAT(ao.selltime,'%Y-%m-%d %H:%i:%s') as selltime, ao.profitprice,ao.cardprice,
 		timestampdiff(SECOND,now(),date_add(ao.buytime, interval 1 hour)) as remaintime,
-		ao.payorder,ce.realname,us.phone, pm.weixinnum,mc.typename, mc.forder
+		ao.payorder,ce.realname,us.phone, pm.weixinnum,mc.typename, mc.forder,ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		 from c_t_app_order ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 		left join  c_t_app_certification ce on ao.buyuserid = ce.userid  and ce.status = 2
 		left join c_t_app_userinfo us on ce.userid = us.userid
 		left join c_t_app_paymentmethod pm on ce.userid = pm.userid
@@ -281,9 +302,11 @@
 			timestampdiff(day,now(),ao.duetime) as remainwatchdays,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where ao.status in (3,4)
 			and ao.buyuserid = #{userid}
 			order by ao.status desc, ao.buytime desc 
@@ -297,9 +320,11 @@
 			timestampdiff(day,now(),ao.duetime) as remainwatchdays,
 			(mc.commentcount - ao.commentcount) remaincount,
 			ao.commentcount as alreadycount,
-			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount
+			mc.yield,mc.forder,mc.watchdays,mc.commentstartdays,mc.commentcount,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 			from c_t_app_order ao
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
+			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where (ao.status in (3,4,5) and ao.selluserid = #{userid}) 
 			or (ao.status = 5 and ao.buyuserid = #{userid}) 
 			order by ao.buytime desc 
@@ -307,7 +332,7 @@
 	
 	
 	<select id="getMemberCardInfo" parameterType="map" resultType="map">
-		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
+		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description as carddescription, ao.ordernum,
 			DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
 			ifnull(ao.commentcount, 0) as alreadycount,
@@ -316,9 +341,11 @@
 			ao.cardprice,
 			(mc.commentcount - ao.commentcount) remaincount,
 			timestampdiff(day,now(),ao.duetime) as remaindays,
-			mc.yield, mc.forder,mc.watchdays
+			mc.yield, mc.forder,mc.watchdays,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
 			where ao.orderid = #{orderid}
@@ -331,7 +358,7 @@
 		where ao.status = 3
 			and ao.buyuserid = #{userid}
 			and timestampdiff(day,ao.rushtime,now()) &gt;= mc.commentstartdays
-			and ao.commentcount >= mc.commentcount
+			<!-- and ao.commentcount >= mc.commentcount -->
 	</select>
 	
 	<select id="getDueOrderListByid" resultType="map" parameterType="map">
@@ -351,15 +378,17 @@
 	</select>
 	
 	<select id="getSellCardInfo" parameterType="map" resultType="map">
-		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description, ao.ordernum,
+		select ao.cardid,mc.typename,mc.cardimg, mc.introduction, mc.description as carddescription, ao.ordernum,
 			DATE_FORMAT(ao.rushtime,'%Y-%m-%d %H:%i:%S') as buytime,
 			DATE_FORMAT(ao.duetime,'%Y-%m-%d %H:%i:%S') as duetime,
 			ao.commentcount as alreadycount,
 			mc.commentstartdays,
 			mc.commentcount,
-			round((ao.cardprice + ao.profitprice),2) as maxprice
+			round((ao.cardprice + ao.profitprice),2) as maxprice,
+			ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		from c_t_app_order  ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
+		left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 		left join c_t_app_userinfo us on ao.buyuserid = us.userid
 		left join c_t_app_paymentmethod pay on ao.selluserid = pay.userid
 		where (ao.status = 4 or duetime &gt; now())
@@ -415,6 +444,7 @@
 	        <if test="status != null and status != ''">status,</if>
 	        <if test="rushtime != null and rushtime != ''">rushtime,</if>
 	        <if test="commentstartdays != null and commentstartdays != ''">duetime,</if>
+	        <if test="kitid != null and kitid != ''">kitid,</if>
 	        <if test="createtime != null and createtime != ''">createtime,</if>
 	    </trim>
 	    <trim prefix="values(" suffix=")" suffixOverrides=",">
@@ -430,6 +460,7 @@
 	        <if test="status != null and status != ''">#{status},</if>
 	        <if test="rushtime != null and rushtime != ''">#{rushtime},</if>
 	        <if test="commentstartdays != null and commentstartdays != ''">DATE_ADD(now(), INTERVAL #{commentstartdays} DAY),</if>
+	        <if test="kitid != null and kitid != ''">#{kitid},</if>
 	        <if test="createtime != null and createtime != ''">#{createtime},</if>
 	    </trim>
 	</insert>
@@ -543,4 +574,12 @@
 		insert into c_t_app_rewardrecord(rewardprice, userid, type, createtime)
 		values(#{rewardprice}, #{userid}, #{type}, now())
 	</insert>
+	
+	<select id="getGarageKitList" parameterType="map" resultType="map">
+		select kitid,iconimg,coverimg,title,description,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime from c_t_app_garagekit
+		where  cardid = #{cardid}
+		and status = 1
+		order by forder desc 
+	</select>
+	
 </mapper>

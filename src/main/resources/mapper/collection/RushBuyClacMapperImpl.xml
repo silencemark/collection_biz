@@ -20,6 +20,12 @@
 	    limit 1 
 	</select>
 	
+	<select id="getGarageKitListByCard" parameterType="map" resultType="map">
+		select kitid,cardid,coverimg,title,description,status,forder from c_t_app_garagekit
+		where cardid = #{cardid}
+		and status = 1
+	</select>
+	
     <select id="getRushBuyUser"  resultType="map" parameterType="map">
 	    SELECT ar.userid,ar.cardid,am.starttime,al.levelenum, al.interesttimes,au.nickname,au.phone
 	    from c_t_app_rushtobuy ar
@@ -32,13 +38,15 @@
 	</select>
 	
 	<select id="getWaitSellCardOrder"  resultType="map" parameterType="map">
-		select ao.orderid, ao.selluserid,ao.cardprice,au.nickname,au.phone
+		select ao.orderid, ao.selluserid,ao.cardprice,au.nickname,au.phone,
+		ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		from c_t_app_order  ao
 		left join c_t_app_userinfo au on ao.selluserid = au.userid
+		left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 		left join c_t_app_membercard am on ao.cardid = am.cardid 
 		where am.forder = #{forder}
 		and ao.status = 0
-		order by ao.createtime 
+		order by ao.createtime
 	</select>
 	
 	<select id="getConfigRate" resultType="map">

@@ -271,7 +271,7 @@
     	<trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="coverimg != null and coverimg != ''">coverimg,</if>
             <if test="title != null and title != ''">title,</if>
-            <if test="description != null and title != ''">description,</if>
+            <if test="description != null and description != ''">description,</if>
             <if test="httpurl != null and httpurl != ''">httpurl,</if>
             <if test="type != null and type != ''">type,</if>
             <if test="hotforder != null and hotforder != ''">hotforder,</if>
@@ -510,10 +510,10 @@
 		</where>
     </select>
     
-     <select id="getMemberMovieList" parameterType="map" resultType="map">
-    	select am.movieid, am.cardid, am.coverimg , am.title, am.description, am.httpurl, am.status,mc.typename,am.hotforder,
+	<select id="getGarageKitList" parameterType="map" resultType="map">
+    	select am.kitid, am.iconimg, am.coverimg, am.title, am.description, am.status,mc.typename,am.forder,
 		am.createtime, am.updatetime
-		from c_t_app_membermovie am
+		from c_t_app_garagekit am
 		left join c_t_app_membercard mc on am.cardid = mc.cardid
 		<where>
 			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
@@ -525,8 +525,8 @@
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
     </select>
     
-    <select id="getMemberMovieListCount" parameterType="map" resultType="int">
-    	select count(0) from c_t_app_membermovie am
+    <select id="getGarageKitListCount" parameterType="map" resultType="int">
+    	select count(0) from c_t_app_garagekit am
 		<where>
 			<if test="title != null and title != ''">and locate(#{title},am.title) > 0</if>
 			<if test="description != null and description != ''">and locate(#{description},am.description) > 0</if>
@@ -535,42 +535,40 @@
 		</where>
     </select>
     
-    <update id="updateMemberMovie" parameterType="map">
-    	update c_t_app_membermovie
+    <update id="updateGarageKit" parameterType="map">
+    	update c_t_app_garagekit
     	<set>
+    		<if test="iconimg != null and iconimg != ''">iconimg=#{iconimg},</if>
             <if test="coverimg != null and coverimg != ''">coverimg=#{coverimg},</if>
             <if test="title != null and title != ''">title=#{title},</if>
             <if test="description != null and description != ''">description=#{description},</if>
-            <if test="httpurl != null and httpurl != ''">httpurl=#{httpurl},</if>
-            <if test="hotforder != null and hotforder != ''">hotforder=#{hotforder},</if>
+            <if test="forder != null and forder != ''">forder=#{forder},</if>
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
             <if test="updateid != null and updateid != ''">updateid=#{updateid},</if>
             <if test="status != null and status != ''">status=#{status},</if>
         </set>
-        where movieid=#{movieid}
+        where kitid=#{kitid}
     </update>
     
-    <insert id="insertMemberMovie" parameterType="map">
-    	insert into c_t_app_membermovie
+    <insert id="insertGarageKit" parameterType="map">
+    	insert into c_t_app_garagekit
     	<trim prefix="(" suffix=")" suffixOverrides=",">
     		<if test="cardid != null and cardid != ''">cardid,</if>
+    		<if test="iconimg != null and iconimg != ''">iconimg,</if>
             <if test="coverimg != null and coverimg != ''">coverimg,</if>
             <if test="title != null and title != ''">title,</if>
-            <if test="description != null and title != ''">description,</if>
-            <if test="httpurl != null and httpurl != ''">httpurl,</if>
-            <if test="type != null and type != ''">type,</if>
-            <if test="hotforder != null and hotforder != ''">hotforder,</if>
+            <if test="description != null and description != ''">description,</if>
+            <if test="forder != null and forder != ''">forder,</if>
             <if test="createtime != null and createtime != ''">createtime,</if>
             <if test="createid != null and createid != ''">createid,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
         	<if test="cardid != null and cardid != ''">#{cardid},</if>
+        	<if test="iconimg != null and iconimg != ''">#{iconimg},</if>
             <if test="coverimg != null and coverimg != ''">#{coverimg},</if>
             <if test="title != null and title != ''">#{title},</if>
             <if test="description != null and description != ''">#{description},</if>
-            <if test="httpurl != null and httpurl != ''">#{httpurl},</if>
-            <if test="type != null and type != ''">#{type},</if>
-            <if test="hotforder != null and hotforder != ''">#{hotforder},</if>
+            <if test="forder != null and forder != ''">#{forder},</if>
             <if test="createtime != null and createtime != ''">#{createtime},</if>
             <if test="createid != null and createid != ''">#{createid},</if>
         </trim>

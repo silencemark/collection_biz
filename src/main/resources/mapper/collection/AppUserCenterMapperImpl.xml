@@ -353,4 +353,62 @@
 		(select count(0) from c_t_app_userinfo where parentid =#{userid} and levelid > 1) effectuser
 		from dual
 	</select>
+	
+	<select id="getAddressList" parameterType="map" resultType="map" >
+		select addressid,name,phone,province,city,county,town,address,isdefault c_t_app_address
+		<where>
+		 	<if test="userid != null and userid != ''">and userid=#{userid}</if>
+		 	<if test="isdefault != null and isdefault != ''">and isdefault=#{isdefault}</if>
+		 </where>
+		order by isdefault desc, createtime desc
+	</select>
+	
+	<insert id="insertAddress" parameterType="map" >
+		insert into c_t_app_address
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">userid,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="province != null and province != ''">province,</if>
+            <if test="city != null and city != ''">city,</if>
+            <if test="county != null and county != ''">county	,</if>
+            <if test="createtime != null and createtime != ''">createtime,</if>
+            <if test="town != null and town != ''">town,</if>
+            <if test="address != null and address != ''">address,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">#{userid},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="province != null and province != ''">#{province},</if>
+            <if test="city != null and city != ''">#{city},</if>
+            <if test="county != null and county != ''">#{county},</if>
+            <if test="createtime != null and createtime != ''">#{createtime},</if>
+            <if test="town != null and town != ''">#{town},</if>
+            <if test="address != null and address != ''">#{address},</if>
+        </trim>
+	</insert>
+	
+	<update id="updateAddress" parameterType="map" >
+		update c_t_app_address
+    	<set>
+            <if test="name != null and name != ''">name=#{name},</if>
+            <if test="phone != null and phone != ''">phone=#{phone},</if>
+            <if test="province != null and province != ''">province=#{province},</if>
+            <if test="city != null and city != ''">city=#{city},</if>
+            <if test="county != null and county != ''">county=#{county},</if>
+            <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
+            <if test="town != null and town != ''">town=#{town},</if>
+            <if test="address != null and address != ''">address=#{address},</if>
+            <if test="isdefault != null and isdefault != ''">isdefault=#{isdefault},</if>
+        </set>
+        <where>
+		 	<if test="userid != null and userid != ''">and userid=#{userid}</if>
+		 	<if test="addressid != null and addressid != ''">and addressid=#{addressid}</if>
+		 </where>
+	</update>
+	
+	<delete id="deleteAddress" parameterType="map">
+		delete from c_t_app_address where addressid=#{addressid}
+	</delete>
 </mapper>
