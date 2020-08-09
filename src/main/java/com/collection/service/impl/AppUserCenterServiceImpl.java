@@ -99,13 +99,13 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	    		notice.put("userid", levelMap.get("userid"));
 	    		notice.put("createtime", new Date());
 	    		this.systemMapper.insertUserNotice(notice);
-	    		// 发送短信通知
+/*	    		// 发送短信通知
 	    		try {
 	    			sendSms.sendSms(levelMap.get("phone").toString(), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()));
 	    		} catch (Exception e) {
 	    			logger.info("短信发送错误"+e.getMessage());
 	    		}
-			}
+*/			}
 			result.put("status", 0);
 			result.put("remark", data.get("remark"));
 			return result;

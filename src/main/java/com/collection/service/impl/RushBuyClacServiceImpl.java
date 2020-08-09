@@ -301,7 +301,7 @@ public class RushBuyClacServiceImpl implements IRushBuyClacService{
 				for(int i = indexlist.size(); i < orderlist.size(); i++) {
 					//查询所有系统用户
 					sysUserList = this.rushBuyClacMapper.getSysUser(indexlist.get(i));
-					//从系统用户中随机取一个用户回收任务卡
+					//从系统用户中随机取一个用户回收手办
 					int index = random.nextInt(sysUserList.size());
 					Map<String, Object> orderMap = new HashMap<String, Object>();
 					orderMap.put("buyuserid", sysUserList.get(index).get("userid"));

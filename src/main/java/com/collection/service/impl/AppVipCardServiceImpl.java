@@ -111,12 +111,6 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	@Override
 	public Map<String, Object> payVipCard(Map<String, Object> datamap) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		if(datamap.get("kitid") == null || "".equals(datamap.get("kitid").toString())){
-			logger.info("上传失败，请选择您抢购的手办");
-            result.put("status", 1);
-     		result.put("message", "上传失败，选择您抢购的手办");
-     		return result;
-		}
 		//拿出payorder的base64文件流
 		String base64Data = String.valueOf(datamap.get("payorder"));
         try{  
@@ -252,7 +246,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		//1、新增买家通知
         Map<String, Object> notice = new HashMap<String, Object>();
 		notice.put("title", "抢购通知");
-		notice.put("message", "恭喜你，卖家已审核完成，请查看已抢购成功最新任务卡");
+		notice.put("message", "恭喜你，卖家已审核完成，请查看最新抢购成功的手办信息");
 		notice.put("userid", data.get("buyuserid"));
 		notice.put("createtime", new Date());
 		this.systemMapper.insertUserNotice(notice);
@@ -311,7 +305,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	    		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
 	    			appUserCenterMapper.updateUserInfoLevel(levelMap);
 	    			//新增卖家通知/发送短信通知和系统通知
-	        		insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), elder.get("parentid").toString(),  elder.get("phone").toString());
+	        		//insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), elder.get("parentid").toString(),  elder.get("phone").toString());
 	    		}
 			}
 			//3、给父级5%收益和爷级2%收益 （爸爷的个人资产） 且新增记录到团队收益表c_t_app_teamprofit
@@ -362,7 +356,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		if (!levelMap.get("levelid").toString().equals(levelMap.get("oldlevelid").toString())){
 			appUserCenterMapper.updateUserInfoLevel(levelMap);
 			//新增卖家成长通知/发送短信通知和系统通知
-    		insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), data.get("selluserid").toString(),  userinfo.get("phone").toString());
+    		//insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), data.get("selluserid").toString(),  userinfo.get("phone").toString());
 		}
 		//5、增加自己资产总和
 		sellUser = new HashMap<String, Object>();
@@ -409,11 +403,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	@Override
 	public Map<String, Object> getMemberCardInfo(Map<String, Object> data) {
 		//获取VIP会员卡信息
-		Map<String, Object> cardInfo = this.appVipCardMapper.getMemberCardInfo(data);
-		//获取视频包集合信息
-		List<Map<String, Object>> movielist = this.appVipCardMapper.getMovieByCardId(cardInfo);
-		cardInfo.put("movielist", movielist);
-		return cardInfo;
+		return this.appVipCardMapper.getMemberCardInfo(data);
 	}
 
 	@Override
@@ -432,11 +422,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			result.put("message", "您的账号已被冻结，不能出售订单");
 			return result;
 		}
-		//2、查询一次当前任务卡的最大出售价格
+		//2、查询一次当前手办的最大出售价格
 		Map<String, Object> cardInfo = this.appVipCardMapper.getSellCardInfo(data);
 		if(Double.parseDouble(cardInfo.get("maxprice").toString()) < Double.parseDouble(data.get("cardprice").toString())) {
 			result.put("status", 1);
-			result.put("message", "您输入的价格大于任务卡可出售的最大金额，不能出售");
+			result.put("message", "您输入的价格大于手办可出售的最大金额，不能出售");
 			return result;
 		}
 		//1、如果出售价格 大于最大限制(20000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
@@ -533,7 +523,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		//7.查询结算时间是否已经超过，已过不能抢购（再查询一次抢购的会员卡 是否 可抢购即可）
 		if ("0".equals(cardinfo.get("isbuy").toString())) {
 			result.put("status", 1);
-			result.put("message", "任务领取时间已结束");
+			result.put("message", "参与团购时间已结束");
 			return result;
 		}
 		data.put("createtime", new Date());
@@ -586,8 +576,58 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 
 	@Override
-	public List<Map<String, Object>> getGarageKitList(Map<String, Object> data) {
-		return this.appVipCardMapper.getGarageKitList(data);
+	public Map<String, Object> getGarageKitList(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//分页处理如果没传 默认就是 第一页  每页6条
+		if(data.get("startnum") == null || "".equals(data.get("startnum").toString())) {
+			data.put("startnum", 0);
+		}
+		if(data.get("rownum") == null || "".equals(data.get("rownum").toString())) {
+			data.put("rownum", 10);
+		}
+		data.put("startnum", Integer.parseInt(data.get("startnum").toString()));
+		data.put("rownum", Integer.parseInt(data.get("rownum").toString()));
+		//定义一个pagenum
+		int kitnum =  appVipCardMapper.getGarageKitListCount(data);
+		List<Map<String, Object>> kitlist = this.appVipCardMapper.getGarageKitList(data);
+		result.put("kitnum", kitnum);
+		result.put("kitlist", kitlist);
+		return result;
+	}
+
+
+	@Override
+	public Map<String, Object> getGarageKitInfo(Map<String, Object> data) {
+		Map<String, Object> result = this.appVipCardMapper.getGarageKitInfo(data);
+		result.put("likelist", this.appVipCardMapper.getGarageLikeHeadimage(data));
+		return result;
+	}
+
+
+	@Override
+	public void likeGarageKit(Map<String, Object> data) {
+		//查询用户是否有过该社区动态的喜欢记录
+		Map<String, Object> like = this.appVipCardMapper.getLikeGarageKit(data);
+		if (like == null || like.isEmpty()) {
+			//手办喜欢加一
+			data.put("likenum", 1);
+			this.appVipCardMapper.likeGarageKit(data);
+			//新增喜欢记录表
+			this.appVipCardMapper.insertLikeGarageKit(data);
+		} else {
+			//取消点赞
+			if("1".equals(like.get("status").toString())) {
+				//朋友圈点赞减一
+				data.put("likenum", -1);
+			} else {
+				//朋友圈点赞加一
+				data.put("likenum", 1);
+			}
+			this.appVipCardMapper.likeGarageKit(data);
+			//修改喜欢记录表
+			like.put("status", data.get("status"));
+			this.appVipCardMapper.updateGarageKitLike(like);
+		}
 	}
 
 }

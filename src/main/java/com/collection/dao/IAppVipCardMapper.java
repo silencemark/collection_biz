@@ -40,6 +40,13 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getGarageKitList(Map<String, Object> data);
 	
 	/**
+	 * 获取手办数量
+	 * @param data
+	 * @return
+	 */
+	int getGarageKitListCount(Map<String, Object> data);
+	
+	/**
 	 * 上传支付凭证
 	 * @param data
 	 */
@@ -163,11 +170,11 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getDueOrderListByid(Map<String, Object> data);
 	
 	/**
-	 * 获取会员VIP卡对应的视频包
+	 * 获取会员VIP卡对应的视频包 废弃
 	 * @param data
 	 * @return
 	 */
-	List<Map<String, Object>> getMovieByCardId(Map<String, Object> data);
+	//List<Map<String, Object>> getMovieByCardId(Map<String, Object> data);
 	
 	/**
 	 * 获取会员卡信息（初始化出售页面）
@@ -297,4 +304,42 @@ public interface IAppVipCardMapper {
 	 */
 	void addRewardRecord(Map<String, Object> data);
 	
+	/**
+	 * 查询手办详情
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getGarageKitInfo(Map<String, Object> data);
+	
+	/**
+	 * 获取喜欢人的头像
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getGarageLikeHeadimage(Map<String, Object> data);
+	
+	/**
+	 * 喜欢/取消喜欢手办
+	 * @param data
+	 */
+	void likeGarageKit(Map<String, Object> data);
+	
+	/**
+	 * 查询是否喜欢
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getLikeGarageKit(Map<String, Object> data);
+	
+	/**
+	 * 添加喜欢
+	 * @param data
+	 */
+	void insertLikeGarageKit(Map<String, Object> data);
+	
+	/**
+	 * 修改喜欢
+	 * @param data
+	 */
+	void updateGarageKitLike(Map<String, Object> data);
 }

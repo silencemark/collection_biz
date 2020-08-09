@@ -101,24 +101,15 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			typeMap.put("typename", "电视剧");
 			typeMap.put("movielist", homePageMovie);
 			resultlist.add(typeMap);
-			movienum =  appIndexMapper.getMemberMovieListCount(data);
-			List<Map<String, Object>> memberMovie = appIndexMapper.getMemberMovieList(data);
+			//精品推荐
+			data.put("type", 1);
+			movienum =  appIndexMapper.getHomePageMovieCount(data);
+			homePageMovie = appIndexMapper.getHomePageMovie(data);
 			typeMap = new HashMap<String, Object>();
-			typeMap.put("type", 1);
+			typeMap.put("type", 4);
 			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
-			typeMap.put("typename", "会员专享");
-			typeMap.put("movielist", memberMovie);
-			resultlist.add(typeMap);
-			return resultlist;
-		} else if ("1".equals(data.get("type"))){
-			movienum =  appIndexMapper.getMemberMovieListCount(data);
-			homePageMovie = appIndexMapper.getMemberMovieList(data);
-			Map<String, Object> typeMap = new HashMap<String, Object>();
-			typeMap.put("type", 1);
-			if(fristflag){typeMap.put("pageno", 1);}
-			typeMap.put("movienum", movienum);
-			typeMap.put("typename", "会员专享");
+			typeMap.put("typename", "精品推荐");
 			typeMap.put("movielist", homePageMovie);
 			resultlist.add(typeMap);
 			return resultlist;
@@ -128,6 +119,9 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			Map<String, Object> typeMap = new HashMap<String, Object>();
 			typeMap.put("type", data.get("type"));
 			switch (Integer.parseInt(data.get("type").toString())) {
+			case 1:
+				typeMap.put("typename", "精品推荐");
+				break;
 			case 2:
 				typeMap.put("typename", "珍藏电影");
 				break;

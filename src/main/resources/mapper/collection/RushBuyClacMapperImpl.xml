@@ -39,7 +39,7 @@
 	
 	<select id="getWaitSellCardOrder"  resultType="map" parameterType="map">
 		select ao.orderid, ao.selluserid,ao.cardprice,au.nickname,au.phone,
-		ki.title, ki.coverimg, ki.iconimg, ki.kitid, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
+		ki.title, ki.coverimg, ki.iconimg, ki.kitid,ki.likenum,ki.avgprice, DATE_FORMAT(ki.createtime,'%Y-%m-%d %H:%i:%s') as kitcreatetime, ki.description
 		from c_t_app_order  ao
 		left join c_t_app_userinfo au on ao.selluserid = au.userid
 		left join c_t_app_garagekit ki on ao.kitid = ki.kitid

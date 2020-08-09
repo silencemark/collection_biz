@@ -32,56 +32,13 @@
 	    </where>
 	</select>
 	
-	
-	<select id="getMemberMovieList" parameterType="map" resultType="map">
-	    select 1 as type ,max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
-		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, ao.orderid
-	    from c_t_app_order ao
-	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
-		<where>
-	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
-	         and ao.status = 3
-	         and mo.movieid is not null
-	    </where>
-	    order by mo.hotforder desc 
-		) A group by A.title 
-		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
-	</select>
-	
-	<select id="getMemberMovieListCount" parameterType="map" resultType="int">
-	    select count(0) from (select 1 as type ,max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
-		from (select mo.movieid, mo.coverimg, mo.title, mo.httpurl, mo.description, ao.orderid
-	    from c_t_app_order ao
-	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
-		<where>
-	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
-	         and ao.status = 3
-	         and mo.movieid is not null
-	    </where>
-	    order by mo.hotforder desc 
-		) A group by A.title ) C
-	</select>
-	
 	<select id="getHomePageVideoDesc" parameterType="map" resultType="map">
-	    select max(A.coverimg) coverimg,A.title,max(A.httpurl) as httpurl,max(A.description) as description
-		from (
 		select coverimg, title, httpurl, description
 	    from  c_t_app_movie am
 		<where>
 	        <if test="videodesc != null and videodesc != ''">and (locate(#{videodesc},am.title) > 0  or  locate(#{videodesc},am.description) > 0)</if>
 	         and status = 1
 	    </where>
-	    union
-		select mo.coverimg, mo.title, mo.httpurl, mo.description 
-	    from c_t_app_order ao
-	    left join c_t_app_membermovie mo on ao.cardid = mo.cardid and mo.status = 1
-		<where>
-	        <if test="videodesc != null and videodesc != ''">and (locate(#{videodesc},mo.title) > 0  or  locate(#{videodesc},mo.description) > 0)</if>
-	        <if test="userid != null and userid != '' ">and ao.buyuserid=#{userid}</if>
-	         and ao.status = 3
-	         and mo.movieid is not null
-	    </where>
-		) A group by A.title 
 	</select>
 	
 	<insert id="addCommunity" useGeneratedKeys="true" keyProperty="communityid" parameterType="map">
