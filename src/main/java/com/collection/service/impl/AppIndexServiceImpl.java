@@ -106,7 +106,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			movienum =  appIndexMapper.getHomePageMovieCount(data);
 			homePageMovie = appIndexMapper.getHomePageMovie(data);
 			typeMap = new HashMap<String, Object>();
-			typeMap.put("type", 4);
+			typeMap.put("type", 1);
 			if(fristflag){typeMap.put("pageno", 1);}
 			typeMap.put("movienum", movienum);
 			typeMap.put("typename", "精品推荐");
@@ -177,8 +177,8 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			return result;
 		}
 		//5、判断当天是否发布2次过（一天发两次）
-		Map<String, Object> communitymap = this.appIndexMapper.getTodayCommunity(data);
-		if(communitymap != null && communitymap.size() > 1 ){
+		List<Map<String, Object>> communitylist = this.appIndexMapper.getTodayCommunity(data);
+		if(communitylist != null && communitylist.size() > 1 ){
 			result.put("status", 1);
      		result.put("message", "上传失败，每天最多发布2条动态");
      		return result;
@@ -364,6 +364,11 @@ public class AppIndexServiceImpl implements IAppIndexService{
 		result.put("status", 0);
 		result.put("message", "查询详情成功");
 		return result;
+	}
+
+	@Override
+	public Map<String, Object> getNewSystemNotice(Map<String, Object> data) {
+		return this.appIndexMapper.getNewSystemNotice(data);
 	}
 
 }

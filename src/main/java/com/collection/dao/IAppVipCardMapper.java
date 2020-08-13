@@ -40,6 +40,12 @@ public interface IAppVipCardMapper {
 	List<Map<String, Object>> getGarageKitList(Map<String, Object> data);
 	
 	/**
+	 * 获取用户阅读用户协议标识
+	 * @param data
+	 */
+	Map<String, Object> getUserAgreementStatus(Map<String, Object> data);
+	
+	/**
 	 * 获取手办数量
 	 * @param data
 	 * @return

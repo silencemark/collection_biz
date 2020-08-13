@@ -187,7 +187,7 @@
 	</update>
 	
 	<select id="getMyUserInfo" parameterType="map" resultType="map">
-		select userid,password,phone,nickname,status,delflag,headimage,isrealname,xgocoin,
+		select userid,password,phone,nickname,status,delflag,headimage,isrealname,xgocoin,agreementstatus,
 			case when ISNULL(paypassword) = 1 then 0 else 1 end as ispaypass,
 	    (select count(0) from c_t_app_paymentmethod where userid = #{userid} and (weixinqrcode is not null or alipayqrcode is not null or banknum is not null)) ispaymentmethod
 	    from  c_t_app_userinfo 
@@ -209,6 +209,7 @@
 	      <if test="delflag != null and delflag != ''">delflag = #{delflag},</if>
 	      <if test="levelid != null and levelid != ''">levelid = #{levelid},</if>
 	      <if test="isrealname != null">isrealname = #{isrealname},</if>
+	      <if test="agreementstatus != null">agreementstatus = #{agreementstatus},</if>
 	   </set>
 	   <where>
 	       <if test="userid != null and userid != ''">and userid=#{userid}</if>
@@ -296,9 +297,23 @@
 	<select id="getUserNotice" parameterType="map" resultType="map">
 		select noticeid,title, message,status,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime,userid
     	from c_t_usernotice 
-    	where userid =#{userid}
+    	<where>
+    		<if test="userid != null and userid != ''">and userid=#{userid}</if>
+    		<if test="status != null and status != ''">and status=#{status}</if>
+    	</where>
 		order by createtime desc  
+		<!-- <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if> -->
 	</select>
+	
+	<select id="getUserNoticeCount" parameterType="map" resultType="int">
+		select count(0)
+    	from c_t_usernotice 
+    	<where>
+    		<if test="userid != null and userid != ''">and userid=#{userid}</if>
+    		<if test="status != null and status != ''">and status=#{status}</if>
+    	</where>
+	</select>
+	
 	
 	<select id="getNoticeUnreadNum" parameterType="map" resultType="map">
 		select count(0) as count
@@ -355,7 +370,7 @@
 	</select>
 	
 	<select id="getAddressList" parameterType="map" resultType="map" >
-		select addressid,name,phone,province,city,county,town,address,isdefault c_t_app_address
+		select addressid,name,phone,province,city,county,town,address,isdefault from c_t_app_address
 		<where>
 		 	<if test="userid != null and userid != ''">and userid=#{userid}</if>
 		 	<if test="isdefault != null and isdefault != ''">and isdefault=#{isdefault}</if>
@@ -375,6 +390,7 @@
             <if test="createtime != null and createtime != ''">createtime,</if>
             <if test="town != null and town != ''">town,</if>
             <if test="address != null and address != ''">address,</if>
+            <if test="isdefault != null and isdefault != ''">isdefault,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userid != null and userid != ''">#{userid},</if>
@@ -386,6 +402,7 @@
             <if test="createtime != null and createtime != ''">#{createtime},</if>
             <if test="town != null and town != ''">#{town},</if>
             <if test="address != null and address != ''">#{address},</if>
+            <if test="isdefault != null and isdefault != ''">#{isdefault},</if>
         </trim>
 	</insert>
 	

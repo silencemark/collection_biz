@@ -560,7 +560,7 @@
 	</update>
 	
 	<update id="addMovieHot" parameterType="map">
-		update ${tablename} set hotforder = hotforder + 1 
+		update c_t_app_movie set hotforder = hotforder + 1 
 		where movieid = #{movieid}
 	</update>
 	
@@ -636,4 +636,11 @@
 		set status = #{status}
 		where likeid = #{likeid}
 	</update>
+	
+	<select id="getUserAgreementStatus" parameterType="map" resultType="map" >
+		select agreementstatus from c_t_app_userinfo 
+		where userid = #{userid}
+		limit 1 
+	</select>
+	
 </mapper>

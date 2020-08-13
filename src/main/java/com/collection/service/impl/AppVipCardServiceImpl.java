@@ -309,7 +309,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	    		}
 			}
 			//3、给父级5%收益和爷级2%收益 （爸爷的个人资产） 且新增记录到团队收益表c_t_app_teamprofit
-			double profitprice1 = Double.parseDouble(data.get("profitprice").toString()) * 0.05d;
+			double profitprice1 = formatDouble(Double.parseDouble(data.get("profitprice").toString()) * 0.05d);
 			sellUser.put("profitprice", profitprice1);
 			//增加父级收益
 			this.appVipCardMapper.addParentsAndGrandPa(sellUser);
@@ -322,7 +322,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			this.systemMapper.insertUserNotice(notice);
 			
 			sellUser = new HashMap<String, Object>();
-			double profitprice2 = Double.parseDouble(data.get("profitprice").toString()) * 0.02d;
+			double profitprice2 = formatDouble(Double.parseDouble(data.get("profitprice").toString()) * 0.02d);
 			if(elder.get("grandpaid") != null) {
 				sellUser.put("userid", elder.get("grandpaid"));
 				sellUser.put("profitprice", profitprice2);
@@ -477,6 +477,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	}
 
 	@Override
+	public Map<String, Object> getUserAgreementStatus(Map<String, Object> data) {
+		return this.appVipCardMapper.getUserAgreementStatus(data);
+	}
+	
+	@Override
 	public Map<String, Object> insertRushToBuy(Map<String, Object> data) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		//用户信息
@@ -487,6 +492,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		if ("2".equals(userinfo.get("status").toString())) {
 			result.put("status", 1);
 			result.put("message", "您的账号已被冻结，不能参与抢购");
+			return result;
+		}
+		//判断用户是否勾选协议
+		if (!"1".equals(userinfo.get("agreementstatus").toString()) && !"1".equals(data.get("agreementstatus").toString())) {
+			result.put("status", 1);
+			result.put("message", "请阅读用户协议后，再参与抢购");
 			return result;
 		}
 		//2、防止重复点击抢购接口
@@ -526,6 +537,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			result.put("message", "参与团购时间已结束");
 			return result;
 		}
+		//更新已读协议入库
+		if (!"1".equals(userinfo.get("agreementstatus").toString()) && "1".equals(data.get("agreementstatus").toString())) {
+			this.appUserCenterMapper.updateUserInfo(data);
+		}
+		
 		data.put("createtime", new Date());
 		this.appVipCardMapper.insertRushToBuy(data);
 		result.put("status", 0);
@@ -566,11 +582,6 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 	@Override
 	public void addMovieHot(Map<String, Object> data) {
 		//如果是会员电影是会员电影加一 
-		if("2".equals(data.get("type"))) {
-			data.put("tablename", "c_t_app_membermovie");
-		} else {
-			data.put("tablename", "c_t_app_movie");
-		}
 		this.appVipCardMapper.addMovieHot(data);
 	}
 
@@ -630,4 +641,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		}
 	}
 
+	/**
+     * 保留两位小数，四舍五入的一个老土的方法
+     * @param d
+     * @return
+     */
+    public static double formatDouble(double d) {
+        return (double)Math.round(d*100)/100;
+    }
 }

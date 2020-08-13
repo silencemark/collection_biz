@@ -185,6 +185,13 @@ public interface IAppUserCenterMapper {
 	List<Map<String, Object>> getUserNotice(Map<String, Object> data);
 	
 	/**
+	 * 获取用户的通知信息列表数量
+	 * @param data
+	 * @return
+	 */
+	int getUserNoticeCount(Map<String, Object> data);
+	
+	/**
 	 * 获取用户的消息未读数量
 	 * @param data
 	 * @return

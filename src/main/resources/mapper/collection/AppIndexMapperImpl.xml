@@ -7,20 +7,21 @@
 	        <if test="type != null and type != ''">and type=#{type}</if>
 	        and status = 1
 	    </where>
+	    order by updatetime desc
 	</select>
 	
 	<select id="getAdvertisement" parameterType="map" resultType="map">
-	    select advertid, advertcontent, imgurl, httpurl, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid from  c_t_app_advert
+	    select advertid, advertcontent, imgurl, httpurl, DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime, createid from  c_t_app_advert order by createtime desc
 	</select>
 	
 	<select id="getHomePageMovie" parameterType="map" resultType="map">
-	    select type, coverimg, title, httpurl, description
+	    select movieid,type, coverimg, title, httpurl, description
 	    from  c_t_app_movie
 	    <where>
 	        <if test="type != null and type != '' and type != 0">and type=#{type}</if>
 	        and status = 1
 	    </where>
-	    order by hotforder desc 
+	    order by hotforder desc, createtime desc 
 	    <if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
 	</select>
 	
@@ -170,5 +171,14 @@
 		where ac.userid = #{userid} 
 		and ac.status = 0
 		and TO_DAYS(ac.createtime) = TO_DAYS(now())
+	</select>
+	
+	<select id="getNewSystemNotice" parameterType="map" resultType="map">
+		select title, message,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime
+    	from c_t_usernotice
+		where type = 1
+		group by title,message,createtime
+		order by createtime desc
+		limit 1
 	</select>
 </mapper>

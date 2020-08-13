@@ -17,8 +17,6 @@ import com.collection.dao.IAppUserCenterMapper;
 import com.collection.dao.IAppVipCardMapper;
 import com.collection.dao.ISystemMapper;
 import com.collection.service.IAppUserCenterService;
-import com.collection.sms.sendSms;
-import com.collection.util.Constants;
 /**
  * 个人中心相关
  * @author silence
@@ -377,8 +375,23 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public List<Map<String, Object>> getUserNotice(Map<String, Object> data) {
-		return this.appUserCenterMapper.getUserNotice(data);
+	public Map<String, Object> getUserNotice(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		/*//分页处理如果没传 默认就是 第一页  每页6条
+		if(data.get("startnum") == null || "".equals(data.get("startnum").toString())) {
+			data.put("startnum", 0);
+		}
+		if(data.get("rownum") == null || "".equals(data.get("rownum").toString())) {
+			data.put("rownum", 20);
+		}
+		data.put("startnum", Integer.parseInt(data.get("startnum").toString()));
+		data.put("rownum", Integer.parseInt(data.get("rownum").toString()));
+		//定义一个pagenum
+		int messagenum =  appUserCenterMapper.getUserNoticeCount(data);*/
+		List<Map<String, Object>> resultlist = this.appUserCenterMapper.getUserNotice(data);
+		/*result.put("messagenum", messagenum);*/
+		result.put("resultlist", resultlist);
+		return result;
 	}
 
 	@Override
@@ -464,6 +477,10 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Override
 	public void insertAddress(Map<String, Object> data) {
+		List<Map<String, Object>> addresslist =  this.appUserCenterMapper.getAddressList(data);
+		if(addresslist == null || addresslist.isEmpty()){
+			data.put("isdefault", 1);
+		}
 		this.appUserCenterMapper.insertAddress(data);
 	}
 
@@ -473,11 +490,11 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("userid", data.get("userid"));
 		map.put("isdefault", 0);
-		this.appUserCenterMapper.updateAddress(data);
+		this.appUserCenterMapper.updateAddress(map);
 		//1、当前地址变成默认
 		map.put("isdefault", 1);
 		map.put("addressid", data.get("addressid"));
-		this.appUserCenterMapper.updateAddress(data);
+		this.appUserCenterMapper.updateAddress(map);
 	}
 
 	@Override

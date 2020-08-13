@@ -174,5 +174,12 @@ public interface IAppIndexMapper {
 	 * @param data
 	 * @return
 	 */
-	Map<String, Object> getTodayCommunity(Map<String, Object> data);
+	List<Map<String, Object>> getTodayCommunity(Map<String, Object> data);
+	
+	/**
+	 * 获取系统消息最新的一条
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getNewSystemNotice(Map<String, Object> data);
 }

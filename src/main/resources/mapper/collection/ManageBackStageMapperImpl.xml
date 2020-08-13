@@ -179,16 +179,18 @@
     
     <select id="getOrderList" parameterType="map" resultType="map">
     	select ao.orderid, ao.buyuserid, us1.nickname as buynickname, ao.selluserid, us2.nickname as sellnickname, mc.typename, ao.ordernum, ao.cardid,
-			ao.type, ao.cardprice, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime
+			ao.type, ao.cardprice, ao.commentcount, ao.status, ao.ordertype, ao.payorder, ao.profitprice, ao.selltime, ao.buytime, ao.duetime, ao.rushtime, ao.createtime,
+			ag.title
 		from c_t_app_order ao
 		left join c_t_app_membercard mc on ao.cardid = mc.cardid
 		left JOIN c_t_app_userinfo us1 on ao.buyuserid = us1.userid
 		LEFT JOIN c_t_app_userinfo us2 on ao.selluserid = us2.userid
+		left join c_t_app_garagekit ag on ag.kitid = ao.kitid
 		<where>
 			<if test="ordernum != null and ordernum != ''">and locate(#{ordernum},ao.ordernum) > 0</if>
 			<if test="buynickname != null and buynickname != ''">and locate(#{buynickname},us1.nickname) > 0</if>
 			<if test="sellnickname != null and sellnickname != ''">and locate(#{sellnickname},us2.nickname) > 0</if>
-			<if test="typename != null and typename != ''">and locate(#{typename},mc.typename) > 0 </if>
+			<if test="title != null and title != ''">and locate(#{title},ag.title) > 0 </if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
 			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY) </if>
@@ -206,7 +208,7 @@
 			<if test="ordernum != null and ordernum != ''">and locate(#{ordernum},ao.ordernum) > 0</if>
 			<if test="buynickname != null and buynickname != ''">and locate(#{buynickname},us1.nickname) > 0</if>
 			<if test="sellnickname != null and sellnickname != ''">and locate(#{sellnickname},us2.nickname) > 0</if>
-			<if test="typename != null and typename != ''">and locate(#{typename},mc.typename) > 0 </if>
+			<if test="title != null and title != ''">and locate(#{title},ag.title) > 0 </if>
 			<if test="status != null and status != '全部状态'">and ao.status = #{status}</if>
 			<if test="type != null and type != '全部订单'">and ao.type = #{type}</if>
 			<if test="ordertime != null and ordertime != ''"> ao.createtime &gt;= #{ordertime} and ao.createtime &lt;= DATE_ADD(#{ordertime},INTERVAL 1 DAY)  </if>

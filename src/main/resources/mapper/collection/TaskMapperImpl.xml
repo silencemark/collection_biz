@@ -59,7 +59,7 @@
  	</insert>
  	
  	<delete id="deleteCrontab" parameterType="map">
- 		DELETE FROM c_t_crontab WHERE taskid  = #{taskid} AND (validdate &gt;= STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S') OR validdate &gt;= DATE_ADD(curdate(),INTERVAL 1 DAY)
+ 		DELETE FROM c_t_crontab WHERE taskid  = #{taskid} AND (validdate &gt;= STR_TO_DATE(#{validdate}, '%Y-%m-%d %H:%i:%S') OR validdate &gt;= DATE_ADD(curdate(),INTERVAL 1 DAY))
  	</delete>
  	
  	<update id="updateCrontab" parameterType="map">
