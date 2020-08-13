@@ -26,7 +26,8 @@
 						ELSE  0
 				END as isbuy,
 				timestampdiff(SECOND,now(),STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i')) as secondbuy,
-				ar.status as havebuy
+				ar.status as havebuy,
+				am.status
 			FROM
 				c_t_app_membercard am
 				left join c_t_app_rushtobuy ar on am.cardid = ar.cardid and ar.userid = #{userid}
