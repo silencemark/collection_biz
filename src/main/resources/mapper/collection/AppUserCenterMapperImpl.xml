@@ -117,7 +117,10 @@
 	<select id="getCertification" parameterType="map" resultType="map">
 		select certificationid,nationality,realname,idcard,status,message,DATE_FORMAT(createtime,'%Y-%m-%d %H:%i:%S') as createtime
 		from c_t_app_certification 
-		where userid = #{userid}
+		<where>
+			<if test="userid != null and userid != ''"> and userid = #{userid}</if>
+			<if test="idcard != null and idcard != ''"> and idcard = #{idcard}</if>
+		</where>
 		and delflag = 0
 		order by createtime desc 
 		limit 1
@@ -129,8 +132,8 @@
 		from c_t_app_userinfo us
 		left join c_t_app_teamprofit te on te.userid = us.userid
 		where us.parentid = #{userid}
+		order by parentprofit desc
 		) A group by userid,nickname,headimage
-		order by A.parentprofit desc
 	</select>
 	
 	<select id="getGrandSonProfit" parameterType="map" resultType="map">
@@ -140,8 +143,9 @@
 				inner join c_t_app_userinfo usp on us.parentid = usp.userid and usp.parentid = #{grandid}
 				left join c_t_app_teamprofit te on te.userid = us.userid 
 				where us.parentid  = #{userid}
+				order by grandfatherprofit desc
 			) A group by userid,nickname,headimage
-			order by A.grandfatherprofit desc
+			
 	</select>
 	
 	<select id="myAssets" parameterType="map" resultType="map">

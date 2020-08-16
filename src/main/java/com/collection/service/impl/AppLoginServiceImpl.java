@@ -57,23 +57,23 @@ public class AppLoginServiceImpl implements IAppLoginService{
 		Map<String, Object> parent = this.appLoginMapper.getParentIdByInviteCode(data);
 		if (parent != null && parent.size() > 0 ) {
 			/**
-			 * 父级加两块钱邀请奖励 且 入库奖励记录表 累计50便不再奖励
+			 * 父级加1块钱邀请奖励 且 入库奖励记录表 累计50便不再奖励
 			 */
 			//1、查询累计奖励金额总数
 			double rewardprice = this.appVipCardMapper.getSumRewardPrice(parent);
 			//2、小于50可以奖励、直接累加可提现资产
 			if (rewardprice < 50) {
 				//累加可提现资产
-				parent.put("profitprice", 2);
+				parent.put("profitprice", 1);
 				this.appVipCardMapper.addParentsAndGrandPa(parent);
 				//3、入库记录表
-				parent.put("rewardprice", 2);
+				parent.put("rewardprice", 1);
 				parent.put("type", 1);
 				this.appVipCardMapper.addRewardRecord(parent);
 				//4、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "邀请通知");
-				notice.put("message", "恭喜你，您邀请的好友"+data.get("phone")+"已经注册成功，您获得2元可兑换资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您邀请的好友"+data.get("phone")+"已经注册成功，您获得1元可兑换资产奖励，请注意查收");
 				notice.put("userid", parent.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);
@@ -135,4 +135,8 @@ public class AppLoginServiceImpl implements IAppLoginService{
         }
         return randomStr+userIdStr;
     }
+    
+    public static void main(String[] args) {
+		System.out.println( FileDeal.getUUID());
+	}
 }

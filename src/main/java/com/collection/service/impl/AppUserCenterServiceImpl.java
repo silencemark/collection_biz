@@ -121,12 +121,25 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public void certification(Map<String, Object> data) {
+	public Map<String, Object> certification(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		//校验身份证是否重复
+		Map<String, Object> idcardMap = new HashMap<String, Object>();
+		idcardMap.put("idcard", data.get("idcard"));
+		idcardMap = this.appUserCenterMapper.getCertification(idcardMap);
+		if(idcardMap != null && idcardMap.size() > 0) {
+			result.put("status", 1);
+			result.put("message", "身份证已存在，请重新确认后输入");
+			return result;
+		}
 		//更改用户状态
 		data.put("status", 1);
 		this.appUserCenterMapper.updateUserCertification(data);
 		data.put("createtime", new Date());
 		this.appUserCenterMapper.certification(data);
+		result.put("status", 0);
+		result.put("message", "提交成功");
+		return result;
 	}
 
 	@Override

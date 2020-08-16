@@ -306,7 +306,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 				//3、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "社区通知");
-				notice.put("message", "恭喜你，您完成享社区动态获得10个点赞任务，您获得0.5元可兑换资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您完成享社区动态获得10个点赞任务，共获得1元可兑换资产奖励，请注意查收");
 				notice.put("userid", data.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);
@@ -317,7 +317,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 				//3、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "社区通知");
-				notice.put("message", "恭喜你，您完成享社区动态获得50个点赞 任务，您获得0.5元可兑换资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您完成享社区动态获得50个点赞 任务，共获得5元可兑换资产奖励，请注意查收");
 				notice.put("userid", data.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);

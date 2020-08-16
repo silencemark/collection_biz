@@ -270,23 +270,23 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 				this.appVipCardMapper.addGrowthValue(sellUser);
 				
 				/**
-				 * 卖家的父级加8块钱首次任务奖励 且 入库奖励记录表 累计50便不再奖励
+				 * 卖家的父级加4块钱首次任务奖励 且 入库奖励记录表 累计50便不再奖励
 				 */
 				//1、查询累计奖励金额总数
 				double rewardprice = this.appVipCardMapper.getSumRewardPrice(sellUser);
 				//2、小于50可以奖励、直接累加可提现资产
 				if (rewardprice < 50) {
 					//累加可提现资产
-					sellUser.put("profitprice", 8);
+					sellUser.put("profitprice", 4);
 					this.appVipCardMapper.addParentsAndGrandPa(sellUser);
 					//3、入库记录表
-					sellUser.put("rewardprice", 8);
+					sellUser.put("rewardprice", 4);
 					sellUser.put("type", 2);
 					this.appVipCardMapper.addRewardRecord(sellUser);
-					//4、通知父亲通知
+					//4、通知父亲通知 	
 		            notice = new HashMap<String, Object>();
 		    		notice.put("title", "邀请通知");
-		    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，您获得8元可兑换资产奖励，请注意查收");
+		    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，您获得4元可兑换资产奖励，请注意查收");
 		    		notice.put("userid", elder.get("parentid"));
 		    		notice.put("createtime", new Date());
 		    		this.systemMapper.insertUserNotice(notice);
@@ -429,11 +429,11 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			result.put("message", "您输入的价格大于手办可出售的最大金额，不能出售");
 			return result;
 		}
-		//1、如果出售价格 大于最大限制(20000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
+		//1、如果出售价格 大于最大限制(8000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
 		double cardprice = Double.parseDouble(data.get("cardprice").toString());
-		if (cardprice > 20000) {
-			double overprofit = 20000d - cardprice;
-			cardprice = 20000d;
+		if (cardprice > 8000) {
+			double overprofit = 8000d - cardprice;
+			cardprice = 8000d;
 			data.put("overprofit", overprofit);
 			//添加到个人可兑换资产
 			this.appVipCardMapper.addUserInfoOverProfit(data);

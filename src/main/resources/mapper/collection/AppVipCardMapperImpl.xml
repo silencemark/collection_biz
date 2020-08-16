@@ -21,7 +21,7 @@
 				DATE_FORMAT(am.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
 				am.updateid,
 				case when STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') &lt;= now() AND
-									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') &gt; now()
+									STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),endtime),'%Y-%m-%d %H:%i') &gt; now() and am.status = 1
 						THEN  1
 						ELSE  0
 				END as isbuy,
