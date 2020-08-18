@@ -43,8 +43,17 @@
 	</select>
 	
 	<insert id="addCommunity" useGeneratedKeys="true" keyProperty="communityid" parameterType="map">
-    	insert into c_t_app_community(userid, content, createtime) 
-    	VALUES(#{userid}, #{content}, now())
+    	insert into c_t_app_community
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">userid,</if>
+            <if test="content != null and content != ''">content,</if>
+            createtime
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null and userid != ''">#{userid},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            now()
+        </trim>
  	</insert>
  	
  	<insert id="addCommunityImg" parameterType="List">

@@ -431,9 +431,9 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		}
 		//1、如果出售价格 大于最大限制(8000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
 		double cardprice = Double.parseDouble(data.get("cardprice").toString());
-		if (cardprice > 8000) {
-			double overprofit = 8000d - cardprice;
-			cardprice = 8000d;
+		if (cardprice > 1000) {
+			double overprofit = 1000d - cardprice;
+			cardprice = 1000d;
 			data.put("overprofit", overprofit);
 			//添加到个人可兑换资产
 			this.appVipCardMapper.addUserInfoOverProfit(data);

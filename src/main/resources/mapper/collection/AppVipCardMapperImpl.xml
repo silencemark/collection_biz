@@ -326,7 +326,7 @@
 			left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			left join c_t_app_garagekit ki on ao.kitid = ki.kitid
 			where (ao.status in (3,4,5) and ao.selluserid = #{userid}) 
-			or (ao.status = 5 and ao.buyuserid = #{userid}) 
+			<!-- or (ao.status = 5 and ao.buyuserid = #{userid})  -->
 			order by ao.buytime desc 
 	</select>
 	
