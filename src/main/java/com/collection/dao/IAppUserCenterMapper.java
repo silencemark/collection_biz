@@ -16,6 +16,13 @@ public interface IAppUserCenterMapper {
 	Map<String, Object> getMyCenter(Map<String, Object> data);
 	
 	/**
+	 * 获取提现次数
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getCashOutNum(Map<String, Object> data);
+	
+	/**
 	 * 签到
 	 * @param data
 	 */

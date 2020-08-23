@@ -256,16 +256,16 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		sellUser.put("selluserid", data.get("selluserid"));
 		sellUser.put("status", 3);
 		int count = this.appVipCardMapper.getUserVipCount(sellUser);
-		//2、当前卖家的邀请者加1000成长值
+		//2、当前卖家的邀请者加100成长值
 		//查询当前卖家的邀请者 父id 和 爷爷id
 		sellUser = new HashMap<String, Object>();
 		sellUser.put("userid", data.get("selluserid"));
 		Map<String, Object> elder = this.appVipCardMapper.getElderid(sellUser);
 		if(elder != null) {
 			if (count == 1) {
-				//卖家的爹加1000成长值
+				//卖家的爹加100成长值
 				sellUser = new HashMap<String, Object>();
-				sellUser.put("growthvalue", 1000);
+				sellUser.put("growthvalue", 100);
 				sellUser.put("userid", elder.get("parentid"));
 				this.appVipCardMapper.addGrowthValue(sellUser);
 				
@@ -295,7 +295,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 				//新增父亲通知
 	            notice = new HashMap<String, Object>();
 	    		notice.put("title", "成长值通知");
-	    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，恭喜您获得1000点成长值");
+	    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，恭喜您获得100点成长值");
 	    		notice.put("userid", elder.get("parentid"));
 	    		notice.put("createtime", new Date());
 	    		this.systemMapper.insertUserNotice(notice);
@@ -347,7 +347,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			this.appVipCardMapper.insertTeamProfit(teamprofit);
 		}
 		//4、给卖家自己增长成长值
-		sellUser = new HashMap<String, Object>();
+		/*sellUser = new HashMap<String, Object>();
 		sellUser.put("growthvalue", (int)Double.parseDouble(data.get("profitprice").toString()));
 		sellUser.put("userid", data.get("selluserid"));
 		this.appVipCardMapper.addGrowthValue(sellUser);
@@ -357,7 +357,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			appUserCenterMapper.updateUserInfoLevel(levelMap);
 			//新增卖家成长通知/发送短信通知和系统通知
     		//insertUserNotice("会员等级通知", Constants.sysSmsTranslate2.replace("member", levelMap.get("levelname").toString()), Constants.smsTranslate2.replace("member", levelMap.get("levelname").toString()), data.get("selluserid").toString(),  userinfo.get("phone").toString());
-		}
+		}*/
 		//5、增加自己资产总和
 		sellUser = new HashMap<String, Object>();
 		sellUser.put("userid", data.get("selluserid"));
@@ -385,12 +385,12 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			this.appVipCardMapper.updateCardOrderStatus(orderMap);
 		}
 		//查询买家为当前用户 且时间大于剩余时限的订单
-		orderlist = this.appVipCardMapper.getDueOrderListByid(data);
+		/*orderlist = this.appVipCardMapper.getDueOrderListByid(data);
 		//更改订单为过期不可出售的债券status = 5
 		for (Map<String, Object> orderMap : orderlist) {
 			orderMap.put("status", 5);
 			this.appVipCardMapper.updateCardOrderStatus(orderMap);
-		}
+		}*/
 		return this.appVipCardMapper.getMyCardList(data);
 	}
 	
@@ -429,11 +429,13 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 			result.put("message", "您输入的价格大于手办可出售的最大金额，不能出售");
 			return result;
 		}
-		//1、如果出售价格 大于最大限制(8000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
+		//1、如果出售价格 大于最大限制(20000)价格 多余资产直接加入个人溢出资产总和 并新增到添加记录到溢出记录表
 		double cardprice = Double.parseDouble(data.get("cardprice").toString());
-		if (cardprice > 1000) {
-			double overprofit = 1000d - cardprice;
-			cardprice = 1000d;
+		if (cardprice > 20000) {
+			Random random = new Random();
+			int newprice = (int) (15000d + random.nextInt((int)(5000/2)));
+			double overprofit = cardprice - newprice ;
+			cardprice = newprice;
 			data.put("overprofit", overprofit);
 			//添加到个人可兑换资产
 			this.appVipCardMapper.addUserInfoOverProfit(data);

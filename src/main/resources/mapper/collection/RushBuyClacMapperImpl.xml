@@ -12,7 +12,7 @@
 		watchdays,
 		minprice,
 		maxprice,
-		(maxprice - minprice) as spread,
+		((maxprice - minprice)/3) as spread,
 		STR_TO_DATE(CONCAT(DATE_FORMAT(date_add(now(), interval 1 day),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') as selltime,
 		TIMESTAMPDIFF(MINUTE,STR_TO_DATE(CONCAT(DATE_FORMAT(now(),'%Y-%m-%d '),starttime),'%Y-%m-%d %H:%i') ,STR_TO_DATE(#{calctime},'%Y-%m-%d %H:%i:%S')) as minutenum
 		from c_t_app_membercard am
@@ -49,8 +49,9 @@
 		order by ao.createtime
 	</select>
 	
-	<select id="getConfigRate" resultType="map">
+	<select id="getConfigRate" resultType="map" parameterType="map">
 		select rateid, forder ,rate,minute,lastflag from c_t_rate
+		where cardid = #{cardid}
 	</select>
 	
 	<update id="updateOrder" parameterType="map">
@@ -93,7 +94,14 @@
 		select au.userid,al.levelenum, al.interesttimes,au.nickname,au.phone
 		from c_t_app_userinfo au
 		left join c_t_app_memberlevel al on au.levelid = al.levelid
-		where au.isadmin = 1 and au.status = 0 and au.delflag = 0
-		and au.userid != #{userid}
+		<where>
+			<if test="userid != null and userid != ''">and au.userid != #{userid}</if>
+			and au.isadmin = 1 and au.status = 0 and au.delflag = 0
+		</where> 
 	</select>
+	
+	<select id="getHuoYingNum" resultType="int" parameterType="map">
+		select count(0) from c_t_app_order where buyuserid = #{userid} and type = 1  and cardid = 1
+	</select>
+	
 </mapper>

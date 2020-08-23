@@ -42,7 +42,7 @@ public interface IRushBuyClacMapper {
 	 * 查询配置的抢购三次计算的几率
 	 * @return
 	 */
-	List<Map<String, Object>> getConfigRate();
+	List<Map<String, Object>> getConfigRate(Map<String, Object> data);
 	
 	/**
 	 * 分配会员卡出售订单给用户
@@ -67,6 +67,13 @@ public interface IRushBuyClacMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> getSysUser(Map<String, Object> user); 
+	
+	/**
+	 * 获取火影专区抢购的次数
+	 * @param user
+	 * @return
+	 */
+	int getHuoYingNum(Map<String, Object> user); 
 	
 	/**
 	 * 获取所有未抢购成功的用户id

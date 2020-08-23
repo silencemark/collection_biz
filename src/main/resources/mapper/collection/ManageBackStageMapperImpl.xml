@@ -620,18 +620,20 @@
     <update id="updateRate" parameterType="map">
     	update c_t_rate
     	<set>
+    		<if test="cardid != null and cardid != ''">cardid=#{cardid},</if>
             <if test="forder != null and forder != ''">forder=#{forder},</if>
             <if test="minute != null and minute != ''">minute=#{minute},</if>
             <if test="rate != null and rate != ''">rate=#{rate},</if>
             <if test="lastflag != null and lastflag != ''">lastflag=#{lastflag},</if>
             <if test="updatetime != null and updatetime != ''">updatetime=#{updatetime},</if>
         </set>
-        where movieid=#{movieid}
+        where rateid=#{rateid}
     </update>
     
     <insert id="insertRate" parameterType="map">
     	insert into c_t_rate
     	<trim prefix="(" suffix=")" suffixOverrides=",">
+    		<if test="cardid != null and cardid != ''">cardid,</if>
             <if test="forder != null and forder != ''">forder,</if>
             <if test="minute != null and minute != ''">minute,</if>
             <if test="rate != null and title != ''">rate,</if>
@@ -639,6 +641,7 @@
             <if test="createtime != null and createtime != ''">createtime,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
+        	<if test="cardid != null and cardid != ''">#{cardid},</if>
             <if test="forder != null and forder != ''">#{forder},</if>
             <if test="minute != null and minute != ''">#{minute},</if>
             <if test="rate != null and rate != ''">#{rate},</if>
@@ -648,14 +651,16 @@
     </insert>
     
     <select id="getRateList" parameterType="map" resultType="map">
-    	select rateid, forder, minute, rate, lastflag,updatetime,createtime
-    	from c_t_rate
+    	select am.typename, r.rateid, r.forder, r.minute, r.rate, r.lastflag,r.updatetime, r.createtime
+    	from c_t_rate r 
+    	left join c_t_app_membercard am on r.cardid = am.cardid
+    	where r.cardid = #{cardid}
 		order by createtime desc
 		<if test="startnum != null and rownum != null">limit #{startnum},#{rownum}</if>
     </select>
     
     <select id="getRateListCount" parameterType="map" resultType="int">
-    	select  count(0) from c_t_rate
+    	select  count(0) from c_t_rate where cardid = #{cardid}
     </select>
     
     <select id="getOrderBuyAndSellInfo" parameterType="map" resultType="map">

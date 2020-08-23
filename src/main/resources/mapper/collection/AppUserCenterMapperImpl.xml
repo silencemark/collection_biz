@@ -8,7 +8,7 @@
 	    us.sumprofit,
 	    us.sumassets,
 	    us.growthvalue,
-	    us.isrealname,ml.levelname, ml.levelenum,(ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+	    us.isrealname,ml.levelname, ml.levelenum,(ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue) as needgrowthvalue
 	    from  c_t_app_userinfo us
 		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 	    <where>
@@ -19,6 +19,12 @@
 	        and us.delflag=0
 	    </where>
 	    limit 1
+	</select>
+	
+	<select id="getCashOutNum" parameterType="map" resultType="map">
+		select (select count(0) from c_t_app_exchange where userid = #{userid} and amount = 50) as fifnum,
+		(select count(0) from c_t_app_exchange where userid = #{userid} and amount = 1000) as thousandnum
+		 from dual 
 	</select>
 	
 	<update id="signIn" parameterType="map">
@@ -181,12 +187,16 @@
 	</insert>
 	
 	<select id="myInviteCode" parameterType="map" resultType="map">
-		select userid,invitecode,invitecodehttpurl,invitecodeqrcode, qrcode from c_t_app_userinfo where userid = #{userid}
+		select userid,invitecode,invitecodehttpurl,invitecodeqrcode, qrcode,shorturl from c_t_app_userinfo where userid = #{userid}
 	</select>
 	
 	<update id="updateQrcode" parameterType="map">
 		update c_t_app_userinfo 
-		set invitecodeqrcode = #{invitecodeqrcode}, qrcode = #{qrcode}
+		<set>
+	      <if test="invitecodeqrcode != null">invitecodeqrcode = #{invitecodeqrcode},</if>
+	      <if test="qrcode != null">qrcode = #{qrcode},</if>
+	      <if test="shorturl != null and shorturl != ''">shorturl = #{shorturl},</if>
+	   </set>
 		where userid = #{userid}
 	</update>
 	

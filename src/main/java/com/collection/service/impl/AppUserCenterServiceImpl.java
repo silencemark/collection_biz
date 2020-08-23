@@ -74,8 +74,8 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 			result.put("remark", data.get("remark"));
 			return result;
 		} else {
-			//签到送1-50成长值 和一个 xgo
-			int value = new Random().nextInt(50) + 1;
+			//签到送1-10成长值 和一个 xgo
+			int value = new Random().nextInt(10) + 1;
 			data.put("growthvalue", value);
 			this.appUserCenterMapper.signIn(data);
 			//新增到签到记录表
@@ -170,7 +170,10 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Override
 	public Map<String, Object> myAssets(Map<String, Object> data) {
-		return this.appUserCenterMapper.myAssets(data);
+		Map<String, Object> result = this.appUserCenterMapper.myAssets(data);
+		Map<String, Object> numMap = this.appUserCenterMapper.getCashOutNum(data);
+		result.putAll(numMap);
+		return result;
 	}
 
 	@Override
@@ -182,11 +185,25 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	public Map<String, Object> exchangeVipCard(Map<String, Object> data) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		Map<String, Object> userinfo = this.appUserCenterMapper.getMyCenter(data);
+		
+		//查询 50 、 1000、 的提现次数，50只能提现一次  1000可以提现一次
+		Map<String, Object> cashOutMap = this.appUserCenterMapper.getCashOutNum(data);
+		if ("50".equals(data.get("cardprice").toString()) && Integer.parseInt(cashOutMap.get("fifnum").toString()) >= 1) {
+			result.put("status", 1);
+			result.put("message", "您好，金额50的提现次数不足");
+			return result;
+		}
+		if ("1000".equals(data.get("cardprice").toString()) && Integer.parseInt(cashOutMap.get("thousandnum").toString()) >= 1) {
+			result.put("status", 1);
+			result.put("message", "您好，金额1000的提现次数不足");
+			return result;
+		}
+		
 		//判断用户是否冻结
 		//1、账号冻结不能兑换
 		if ("2".equals(userinfo.get("status").toString())) {
 			result.put("status", 1);
-			result.put("message", "您的账号已被冻结，不能兑换");
+			result.put("message", "您的账号已被冻结，不能提现");
 			return result;
 		}
 		//2、判断该用户的下级用户是否超过25个 且没有一个有效用户（青铜会员），满足条件便不能提现 
