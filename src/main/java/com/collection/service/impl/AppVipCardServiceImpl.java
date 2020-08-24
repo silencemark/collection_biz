@@ -190,7 +190,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 
 	@Override
 	public List<Map<String, Object>> getSaleCardList(Map<String, Object> data) {
-		//查询时，如果你是卖家且待支付的订单超过了支付时间，那么冻结你的账户，且订单回退到待出售，短信提醒卖家 和买家
+		//查询时，如果你是卖家且待支付的订单超过了支付时间，那么冻结买家的账户，且订单回退到待出售，提醒卖家 和买家
 		Map<String, Object> buyMap = new HashMap<String, Object>();
 		buyMap.put("selluserid", data.get("userid"));
 		List<Map<String, Object>> waitPayList = this.appVipCardMapper.getMoreThanWaitTime(buyMap);
@@ -263,9 +263,9 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 		Map<String, Object> elder = this.appVipCardMapper.getElderid(sellUser);
 		if(elder != null) {
 			if (count == 1) {
-				//卖家的爹加100成长值
+				//卖家的爹加50成长值
 				sellUser = new HashMap<String, Object>();
-				sellUser.put("growthvalue", 100);
+				sellUser.put("growthvalue", 50);
 				sellUser.put("userid", elder.get("parentid"));
 				this.appVipCardMapper.addGrowthValue(sellUser);
 				
@@ -295,7 +295,7 @@ public class AppVipCardServiceImpl implements IAppVipCardService{
 				//新增父亲通知
 	            notice = new HashMap<String, Object>();
 	    		notice.put("title", "成长值通知");
-	    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，恭喜您获得100点成长值");
+	    		notice.put("message", "恭喜您，您邀请的好友"+userinfo.get("nickname")+"完成了第一次任务，恭喜您获得50点成长值");
 	    		notice.put("userid", elder.get("parentid"));
 	    		notice.put("createtime", new Date());
 	    		this.systemMapper.insertUserNotice(notice);

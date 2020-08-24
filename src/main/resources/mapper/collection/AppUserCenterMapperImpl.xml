@@ -58,7 +58,7 @@
 	</select>
 	
 	<select id="myGrowthValue" parameterType="map" resultType="map">
-		select us.growthvalue,ml.levelname,ml.levelenum, (ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue+1) as needgrowthvalue
+		select us.growthvalue,ml.levelname,ml.levelenum, (ml.levelenum+1) as nextlevelnum,ml.mingrowthvalue,ml.maxgrowthvalue,ml.interesttimes,(maxgrowthvalue - growthvalue) as needgrowthvalue
 		from c_t_app_userinfo us 
 		left join c_t_app_memberlevel ml on us.levelid = ml.levelid
 		 where userid = #{userid}
@@ -133,7 +133,7 @@
 	</select>
 	
 	<select id="getSonProfit" parameterType="map" resultType="map">
-		select userid,nickname,headimage,sum(parentprofit) as sumprofit from (
+		select userid,nickname,headimage,round(IFNULL(sum(parentprofit),0), 2) as sumprofit from (
 		select us.userid,us.nickname,us.headimage,IFNULL(te.parentprofit,0) as parentprofit
 		from c_t_app_userinfo us
 		left join c_t_app_teamprofit te on te.userid = us.userid
@@ -143,7 +143,7 @@
 	</select>
 	
 	<select id="getGrandSonProfit" parameterType="map" resultType="map">
-		select userid,nickname,headimage,sum(grandfatherprofit) as sumprofit from (
+		select userid,nickname,headimage,round(IFNULL(sum(grandfatherprofit),0), 2) as sumprofit from (
 			select us.userid,us.nickname,us.headimage,IFNULL(te.grandfatherprofit ,0) as grandfatherprofit
 				from c_t_app_userinfo us
 				inner join c_t_app_userinfo usp on us.parentid = usp.userid and usp.parentid = #{grandid}
@@ -158,11 +158,16 @@
 		select (select round(IFNULL(sum(cardprice),0), 2) from c_t_app_order where buyuserid =#{userid} and status &gt; 1) as allorder,
 		(select round(IFNULL(sum(cardprice), 0), 2) from c_t_app_order where buyuserid = #{userid} and status in (3, 4)) as buyorder,
 		round(sumassets, 2) as sumassets,round(sumprofit, 2) as sumprofit,
-		(select IFNULL(SUM(ROUND(ao.profitprice/mc.commentstartdays,2)),0)
+		((select IFNULL(SUM(ROUND(ao.profitprice/mc.commentstartdays,2)),0)
 			from c_t_app_order ao 
 		  left join c_t_app_membercard mc on ao.cardid = mc.cardid
 			where ao.buyuserid = #{userid}
-			and ao.status = 3) as yesterdayprofit,ml.interesttimes
+			and ao.status = 3) + (select IFNULL(sum(rewardprice),0) 
+								from c_t_app_rewardrecord 
+								where userid =  #{userid} and to_days(createtime) = to_days(now())) 
+							 + (select IFNULL(sum(parentprofit),0) + IFNULL(sum(grandfatherprofit),0) 
+								from c_t_app_teamprofit 
+								where grandfatherid =  #{userid} or parentid =  #{userid} and to_days(createtime) = to_days(now()))) as yesterdayprofit,ml.interesttimes
 		from c_t_app_userinfo us 
 		left join c_t_app_memberlevel ml 
 		on us.levelid = ml.levelid  
@@ -209,6 +214,19 @@
 	    	<if test="userid != null and userid != ''">and userid=#{userid}</if>
 	    	<if test="oldpassword != null and oldpassword != ''">and password=#{oldpassword}</if>
 	    </where>
+	</select>
+	
+	<select id="getParentUserInfo" parameterType="map" resultType="map">
+		select us.userid,us.password,us.phone,us.nickname,us.status,us.delflag,us.headimage,DATE_FORMAT(us.updatetime,'%Y-%m-%d %H:%i:%S') as updatetime,
+	    DATE_FORMAT(us.createtime,'%Y-%m-%d %H:%i:%S') as createtime,
+	    us.xgocoin,
+	    us.sumprofit,
+	    us.sumassets,
+	    us.growthvalue,
+	    us.isrealname
+	    from  c_t_app_userinfo son
+	    left join c_t_app_userinfo us on son.parentid = us.userid
+		where son.userid = #{userid}
 	</select>
 	
 	<update id="updateUserInfo" parameterType="map">
@@ -376,6 +394,21 @@
 		and isadmin = 0
 		order by sumassets desc 
 	</select>
+	
+	<select id="getExtensionRank" parameterType="map" resultType="map" >
+		select userid,nickname,headimage,sumassets,(@curRank := @curRank + 1) AS ranknum  from 
+		(select userid,nickname,headimage,((select IFNULL(sum(rewardprice),0) 
+															from c_t_app_rewardrecord 
+															where userid = us.userid) 
+													 + (select IFNULL(sum(parentprofit),0) + IFNULL(sum(grandfatherprofit),0) 
+															from c_t_app_teamprofit 
+															where grandfatherid =  us.userid or parentid = us.userid )) as sumassets
+			 from c_t_app_userinfo us
+			where delflag = 0
+			and isadmin = 0) p,(select @curRank := 0) q
+		order by sumassets desc 
+	</select>
+	
 	
 	<select id="getEffectiveUserCount" parameterType="map" resultType="map" >
 		select (select count(0) from c_t_app_userinfo where parentid =#{userid}) alluser,

@@ -112,6 +112,17 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			typeMap.put("typename", "精品推荐");
 			typeMap.put("movielist", homePageMovie);
 			resultlist.add(typeMap);
+			//综艺节目
+			data.put("type", 5);
+			movienum =  appIndexMapper.getHomePageMovieCount(data);
+			homePageMovie = appIndexMapper.getHomePageMovie(data);
+			typeMap = new HashMap<String, Object>();
+			typeMap.put("type", 5);
+			if(fristflag){typeMap.put("pageno", 1);}
+			typeMap.put("movienum", movienum);
+			typeMap.put("typename", "综艺节目");
+			typeMap.put("movielist", homePageMovie);
+			resultlist.add(typeMap);
 			return resultlist;
 		} else {
 			movienum =  appIndexMapper.getHomePageMovieCount(data);
@@ -130,6 +141,9 @@ public class AppIndexServiceImpl implements IAppIndexService{
 				break;
 			case 4:
 				typeMap.put("typename", "电视剧");
+				break;
+			case 5:
+				typeMap.put("typename", "综艺节目");
 				break;
 			}
 			if(fristflag){typeMap.put("pageno", 1);}
@@ -287,7 +301,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 			//新增点赞记录表
 			this.appIndexMapper.insertLikeCommunity(data);
 			//查询点赞数量5个赞加0.5元 
-			int count = this.appIndexMapper.getCommunityLikeCount(data);
+			/*int count = this.appIndexMapper.getCommunityLikeCount(data);
 			if (count == 5) {
 				//2、五个赞送0.5元可兑换资产(包含点赞后取消的)
 				data.put("profitprice", 0.5);
@@ -321,8 +335,7 @@ public class AppIndexServiceImpl implements IAppIndexService{
 				notice.put("userid", data.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);
-			}
-			
+			}*/
 		} else {
 			//取消点赞
 			if("1".equals(like.get("status").toString())) {

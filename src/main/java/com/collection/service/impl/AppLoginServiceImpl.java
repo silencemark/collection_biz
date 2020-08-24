@@ -70,10 +70,15 @@ public class AppLoginServiceImpl implements IAppLoginService{
 				parent.put("rewardprice", 1);
 				parent.put("type", 1);
 				this.appVipCardMapper.addRewardRecord(parent);
+				
+				//邀请者加10成长值
+				parent.put("growthvalue", 10);
+				this.appVipCardMapper.addGrowthValue(parent);
+				
 				//4、系统通知
 				Map<String, Object> notice = new HashMap<String, Object>();
 				notice.put("title", "邀请通知");
-				notice.put("message", "恭喜你，您邀请的好友"+data.get("phone")+"已经注册成功，您获得1元可兑换资产奖励，请注意查收");
+				notice.put("message", "恭喜你，您邀请的好友"+data.get("phone")+"已经注册成功，您获得1元可兑换资产奖励和10点会员成长值，请注意查收");
 				notice.put("userid", parent.get("userid"));
 				notice.put("createtime", new Date());
 				this.systemMapper.insertUserNotice(notice);

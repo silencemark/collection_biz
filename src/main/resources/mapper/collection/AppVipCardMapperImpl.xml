@@ -501,7 +501,7 @@
 	
 	<update id="updateWaitSell" parameterType="map">
 		update c_t_app_order 
-		set rushtime = null, buyuserid = null
+		set rushtime = null, buyuserid = null, status = 0
 		where orderid = #{orderid}
 	</update>
 	

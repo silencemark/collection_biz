@@ -150,6 +150,7 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	@Override
 	public Map<String, Object> myTeam(Map<String, Object> data) {
 		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> userinfo = this.appUserCenterMapper.getParentUserInfo(data);
 		//获取子集
 		List<Map<String, Object>> sonlist = this.appUserCenterMapper.getSonProfit(data);
 		int allnum = sonlist.size();
@@ -163,6 +164,7 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 			son.put("grandsonlist", grandsonlist);
 		}
 		result.put("sonlist", sonlist);
+		result.put("parentnickname", userinfo.get("nickname")==null?"享GO":userinfo.get("nickname"));
 		result.put("sonnum", sonlist.size());
 		result.put("alllowernum", allnum);
 		return result;
@@ -307,8 +309,28 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 	}
 
 	@Override
-	public void updateNickName(Map<String, Object> data) {
+	public Map<String, Object> updateNickName(Map<String, Object> data) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> userinfo = new HashMap<String, Object>();
+		userinfo.put("userid", data.get("userid"));
+		userinfo = this.appUserCenterMapper.getMyCenter(userinfo);
+		if(!userinfo.get("phone").toString().equals(userinfo.get("nickname").toString())){
+			result.put("status", 1);
+			result.put("message", "你已经设置过昵称了，不能修改");
+			return result;
+		}
+		userinfo = new HashMap<String, Object>();
+		userinfo.put("nickname", data.get("nickname"));
+		userinfo = this.appUserCenterMapper.getMyCenter(userinfo);
+		if(userinfo != null && !userinfo.isEmpty()) {
+			result.put("status", 1);
+			result.put("message", "此昵称已被使用，试试其他的吧");
+			return result;
+		}
 		this.appUserCenterMapper.updateUserInfo(data);
+		result.put("status", 0);
+		result.put("message", "昵称修改成功");
+		return result;	
 	}
 
 	@Override
@@ -492,7 +514,12 @@ public class AppUserCenterServiceImpl implements IAppUserCenterService{
 
 	@Override
 	public List<Map<String, Object>> getRank(Map<String, Object> data) {
-		return this.appUserCenterMapper.getRank(data);
+		if("1".equals(data.get("type").toString())) {
+			return this.appUserCenterMapper.getRank(data);
+		} else {
+			//推荐收益排行榜
+			return this.appUserCenterMapper.getExtensionRank(data);
+		}
 	}
 
 	@Override

@@ -148,6 +148,14 @@ public interface IAppUserCenterMapper {
 	Map<String, Object> getMyUserInfo(Map<String, Object> data);
 	
 	/**
+	 * 查询上级用户信息
+	 * @param data
+	 * @return
+	 */
+	Map<String, Object> getParentUserInfo(Map<String, Object> data);
+	
+	
+	/**
 	 * 修改用户信息
 	 * @param data
 	 */
@@ -236,6 +244,13 @@ public interface IAppUserCenterMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> getRank(Map<String, Object> data);
+	
+	/**
+	 * 获取推荐收益排行榜用户信息
+	 * @param data
+	 * @return
+	 */
+	List<Map<String, Object>> getExtensionRank(Map<String, Object> data);
 	
 	/**
 	 * 获取下级有效用户个数 和 总下级个数
